@@ -419,13 +419,22 @@ hexo g -d
 <ul>
 <li><p>将本地源码和 github 仓库连接 <code>git remote add origin git@github.com:Jiaget/Jiaget.github.io.git</code></p>
 </li>
-<li><p>检查 <code>.gitignore</code>, 忽视无关文件。如果没有该文件，则新建一个。<br>```<br>.DS_Store<br>Thumbs.db<br>db.json</p>
+<li><p>检查 <code>.gitignore</code>, 忽视无关文件。如果没有该文件，则新建一个。</p>
 </li>
 </ul>
-<p><em>.log<br>node_modules/<br>public/<br>.deploy</em>/</p>
-<pre><code>最后推送给新的分支
+<pre><code>.DS_Store
+Thumbs.db
+db.json
+*.log
+node_modules/
+public/
+.deploy*/
 </code></pre>
-<p>git add .<br>git commit -m “hexo source code”<br>git push origin master:source<br>```</p>
+<p>最后推送给新的分支</p>
+<pre><code>git add .
+git commit -m &quot;hexo source code&quot;
+git push origin master:source
+</code></pre>
 
                     
                         
