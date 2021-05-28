@@ -15,16 +15,16 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Doe","sameAs":["https://github.com/","http://stackoverflow.com/users","https://twitter.com/","https://facebook.com/","https://plus.google.com/","https://www.linkedin.com/profile/","mailto"]},"articleBody":"0.初次见面拖延症患者，拖拖拉拉，终于开始搭建自己的博客。本博客使用 Hexo 和 Github page 。下面是博客搭建的历程。\n1.准备环境\nNodeJS \ngit2.安装Hexo\n\nHexo官网\nnpm 是NodeJS的包管理工具，关于Hexo的安装或者依赖的下载都可以交给它完成\nnpm install -g hexo-cli\n安装完成后执行以下命令\nhexo init myBlog\ncd myBlog\nnpm install\n\n测试hexohexo s\n\n访问http://localhost:4040可以预览博客效果。\n3.Github Page 部署\n新建仓库\n\n注意仓库名严格按照[用户名].github.io命名\n\n\nSSH key 配置\ngit config --global user.name &quot;用户名&quot;\ngit config --global user.email &quot;邮箱地址&quot;\nssh-keygen -t rsa -C &#39;上面的邮箱&#39;\ncat ~/.ssh/id_rsa.pub\n\n\n将生成密钥添加到 Github 上\n\nsettings -&gt; SSH and GPG keys -&gt; New SSH key\n\n\n本地部署到Github\n\n博客目录下 _config.yml,在文件末尾添加：deploy:\ntype: git\nrepo:\n    github: https://github.com/Jiaget/Jiaget.github.io.git\nbranch: main\n\n\n安装部署插件 npm install hexo-deployer-git --save\n博客页面生成与上传 hexo g -d\n\n\n上传到github到最后效果的显示有段时间延迟，访问  https://你的用户名.github.io就能看到自己的博客了。\n4.写作\n新建文章 hexo new &#39;文章标题&#39;\n\n文章会生成在 /source/_posts 下\n\n\n执行 \nhexo g\nhexo s\n\n文章在博客中显示\n\n部署\nhexo clean\nhexo g -d\n\nhexo clean  是为了清除缓存文件db.json以及静态文件public。\n\n写好的文章暂时不想发布，可以存在草稿里，草稿的生成方法 exo new draft &quot;文章标题&quot;\n\n草稿保存在/source/_drafts中，需要发布只需要hexo publicsh [layout]&lt;filename&gt;\n\n\n\n","dateCreated":"2021-05-28T15:16:52+08:00","dateModified":"2021-05-28T15:36:43+08:00","datePublished":"2021-05-28T15:16:52+08:00","description":"","headline":"first blood","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/05/28/first-blood/"},"publisher":{"@type":"Organization","name":"John Doe","sameAs":["https://github.com/","http://stackoverflow.com/users","https://twitter.com/","https://facebook.com/","https://plus.google.com/","https://www.linkedin.com/profile/","mailto"]},"url":"http://example.com/2021/05/28/first-blood/"}</script>
-    <meta name="description" content="0.初次见面拖延症患者，拖拖拉拉，终于开始搭建自己的博客。本博客使用 Hexo 和 Github page 。下面是博客搭建的历程。 1.准备环境 NodeJS  git2.安装Hexo  Hexo官网 npm 是NodeJS的包管理工具，关于Hexo的安装或者依赖的下载都可以交给它完成 npm install -g hexo-cli 安装完成后执行以下命令 hexo init myBlog cd">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"John Doe","sameAs":["https://github.com/","http://stackoverflow.com/users","https://twitter.com/","https://facebook.com/","https://plus.google.com/","https://www.linkedin.com/profile/","mailto"]},"articleBody":"0.初次见面拖延症患者，拖拖拉拉，终于开始搭建自己的博客。本博客使用 Hexo 和 Github page 。下面是博客搭建的历程。\n1.准备环境\nNodeJS \ngit\n\n2.安装HexoHexo官网\nnpm 是NodeJS的包管理工具，关于Hexo的安装或者依赖的下载都可以交给它完成\nnpm install -g hexo-cli\n安装完成后执行以下命令\nhexo init myBlog\ncd myBlog\nnpm install\n\n测试hexohexo s\n\n访问http://localhost:4040可以预览博客效果。\n3.Github Page 部署\n新建仓库\n\n注意仓库名严格按照[用户名].github.io命名\n\n\nSSH key 配置\ngit config --global user.name &quot;用户名&quot;\ngit config --global user.email &quot;邮箱地址&quot;\nssh-keygen -t rsa -C &#39;上面的邮箱&#39;\ncat ~/.ssh/id_rsa.pub\n\n\n将生成密钥添加到 Github 上\n\nsettings -&gt; SSH and GPG keys -&gt; New SSH key\n\n\n本地部署到Github\n\n博客目录下 _config.yml,在文件末尾添加：deploy:\ntype: git\nrepo:\n    github: https://github.com/Jiaget/Jiaget.github.io.git\nbranch: main\n\n\n安装部署插件 npm install hexo-deployer-git --save\n博客页面生成与上传 hexo g -d\n\n\n上传到github到最后效果的显示有段时间延迟，访问  https://你的用户名.github.io就能看到自己的博客了。\n\n\n4.写作\n新建文章 hexo new &#39;文章标题&#39;\n\n文章会生成在 /source/_posts 下\n\n\n执行 \nhexo g\nhexo s\n\n文章在博客中显示\n\n部署\nhexo clean\nhexo g -d\n\nhexo clean  是为了清除缓存文件db.json以及静态文件public。\n\n写好的文章暂时不想发布，可以存在草稿里，草稿的生成方法 exo new draft &quot;文章标题&quot;\n\n草稿保存在/source/_drafts中，需要发布只需要hexo publicsh [layout]&lt;filename&gt;\n\n\n\n","dateCreated":"2021-05-28T15:16:52+08:00","dateModified":"2021-05-28T15:39:26+08:00","datePublished":"2021-05-28T15:16:52+08:00","description":"","headline":"first blood","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/05/28/first-blood/"},"publisher":{"@type":"Organization","name":"John Doe","sameAs":["https://github.com/","http://stackoverflow.com/users","https://twitter.com/","https://facebook.com/","https://plus.google.com/","https://www.linkedin.com/profile/","mailto"]},"url":"http://example.com/2021/05/28/first-blood/"}</script>
+    <meta name="description" content="0.初次见面拖延症患者，拖拖拉拉，终于开始搭建自己的博客。本博客使用 Hexo 和 Github page 。下面是博客搭建的历程。 1.准备环境 NodeJS  git  2.安装HexoHexo官网 npm 是NodeJS的包管理工具，关于Hexo的安装或者依赖的下载都可以交给它完成 npm install -g hexo-cli 安装完成后执行以下命令 hexo init myBlog cd">
 <meta property="og:type" content="blog">
 <meta property="og:title" content="first blood">
 <meta property="og:url" content="http://example.com/2021/05/28/first-blood/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="0.初次见面拖延症患者，拖拖拉拉，终于开始搭建自己的博客。本博客使用 Hexo 和 Github page 。下面是博客搭建的历程。 1.准备环境 NodeJS  git2.安装Hexo  Hexo官网 npm 是NodeJS的包管理工具，关于Hexo的安装或者依赖的下载都可以交给它完成 npm install -g hexo-cli 安装完成后执行以下命令 hexo init myBlog cd">
+<meta property="og:description" content="0.初次见面拖延症患者，拖拖拉拉，终于开始搭建自己的博客。本博客使用 Hexo 和 Github page 。下面是博客搭建的历程。 1.准备环境 NodeJS  git  2.安装HexoHexo官网 npm 是NodeJS的包管理工具，关于Hexo的安装或者依赖的下载都可以交给它完成 npm install -g hexo-cli 安装完成后执行以下命令 hexo init myBlog cd">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-05-28T07:16:52.000Z">
-<meta property="article:modified_time" content="2021-05-28T07:36:43.492Z">
+<meta property="article:modified_time" content="2021-05-28T07:39:26.682Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
     
@@ -344,9 +344,9 @@
             <h1 id="0-初次见面"><a href="#0-初次见面" class="headerlink" title="0.初次见面"></a>0.初次见面</h1><p>拖延症患者，拖拖拉拉，终于开始搭建自己的博客。本博客使用 <code>Hexo</code> 和 <code>Github page</code> 。下面是博客搭建的历程。</p>
 <h1 id="1-准备环境"><a href="#1-准备环境" class="headerlink" title="1.准备环境"></a>1.准备环境</h1><ul>
 <li><a target="_blank" rel="noopener" href="https://nodejs.org/en/">NodeJS</a> </li>
-<li>git<h1 id="2-安装Hexo"><a href="#2-安装Hexo" class="headerlink" title="2.安装Hexo"></a>2.安装Hexo</h1></li>
+<li>git</li>
 </ul>
-<p><a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/">Hexo官网</a></p>
+<h1 id="2-安装Hexo"><a href="#2-安装Hexo" class="headerlink" title="2.安装Hexo"></a>2.安装Hexo</h1><p><a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/">Hexo官网</a></p>
 <p><code>npm</code> 是NodeJS的包管理工具，关于Hexo的安装或者依赖的下载都可以交给它完成</p>
 <p><code>npm install -g hexo-cli</code></p>
 <p>安装完成后执行以下命令</p>
@@ -389,7 +389,9 @@ branch: main
 </ul>
 </li>
 <li><p>上传到github到最后效果的显示有段时间延迟，访问 <code> https://你的用户名.github.io</code>就能看到自己的博客了。</p>
-<h1 id="4-写作"><a href="#4-写作" class="headerlink" title="4.写作"></a>4.写作</h1></li>
+</li>
+</ul>
+<h1 id="4-写作"><a href="#4-写作" class="headerlink" title="4.写作"></a>4.写作</h1><ul>
 <li><p>新建文章 <code>hexo new &#39;文章标题&#39;</code></p>
 <ul>
 <li>文章会生成在 <code>/source/_posts</code> 下</li>
