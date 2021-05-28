@@ -379,8 +379,7 @@ cat ~/.ssh/id_rsa.pub
 <li>博客目录下 <code>_config.yml</code>,在文件末尾添加：<pre><code>deploy:
 type: git
 repo:
-    github: https://github.com/Jiaget/Jiaget.github.io.git
-branch: main
+    github: https://github.com/Jiaget/Jiaget.github.io.git,main
 </code></pre>
 </li>
 <li>安装部署插件 <code>npm install hexo-deployer-git --save</code></li>
@@ -414,6 +413,19 @@ hexo g -d
 </ul>
 </li>
 </ul>
+<h2 id="git-源码管理"><a href="#git-源码管理" class="headerlink" title="git 源码管理"></a>git 源码管理</h2><p>hexo会把<code>./deploy_git</code>中的静态页面上传给github, 也就是说我们写的markdown文件以及hexo源码都在本地储存。</p>
+<p>因此我们还需要将源码托管到github。不需要新建仓库，只需要新的分支管理即可。</p>
+<p>关于分支，这里需要提一句，在 <code>github page</code> 部署的静态页面应该在 <code>main</code> 分支，而不是 <code>master</code>分支。github应该是将主分支名称修改了，原先一直是 <code>master</code>。</p>
+<ul>
+<li><p>将本地源码和 github 仓库连接 <code>git remote add origin git@github.com:Jiaget/Jiaget.github.io.git</code></p>
+</li>
+<li><p>检查 <code>.gitignore</code>, 忽视无关文件。如果没有该文件，则新建一个。<br>```<br>.DS_Store<br>Thumbs.db<br>db.json</p>
+</li>
+</ul>
+<p><em>.log<br>node_modules/<br>public/<br>.deploy</em>/</p>
+<pre><code>最后推送给新的分支
+</code></pre>
+<p>git add .<br>git commit -m “hexo source code”<br>git push origin master:source<br>```</p>
 
                     
                         
