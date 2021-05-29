@@ -15,7 +15,7 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"Linux 中网络I/O复用并发模型什么是阻塞，非阻塞，IO多路复用？\n流\n\n可进行I/O操作的内核对象\n文字\n管道\n套接字\n\n\n流的入口：文件描述符(fd)\n\n\n阻塞等待不占用CPU时间片\n\n缺点\n不能处理多个I/O请求的问题\n同一个阻塞，同一时间只能处理一个流的阻塞监听\n\n\n\n\n非阻塞（忙轮询）占用资源不断去查看资源锁有没有释放\n\n多路IO复用既能阻塞等待，不浪费资源，又能同一时刻监听多个IO请求的状态\n\n\nIO复用解决的问题如何解决大量IO读写问题\n\n忙轮询\nwhile true &#123;\n  for i in 流[] &#123;\n      if i has 数据 &#123;\n          读 或者 其他处理\n      &#125;\n  &#125;\n&#125;\n\n同时和多个流访问。\n\nselect\nwhile true &#123;\n  select(流[]); //阻塞\n\n//有消息抵达\n  for i in 流[] &#123;\n      if i has 数据 &#123;\n          读 或者 其他处理\n      &#125;\n  &#125;\n&#125;\n\nselect负责接收IO，但不能精准直到哪些IO可用，还需要遍历。监听的IO有限，一般1024个，与平台无关\n\nepoll\nwhile true &#123;\n  可处理的流[] = epoll_wait(epoll_fd); //阻塞\n\n//有消息抵达，全部放在 “可处理的流[]”中\n  for i in 可处理的流[] &#123;\n      读 或者 其他处理\n  &#125;\n&#125;\n\n类似select,但能返回所有可以处理的流，不必再去遍历确认\n\n\nepoll是什么\nlinux独有\n一种I/O 多路复用技术\n只关心活跃的链接，无需遍历所有的描述符集合。\n能处理大量链接请求（系统可以打开的文件数目 cat /proc/sys/fs/file-max）\n\nAPI\n创建```/** \n\n\n@param size 告诉内核监听的数目 \n\n@returns 返回一个epoll句柄（即一个文件描述符） \n/int epoll_create(int size);```\n\n\n控制```/**\n\n\n@param epfd 用epoll_create所创建的epoll句柄\n@param op 表示对epoll监控描述符控制的动作\n\nEPOLL_CTL_ADD(注册新的fd到epfd)\nEPOLL_CTL_MOD(修改已经注册的fd的监听事件)\nEPOLL_CTL_DEL(epfd删除一个fd)\n\n@param fd 需要监听的文件描述符\n@param event 告诉内核需要监听的事件\n\n@returns 成功返回0，失败返回-1, errno查看错误信息\n/int epoll_ctl(int epfd, int op, int fd,struct epoll_event *event);\n\nstruct epoll_event {    __uint32_t events; /* epoll 事件 /    epoll_data_t data; / 用户传递的数据 */}\n/*\n\nevents : {EPOLLIN, EPOLLOUT, EPOLLPRI,                  EPOLLHUP, EPOLLET, EPOLLONESHOT&#125;\n\n\n/typedef union epoll_data {  void *ptr;  int fd;  uint32_t u32;  uint64_t u64;} epoll_data_t;```\n\n\n等待```/**\n\n*\n\n@param epfd 用epoll_create所创建的epoll句柄\n@param event 从内核得到的事件集合\n@param maxevents 告知内核这个events有多大,\n注意: 值 不能大于创建epoll_create()时的size.\n@param timeout 超时时间\n-1: 永久阻塞\n0: 立即返回，非阻塞\n\n0: 指定微秒\n\n\n\n@returns 成功: 有多少文件描述符就绪,时间到时返回0\n失败: -1, errno 查看错误\n/int epoll_wait(int epfd, struct epoll_event *event,                        int maxevents, int timeout);\n\n### epoll 基本编程架构\n\nint epfd = epoll_crete(1000);\n\n//将 listen_fd 添加进 epoll 中epoll_ctl(epfd, EPOLL_CTL_ADD, listen_fd,&amp;listen_event);\nwhile (1) {    //阻塞等待 epoll 中 的fd 触发    int active_cnt = epoll_wait(epfd, events, 1000, -1);\nfor (i = 0 ; i &lt; active_cnt; i++) &#123;\n    if (evnets[i].data.fd == listen_fd) &#123;\n        //accept. 并且将新accept 的fd 加进epoll中.\n    &#125;\n    else if (events[i].events &amp; EPOLLIN) &#123;\n        //对此fd 进行读操作\n    &#125;\n    else if (events[i].events &amp; EPOLLOUT) &#123;\n        //对此fd 进行写操作\n    &#125;\n&#125;\n\n}\n\n## 常见模型\n\n### 单线程Accept\n![single](./IO-reuse/single-accept.png)\n- 主线程的 `Accept（ListenFd）` 会阻塞主线程\n- 连接成功后，会在服务端生成一个连接的套接字\n- 一次只能形成一个连接，另一个客户端如果尝试连接，会阻塞\n- 处理完当前客户端，并关闭套接字文件，再去处理下一个客户端\n\n### 单线程Accept + 多线程读写业务 (无I/O复用)\n![single+multiple-thread.png](./IO-reuse/single+multiple-thread.png)\n- `Accept(ListenFd)` 监听客户端请求，阻塞主线程\n- 接收客户端请求后，开辟一个新线程，进行读写业务。\n- 主线程继续监听，能处理其他客户端的请求\n\n这个模型虽然支持了并发，但是：\n- 高并发情况下，多线程加重服务器负担\n- 长连接的场景，客户端没有读写业务，但它不关闭，就需要不断进行心跳检测，占用了资源。\n\n### 单线程多路I/O复用\n![single-reuse](./IO-reuse/single-reuseIO.png)\n- 主线程创建 `listenFd`， 采用多路I/O服用机制，进行IO状态阻塞监控。当client1发送请求，检测到了 `listenFd` 触发读时间，运行 accept 建立连接，并将 `connFd1`加入监听集合。\n- client1进行读写请求时，多路IO复用机制的监听阻塞释放，并触发套接字读写事件\n- client1触发的读写业务会使主线程阻塞，无法处理新的客户端的请求。\n\n该模型可以监听多个客户端的读写状态。且发生阻塞，处于非忙轮询的状态，不浪费CPU资源\n\n**缺点**：\n- 能同时监听，但不能同时处理多个客户端的读写请求\n- 不支持高并发场景\n\n## 单线程多路I/O复用 + 多线程业务工作池\n\n该场景使用比较少\n\n![sigle-reuse-thread](./IO-reuse/single-reuse-thread.png)\n- 主线程采用多路I/O复用机制监听连接请求。当监听到客户端连接请求后，处理连接请求，并将生成的`connFd1`加入到监听集合中\n- 当监听到读写事件，则进行读写消息的处理\n- 主线程处理读写消息，将业务逻辑交给工作线程池处理。工作线程池在server启动前开启的一定数量的线程。他们只处理逻辑业务，不处理套接字读写操作。\n- 工作线程池处理完业务，再触发`connFd1`的写事件，将回执消息返回给对方\n\n优点：\n    - 将业务处理分离出来，缩短客户端的等待时间。\n    - 能并发处理客户端业务。\n\n缺点：\n    - 读写处理仍然需要单独处理。(排队)\n    - 业务处理后的结果，也需要按顺序返回给客户端。（排队）\n\n","dateCreated":"2021-05-29T22:51:02+08:00","dateModified":"2021-05-29T22:56:19+08:00","datePublished":"2021-05-29T22:51:02+08:00","description":"","headline":"Linux 的网络I/O复用并发模型","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/05/29/Linux-%E7%9A%84%E7%BD%91%E7%BB%9CI-O%E5%A4%8D%E7%94%A8%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/05/29/Linux-%E7%9A%84%E7%BD%91%E7%BB%9CI-O%E5%A4%8D%E7%94%A8%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/","keywords":"linux 网络"}</script>
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"Linux 中网络I/O复用并发模型什么是阻塞，非阻塞，IO多路复用？\n流\n\n可进行I/O操作的内核对象\n文字\n管道\n套接字\n\n\n流的入口：文件描述符(fd)\n\n\n阻塞等待不占用CPU时间片\n\n缺点\n不能处理多个I/O请求的问题\n同一个阻塞，同一时间只能处理一个流的阻塞监听\n\n\n\n\n非阻塞（忙轮询）占用资源不断去查看资源锁有没有释放\n\n多路IO复用既能阻塞等待，不浪费资源，又能同一时刻监听多个IO请求的状态\n\n\nIO复用解决的问题如何解决大量IO读写问题\n\n忙轮询\nwhile true &#123;\n  for i in 流[] &#123;\n      if i has 数据 &#123;\n          读 或者 其他处理\n      &#125;\n  &#125;\n&#125;\n\n同时和多个流访问。\n\nselect\nwhile true &#123;\n  select(流[]); //阻塞\n\n//有消息抵达\n  for i in 流[] &#123;\n      if i has 数据 &#123;\n          读 或者 其他处理\n      &#125;\n  &#125;\n&#125;\n\nselect负责接收IO，但不能精准直到哪些IO可用，还需要遍历。监听的IO有限，一般1024个，与平台无关\n\nepoll\nwhile true &#123;\n  可处理的流[] = epoll_wait(epoll_fd); //阻塞\n\n//有消息抵达，全部放在 “可处理的流[]”中\n  for i in 可处理的流[] &#123;\n      读 或者 其他处理\n  &#125;\n&#125;\n\n类似select,但能返回所有可以处理的流，不必再去遍历确认\n\n\nepoll是什么\nlinux独有\n一种I/O 多路复用技术\n只关心活跃的链接，无需遍历所有的描述符集合。\n能处理大量链接请求（系统可以打开的文件数目 cat /proc/sys/fs/file-max）\n\nAPI\n创建```/** \n\n\n@param size 告诉内核监听的数目 \n\n@returns 返回一个epoll句柄（即一个文件描述符） \n/int epoll_create(int size);```\n\n\n控制```/**\n\n\n@param epfd 用epoll_create所创建的epoll句柄\n@param op 表示对epoll监控描述符控制的动作\n\nEPOLL_CTL_ADD(注册新的fd到epfd)\nEPOLL_CTL_MOD(修改已经注册的fd的监听事件)\nEPOLL_CTL_DEL(epfd删除一个fd)\n\n@param fd 需要监听的文件描述符\n@param event 告诉内核需要监听的事件\n\n@returns 成功返回0，失败返回-1, errno查看错误信息\n/int epoll_ctl(int epfd, int op, int fd,struct epoll_event *event);\n\nstruct epoll_event {    __uint32_t events; /* epoll 事件 /    epoll_data_t data; / 用户传递的数据 */}\n/*\n\nevents : {EPOLLIN, EPOLLOUT, EPOLLPRI,                  EPOLLHUP, EPOLLET, EPOLLONESHOT&#125;\n\n\n/typedef union epoll_data {  void *ptr;  int fd;  uint32_t u32;  uint64_t u64;} epoll_data_t;```\n\n\n等待```/**\n\n*\n\n@param epfd 用epoll_create所创建的epoll句柄\n@param event 从内核得到的事件集合\n@param maxevents 告知内核这个events有多大,\n注意: 值 不能大于创建epoll_create()时的size.\n@param timeout 超时时间\n-1: 永久阻塞\n0: 立即返回，非阻塞\n\n0: 指定微秒\n\n\n\n@returns 成功: 有多少文件描述符就绪,时间到时返回0\n失败: -1, errno 查看错误\n/int epoll_wait(int epfd, struct epoll_event *event,                        int maxevents, int timeout);\n\n### epoll 基本编程架构\n\nint epfd = epoll_crete(1000);\n\n//将 listen_fd 添加进 epoll 中epoll_ctl(epfd, EPOLL_CTL_ADD, listen_fd,&amp;listen_event);\nwhile (1) {    //阻塞等待 epoll 中 的fd 触发    int active_cnt = epoll_wait(epfd, events, 1000, -1);\nfor (i = 0 ; i &lt; active_cnt; i++) &#123;\n    if (evnets[i].data.fd == listen_fd) &#123;\n        //accept. 并且将新accept 的fd 加进epoll中.\n    &#125;\n    else if (events[i].events &amp; EPOLLIN) &#123;\n        //对此fd 进行读操作\n    &#125;\n    else if (events[i].events &amp; EPOLLOUT) &#123;\n        //对此fd 进行写操作\n    &#125;\n&#125;\n\n}\n\n## 常见模型\n\n### 单线程Accept\n![single](./IO-reuse/single-accept.png)\n- 主线程的 `Accept（ListenFd）` 会阻塞主线程\n- 连接成功后，会在服务端生成一个连接的套接字\n- 一次只能形成一个连接，另一个客户端如果尝试连接，会阻塞\n- 处理完当前客户端，并关闭套接字文件，再去处理下一个客户端\n\n### 单线程Accept + 多线程读写业务 (无I/O复用)\n![single+multiple-thread.png](./IO-reuse/single+multiple-thread.png)\n- `Accept(ListenFd)` 监听客户端请求，阻塞主线程\n- 接收客户端请求后，开辟一个新线程，进行读写业务。\n- 主线程继续监听，能处理其他客户端的请求\n\n这个模型虽然支持了并发，但是：\n- 高并发情况下，多线程加重服务器负担\n- 长连接的场景，客户端没有读写业务，但它不关闭，就需要不断进行心跳检测，占用了资源。\n\n### 单线程多路I/O复用\n![single-reuse](./IO-reuse/single-reuseIO.png)\n- 主线程创建 `listenFd`， 采用多路I/O服用机制，进行IO状态阻塞监控。当client1发送请求，检测到了 `listenFd` 触发读时间，运行 accept 建立连接，并将 `connFd1`加入监听集合。\n- client1进行读写请求时，多路IO复用机制的监听阻塞释放，并触发套接字读写事件\n- client1触发的读写业务会使主线程阻塞，无法处理新的客户端的请求。\n\n该模型可以监听多个客户端的读写状态。且发生阻塞，处于非忙轮询的状态，不浪费CPU资源\n\n**缺点**：\n- 能同时监听，但不能同时处理多个客户端的读写请求\n- 不支持高并发场景\n\n## 单线程多路I/O复用 + 多线程业务工作池\n\n该场景使用比较少\n\n![sigle-reuse-thread](./IO-reuse/single-reuse-thread.png)\n- 主线程采用多路I/O复用机制监听连接请求。当监听到客户端连接请求后，处理连接请求，并将生成的`connFd1`加入到监听集合中\n- 当监听到读写事件，则进行读写消息的处理\n- 主线程处理读写消息，将业务逻辑交给工作线程池处理。工作线程池在server启动前开启的一定数量的线程。他们只处理逻辑业务，不处理套接字读写操作。\n- 工作线程池处理完业务，再触发`connFd1`的写事件，将回执消息返回给对方\n\n优点：\n    - 将业务处理分离出来，缩短客户端的等待时间。\n    - 能并发处理客户端业务。\n\n缺点：\n    - 读写处理仍然需要单独处理。(排队)\n    - 业务处理后的结果，也需要按顺序返回给客户端。（排队）\n\n","dateCreated":"2021-05-29T22:51:02+08:00","dateModified":"2021-05-29T22:57:41+08:00","datePublished":"2021-05-29T22:51:02+08:00","description":"","headline":"Linux 的网络I/O复用并发模型","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/05/29/Linux-%E7%9A%84%E7%BD%91%E7%BB%9CI-O%E5%A4%8D%E7%94%A8%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/05/29/Linux-%E7%9A%84%E7%BD%91%E7%BB%9CI-O%E5%A4%8D%E7%94%A8%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/","keywords":"linux"}</script>
     <meta name="description" content="Linux 中网络I&#x2F;O复用并发模型什么是阻塞，非阻塞，IO多路复用？ 流  可进行I&#x2F;O操作的内核对象 文字 管道 套接字   流的入口：文件描述符(fd)   阻塞等待不占用CPU时间片  缺点 不能处理多个I&#x2F;O请求的问题 同一个阻塞，同一时间只能处理一个流的阻塞监听     非阻塞（忙轮询）占用资源不断去查看资源锁有没有释放  多路IO复用既能阻塞等待，不浪费资源，又能同一时刻监听多个IO">
 <meta property="og:type" content="blog">
 <meta property="og:title" content="Linux 的网络I&#x2F;O复用并发模型">
@@ -24,9 +24,9 @@
 <meta property="og:description" content="Linux 中网络I&#x2F;O复用并发模型什么是阻塞，非阻塞，IO多路复用？ 流  可进行I&#x2F;O操作的内核对象 文字 管道 套接字   流的入口：文件描述符(fd)   阻塞等待不占用CPU时间片  缺点 不能处理多个I&#x2F;O请求的问题 同一个阻塞，同一时间只能处理一个流的阻塞监听     非阻塞（忙轮询）占用资源不断去查看资源锁有没有释放  多路IO复用既能阻塞等待，不浪费资源，又能同一时刻监听多个IO">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-05-29T14:51:02.000Z">
-<meta property="article:modified_time" content="2021-05-29T14:56:19.196Z">
+<meta property="article:modified_time" content="2021-05-29T14:57:41.382Z">
 <meta property="article:author" content="Jiaget">
-<meta property="article:tag" content="linux 网络">
+<meta property="article:tag" content="linux">
 <meta name="twitter:card" content="summary">
     
         <link rel="publisher" href="https://plus.google.com/none"/>
@@ -451,7 +451,7 @@ int epfd = epoll_crete(1000);</li>
             <div class="post-footer-tags">
                 <span class="text-color-light text-small">标签</span><br/>
                 
-    <a class="tag tag--primary tag--small t-none-link" href="/tags/linux-%E7%BD%91%E7%BB%9C/" rel="tag">linux 网络</a>
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/linux/" rel="tag">linux</a>
 
             </div>
         
@@ -491,7 +491,7 @@ int epfd = epoll_crete(1000);</li>
             <a
                 class="post-action-btn btn btn--default btn-open-shareoptions"
                 href="#btn-open-shareoptions"
-                aria-label="Diesen Beitrag teilen"
+                aria-label="Share this post"
             >
                 <i class="fa fa-share-alt" aria-hidden="true"></i>
             </a>
@@ -541,7 +541,7 @@ int epfd = epoll_crete(1000);</li>
         
         <li class="post-action">
             
-                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
             
                 <i class="fa fa-list" aria-hidden="true"></i>
             </a>
@@ -603,7 +603,7 @@ int epfd = epoll_crete(1000);</li>
             <a
                 class="post-action-btn btn btn--default btn-open-shareoptions"
                 href="#btn-open-shareoptions"
-                aria-label="Diesen Beitrag teilen"
+                aria-label="Share this post"
             >
                 <i class="fa fa-share-alt" aria-hidden="true"></i>
             </a>
@@ -653,7 +653,7 @@ int epfd = epoll_crete(1000);</li>
         
         <li class="post-action">
             
-                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
             
                 <i class="fa fa-list" aria-hidden="true"></i>
             </a>

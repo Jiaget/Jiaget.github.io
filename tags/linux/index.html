@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Jiaget&#39;s field">
-    <title>标签: hexo blog - Jiaget&#39;s field</title>
+    <title>标签: linux - Jiaget&#39;s field</title>
     <meta name="author" content="Jiaget">
     
     
@@ -18,7 +18,7 @@
     <script type="application/ld+json">{}</script>
     <meta property="og:type" content="blog">
 <meta property="og:title" content="Jiaget&#39;s field">
-<meta property="og:url" content="http://example.com/tags/hexo-blog/index.html">
+<meta property="og:url" content="http://example.com/tags/linux/index.html">
 <meta property="og:site_name" content="Jiaget&#39;s field">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:author" content="Jiaget">
@@ -217,23 +217,23 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/2021/05/28/first-blood/"
-                            aria-label=": first blood"
+                            href="/2021/05/29/Linux-%E7%9A%84%E7%BD%91%E7%BB%9CI-O%E5%A4%8D%E7%94%A8%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/"
+                            aria-label=": Linux 的网络I/O复用并发模型"
                         >
-                            first blood
+                            Linux 的网络I/O复用并发模型
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time datetime="2021-05-28T15:16:52+08:00">
+    <time datetime="2021-05-29T22:51:02+08:00">
 	
-		    5月 28, 2021
+		    5月 29, 2021
     	
     </time>
     
         <span>发布在 </span>
         
-    <a class="category-link" href="/categories/%E6%9D%82%E9%A1%B9/">杂项</a>
+    <a class="category-link" href="/categories/linux/">linux</a>
 
 
     
@@ -242,100 +242,201 @@
             </div>
             
                 <div class="postShorten-content">
-                    <h1 id="0-初次见面"><a href="#0-初次见面" class="headerlink" title="0.初次见面"></a>0.初次见面</h1><p>拖延症患者，拖拖拉拉，终于开始搭建自己的博客。本博客使用 <code>Hexo</code> 和 <code>Github page</code> 。下面是博客搭建的历程。</p>
-<h1 id="1-准备环境"><a href="#1-准备环境" class="headerlink" title="1.准备环境"></a>1.准备环境</h1><ul>
-<li><a target="_blank" rel="noopener" href="https://nodejs.org/en/">NodeJS</a> </li>
-<li>git</li>
-</ul>
-<h1 id="2-安装Hexo"><a href="#2-安装Hexo" class="headerlink" title="2.安装Hexo"></a>2.安装Hexo</h1><p><a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/">Hexo官网</a></p>
-<p><code>npm</code> 是NodeJS的包管理工具，关于Hexo的安装或者依赖的下载都可以交给它完成</p>
-<p><code>npm install -g hexo-cli</code></p>
-<p>安装完成后执行以下命令</p>
-<pre><code>hexo init myBlog
-cd myBlog
-npm install
-</code></pre>
-<h2 id="测试hexo"><a href="#测试hexo" class="headerlink" title="测试hexo"></a>测试hexo</h2><pre><code>hexo s
-</code></pre>
-<p>访问<code>http://localhost:4040</code>可以预览博客效果。</p>
-<h1 id="3-Github-Page-部署"><a href="#3-Github-Page-部署" class="headerlink" title="3.Github Page 部署"></a>3.Github Page 部署</h1><ul>
-<li><p>新建仓库</p>
+                    <h1 id="Linux-中网络I-O复用并发模型"><a href="#Linux-中网络I-O复用并发模型" class="headerlink" title="Linux 中网络I/O复用并发模型"></a>Linux 中网络I/O复用并发模型</h1><h2 id="什么是阻塞，非阻塞，IO多路复用？"><a href="#什么是阻塞，非阻塞，IO多路复用？" class="headerlink" title="什么是阻塞，非阻塞，IO多路复用？"></a>什么是阻塞，非阻塞，IO多路复用？</h2><ul>
+<li><p>流</p>
 <ul>
-<li>注意仓库名严格按照<code>[用户名].github.io</code>命名</li>
+<li>可进行I/O操作的内核对象<ul>
+<li>文字</li>
+<li>管道</li>
+<li>套接字</li>
 </ul>
 </li>
-<li><p>SSH key 配置</p>
-<pre><code>git config --global user.name &quot;用户名&quot;
-git config --global user.email &quot;邮箱地址&quot;
-ssh-keygen -t rsa -C &#39;上面的邮箱&#39;
-cat ~/.ssh/id_rsa.pub
+<li>流的入口：文件描述符(fd)</li>
+</ul>
+</li>
+<li><p>阻塞等待<br>不占用CPU时间片</p>
+<ul>
+<li>缺点<ul>
+<li>不能处理多个I/O请求的问题</li>
+<li>同一个阻塞，同一时间只能处理一个流的阻塞监听</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>非阻塞（忙轮询）<br>占用资源不断去查看资源锁有没有释放</p>
+</li>
+<li><p>多路IO复用<br>既能阻塞等待，不浪费资源，又能同一时刻监听多个IO请求的状态</p>
+</li>
+</ul>
+<h2 id="IO复用解决的问题"><a href="#IO复用解决的问题" class="headerlink" title="IO复用解决的问题"></a>IO复用解决的问题</h2><p>如何解决大量IO读写问题</p>
+<ul>
+<li><p>忙轮询</p>
+<pre><code>while true &#123;
+  for i in 流[] &#123;
+      if i has 数据 &#123;
+          读 或者 其他处理
+      &#125;
+  &#125;
+&#125;
+</code></pre>
+<p>同时和多个流访问。</p>
+</li>
+<li><p>select</p>
+<pre><code>while true &#123;
+  select(流[]); //阻塞
+
+//有消息抵达
+  for i in 流[] &#123;
+      if i has 数据 &#123;
+          读 或者 其他处理
+      &#125;
+  &#125;
+&#125;
+</code></pre>
+<p>select负责接收IO，但不能精准直到哪些IO可用，还需要遍历。监听的IO有限，一般1024个，与平台无关</p>
+</li>
+<li><p>epoll</p>
+<pre><code>while true &#123;
+  可处理的流[] = epoll_wait(epoll_fd); //阻塞
+
+//有消息抵达，全部放在 “可处理的流[]”中
+  for i in 可处理的流[] &#123;
+      读 或者 其他处理
+  &#125;
+&#125;
+</code></pre>
+<p>类似select,但能返回所有可以处理的流，不必再去遍历确认</p>
+</li>
+</ul>
+<h2 id="epoll是什么"><a href="#epoll是什么" class="headerlink" title="epoll是什么"></a>epoll是什么</h2><ul>
+<li>linux独有</li>
+<li>一种I/O 多路复用技术</li>
+<li>只关心活跃的链接，无需遍历所有的描述符集合。</li>
+<li>能处理大量链接请求（系统可以打开的文件数目 <code>cat /proc/sys/fs/file-max</code>）</li>
+</ul>
+<h2 id="API"><a href="#API" class="headerlink" title="API"></a>API</h2><ol>
+<li>创建<br>```<br>/** </li>
+</ol>
+<ul>
+<li>@param size 告诉内核监听的数目 </li>
+<li></li>
+<li>@returns 返回一个epoll句柄（即一个文件描述符） </li>
+<li>/<br>int epoll_create(int size);<br>```</li>
+</ul>
+<ol start="2">
+<li>控制<br>```<br>/**</li>
+</ol>
+<ul>
+<li>@param epfd 用epoll_create所创建的epoll句柄</li>
+<li>@param op 表示对epoll监控描述符控制的动作</li>
+<li></li>
+<li>EPOLL_CTL_ADD(注册新的fd到epfd)</li>
+<li>EPOLL_CTL_MOD(修改已经注册的fd的监听事件)</li>
+<li>EPOLL_CTL_DEL(epfd删除一个fd)</li>
+<li></li>
+<li>@param fd 需要监听的文件描述符</li>
+<li>@param event 告诉内核需要监听的事件</li>
+<li></li>
+<li>@returns 成功返回0，失败返回-1, errno查看错误信息</li>
+<li>/<br>int epoll_ctl(int epfd, int op, int fd,<br>struct epoll_event *event);</li>
+</ul>
+<p>struct epoll_event {<br>    __uint32_t events; /* epoll 事件 <em>/<br>    epoll_data_t data; /</em> 用户传递的数据 */<br>}</p>
+<p>/*</p>
+<ul>
+<li>events : {EPOLLIN, EPOLLOUT, EPOLLPRI,<pre><code>                  EPOLLHUP, EPOLLET, EPOLLONESHOT&#125;
 </code></pre>
 </li>
-<li><p>将生成密钥添加到 Github 上</p>
-<ul>
-<li><code>settings -&gt; SSH and GPG keys -&gt; New SSH key</code></li>
+<li>/<br>typedef union epoll_data {<br>  void *ptr;<br>  int fd;<br>  uint32_t u32;<br>  uint64_t u64;<br>} epoll_data_t;<br>```</li>
 </ul>
-</li>
-<li><p>本地部署到Github</p>
+<ol start="3">
+<li>等待<br>```<br>/**</li>
+</ol>
+<p>*</p>
 <ul>
-<li>博客目录下 <code>_config.yml</code>,在文件末尾添加：<pre><code>deploy:
-type: git
-repo:
-    github: https://github.com/Jiaget/Jiaget.github.io.git,main
+<li>@param epfd 用epoll_create所创建的epoll句柄</li>
+<li>@param event 从内核得到的事件集合</li>
+<li>@param maxevents 告知内核这个events有多大,</li>
+<li>注意: 值 不能大于创建epoll_create()时的size.</li>
+<li>@param timeout 超时时间</li>
+<li>-1: 永久阻塞</li>
+<li>0: 立即返回，非阻塞</li>
+<li><blockquote>
+<p>0: 指定微秒</p>
+</blockquote>
+</li>
+<li></li>
+<li>@returns 成功: 有多少文件描述符就绪,时间到时返回0</li>
+<li>失败: -1, errno 查看错误</li>
+<li>/<br>int epoll_wait(int epfd, struct epoll_event *event,<pre><code>                        int maxevents, int timeout);
 </code></pre>
-</li>
-<li>安装部署插件 <code>npm install hexo-deployer-git --save</code></li>
-<li>博客页面生成与上传 <code>hexo g -d</code></li>
-</ul>
-</li>
-<li><p>上传到github到最后效果的显示有段时间延迟，访问 <code> https://你的用户名.github.io</code>就能看到自己的博客了。</p>
-</li>
-</ul>
-<h1 id="4-写作"><a href="#4-写作" class="headerlink" title="4.写作"></a>4.写作</h1><ul>
-<li><p>新建文章 <code>hexo new &#39;文章标题&#39;</code></p>
-<ul>
-<li>文章会生成在 <code>/source/_posts</code> 下</li>
-</ul>
-</li>
-<li><p>执行 </p>
-<pre><code>hexo g
-hexo s
+<pre><code>### epoll 基本编程架构
 </code></pre>
-<p>文章在博客中显示</p>
-</li>
-<li><p>部署</p>
-<pre><code>hexo clean
-hexo g -d
+int epfd = epoll_crete(1000);</li>
+</ul>
+<p>//将 listen_fd 添加进 epoll 中<br>epoll_ctl(epfd, EPOLL_CTL_ADD, listen_fd,&amp;listen_event);</p>
+<p>while (1) {<br>    //阻塞等待 epoll 中 的fd 触发<br>    int active_cnt = epoll_wait(epfd, events, 1000, -1);</p>
+<pre><code>for (i = 0 ; i &lt; active_cnt; i++) &#123;
+    if (evnets[i].data.fd == listen_fd) &#123;
+        //accept. 并且将新accept 的fd 加进epoll中.
+    &#125;
+    else if (events[i].events &amp; EPOLLIN) &#123;
+        //对此fd 进行读操作
+    &#125;
+    else if (events[i].events &amp; EPOLLOUT) &#123;
+        //对此fd 进行写操作
+    &#125;
+&#125;
 </code></pre>
-<p><code>hexo clean </code> 是为了清除缓存文件<code>db.json</code>以及静态文件<code>public</code>。</p>
-</li>
-<li><p>写好的文章暂时不想发布，可以存在草稿里，草稿的生成方法 <code>exo new draft &quot;文章标题&quot;</code></p>
-<ul>
-<li>草稿保存在<code>/source/_drafts</code>中，需要发布只需要<code>hexo publicsh [layout]&lt;filename&gt;</code></li>
-</ul>
-</li>
-</ul>
-<h2 id="git-源码管理"><a href="#git-源码管理" class="headerlink" title="git 源码管理"></a>git 源码管理</h2><p>hexo会把<code>./deploy_git</code>中的静态页面上传给github, 也就是说我们写的markdown文件以及hexo源码都在本地储存。</p>
-<p>因此我们还需要将源码托管到github。不需要新建仓库，只需要新的分支管理即可。</p>
-<p>关于分支，这里需要提一句，在 <code>github page</code> 部署的静态页面应该在 <code>main</code> 分支，而不是 <code>master</code>分支。github应该是将主分支名称修改了，原先一直是 <code>master</code>。</p>
-<ul>
-<li><p>将本地源码和 github 仓库连接 <code>git remote add origin git@github.com:Jiaget/Jiaget.github.io.git</code></p>
-</li>
-<li><p>检查 <code>.gitignore</code>, 忽视无关文件。如果没有该文件，则新建一个。</p>
-</li>
-</ul>
-<pre><code>.DS_Store
-Thumbs.db
-db.json
-*.log
-node_modules/
-public/
-.deploy*/
-</code></pre>
-<p>最后推送给新的分支</p>
-<pre><code>git add .
-git commit -m &quot;hexo source code&quot;
-git push origin master:source
+<p>}</p>
+<pre><code>
+## 常见模型
+
+### 单线程Accept
+![single](./IO-reuse/single-accept.png)
+- 主线程的 `Accept（ListenFd）` 会阻塞主线程
+- 连接成功后，会在服务端生成一个连接的套接字
+- 一次只能形成一个连接，另一个客户端如果尝试连接，会阻塞
+- 处理完当前客户端，并关闭套接字文件，再去处理下一个客户端
+
+### 单线程Accept + 多线程读写业务 (无I/O复用)
+![single+multiple-thread.png](./IO-reuse/single+multiple-thread.png)
+- `Accept(ListenFd)` 监听客户端请求，阻塞主线程
+- 接收客户端请求后，开辟一个新线程，进行读写业务。
+- 主线程继续监听，能处理其他客户端的请求
+
+这个模型虽然支持了并发，但是：
+- 高并发情况下，多线程加重服务器负担
+- 长连接的场景，客户端没有读写业务，但它不关闭，就需要不断进行心跳检测，占用了资源。
+
+### 单线程多路I/O复用
+![single-reuse](./IO-reuse/single-reuseIO.png)
+- 主线程创建 `listenFd`， 采用多路I/O服用机制，进行IO状态阻塞监控。当client1发送请求，检测到了 `listenFd` 触发读时间，运行 accept 建立连接，并将 `connFd1`加入监听集合。
+- client1进行读写请求时，多路IO复用机制的监听阻塞释放，并触发套接字读写事件
+- client1触发的读写业务会使主线程阻塞，无法处理新的客户端的请求。
+
+该模型可以监听多个客户端的读写状态。且发生阻塞，处于非忙轮询的状态，不浪费CPU资源
+
+**缺点**：
+- 能同时监听，但不能同时处理多个客户端的读写请求
+- 不支持高并发场景
+
+## 单线程多路I/O复用 + 多线程业务工作池
+
+该场景使用比较少
+
+![sigle-reuse-thread](./IO-reuse/single-reuse-thread.png)
+- 主线程采用多路I/O复用机制监听连接请求。当监听到客户端连接请求后，处理连接请求，并将生成的`connFd1`加入到监听集合中
+- 当监听到读写事件，则进行读写消息的处理
+- 主线程处理读写消息，将业务逻辑交给工作线程池处理。工作线程池在server启动前开启的一定数量的线程。他们只处理逻辑业务，不处理套接字读写操作。
+- 工作线程池处理完业务，再触发`connFd1`的写事件，将回执消息返回给对方
+
+优点：
+    - 将业务处理分离出来，缩短客户端的等待时间。
+    - 能并发处理客户端业务。
+
+缺点：
+    - 读写处理仍然需要单独处理。(排队)
+    - 业务处理后的结果，也需要按顺序返回给客户端。（排队）
 </code></pre>
 
                     
@@ -346,7 +447,7 @@ git push origin master:source
                     
                         <p>
                             <a
-                                href="/2021/05/28/first-blood/#post-footer"
+                                href="/2021/05/29/Linux-%E7%9A%84%E7%BD%91%E7%BB%9CI-O%E5%A4%8D%E7%94%A8%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
