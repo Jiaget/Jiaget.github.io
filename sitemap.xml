@@ -2,16 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://example.com/2021/05/29/Linux-%E7%9A%84%E7%BD%91%E7%BB%9CI-O%E5%A4%8D%E7%94%A8%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/</loc>
+    <loc>http://example.com/2021/05/30/GC/</loc>
     
-    <lastmod>2021-05-29</lastmod>
+    <lastmod>2021-05-30</lastmod>
     
   </url>
   
   <url>
     <loc>http://example.com/2021/05/28/first-blood/</loc>
     
-    <lastmod>2021-05-29</lastmod>
+    <lastmod>2021-05-30</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/05/29/Linux-%E7%9A%84%E7%BD%91%E7%BB%9CI-O%E5%A4%8D%E7%94%A8%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/</loc>
+    
+    <lastmod>2021-05-30</lastmod>
     
   </url>
   
@@ -43,17 +50,10 @@
     
   </url>
   
-  <url>
-    <loc>http://example.com/2021/05/27/hello-world/</loc>
-    
-    <lastmod>2021-05-27</lastmod>
-    
-  </url>
-  
 
   <url>
     <loc>http://example.com/</loc>
-    <lastmod>2021-05-29</lastmod>
+    <lastmod>2021-05-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -61,14 +61,63 @@
   
   <url>
     <loc>http://example.com/tags/linux/</loc>
-    <lastmod>2021-05-29</lastmod>
+    <lastmod>2021-05-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://example.com/tags/hexo/</loc>
-    <lastmod>2021-05-29</lastmod>
+    <lastmod>2021-05-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.com/tags/golang/</loc>
+    <lastmod>2021-05-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.com/tags/gc/</loc>
+    <lastmod>2021-05-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.com/tags/%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E6%B3%95/</loc>
+    <lastmod>2021-05-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.com/tags/%E5%86%99%E5%B1%8F%E9%9A%9C/</loc>
+    <lastmod>2021-05-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.com/tags/%E5%8D%9A%E5%AE%A2/</loc>
+    <lastmod>2021-05-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.com/tags/%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/</loc>
+    <lastmod>2021-05-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.com/tags/epoll/</loc>
+    <lastmod>2021-05-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -77,14 +126,21 @@
   
   <url>
     <loc>http://example.com/categories/%E6%9D%82%E9%A1%B9/</loc>
-    <lastmod>2021-05-29</lastmod>
+    <lastmod>2021-05-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://example.com/categories/linux/</loc>
-    <lastmod>2021-05-29</lastmod>
+    <lastmod>2021-05-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.com/categories/golang/</loc>
+    <lastmod>2021-05-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
