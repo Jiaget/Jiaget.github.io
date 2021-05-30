@@ -1,7 +1,10 @@
 ---
 title: first blood
 date: 2021-05-28 15:16:52
-tags:
+tags: 
+    - hexo
+    - 博客
+categories: 杂项
 ---
 # 0.初次见面
 
@@ -90,3 +93,23 @@ hexo会把`./deploy_git`中的静态页面上传给github, 也就是说我们写
 关于分支，这里需要提一句，在 `github page` 部署的静态页面应该在 `main` 分支，而不是 `master`分支。github应该是将主分支名称修改了，原先一直是 `master`。
 
 - 将本地源码和 github 仓库连接 `git remote add origin git@github.com:Jiaget/Jiaget.github.io.git`
+
+- 检查 `.gitignore`, 忽视无关文件。如果没有该文件，则新建一个。
+
+```
+.DS_Store
+Thumbs.db
+db.json
+*.log
+node_modules/
+public/
+.deploy*/
+```
+
+最后推送给新的分支
+
+```
+git add .
+git commit -m "hexo source code"
+git push origin master:source
+```

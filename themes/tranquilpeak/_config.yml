@@ -56,40 +56,40 @@ sidebar:
             title: global.about
             url: "#about"
             icon: fa fa-question
-    author_links:
-        github:
-            title: global.github
-            url: https://github.com/
-            icon: fab fa-github
-        stack_overflow:
-            title: global.stack_overflow
-            url: http://stackoverflow.com/users
-            icon: fab fa-stack-overflow
-        twitter:
-            title: global.twitter
-            url: https://twitter.com/
-            icon: fab fa-twitter
-        facebook:
-            title: global.facebook
-            url: https://facebook.com/
-            icon: fab fa-facebook
-        google_plus:
-            title: global.google_plus
-            url: https://plus.google.com/
-            icon: fab fa-google-plus
-        linked_in:
-            title: global.linkedin
-            url: https://www.linkedin.com/profile/
-            icon: fab fa-linkedin
-        mail:
-            title: global.mail
-            url: mailto
-            icon: fa fa-envelope
-    rss:
-        rss:
-            title: global.rss
-            url: /atom.xml
-            icon: fa fa-rss
+    # author_links:
+    #     github:
+    #         title: global.github
+    #         url: https://github.com/
+    #         icon: fab fa-github
+    #     stack_overflow:
+    #         title: global.stack_overflow
+    #         url: http://stackoverflow.com/users
+    #         icon: fab fa-stack-overflow
+    #     twitter:
+    #         title: global.twitter
+    #         url: https://twitter.com/
+    #         icon: fab fa-twitter
+    #     facebook:
+    #         title: global.facebook
+    #         url: https://facebook.com/
+    #         icon: fab fa-facebook
+    #     google_plus:
+    #         title: global.google_plus
+    #         url: https://plus.google.com/
+    #         icon: fab fa-google-plus
+    #     linked_in:
+    #         title: global.linkedin
+    #         url: https://www.linkedin.com/profile/
+    #         icon: fab fa-linkedin
+    #     mail:
+    #         title: global.mail
+    #         url: mailto
+    #         icon: fa fa-envelope
+    # rss:
+    #     rss:
+    #         title: global.rss
+    #         url: /atom.xml
+    #         icon: fa fa-rss
 
 
 # --------------------
@@ -117,13 +117,15 @@ header:
 
 # Your biography and your job is editable in each languages files in `languages` folder
 author:
-    email:
+    job: Unemployed
+    bio: Make it correst, make it clear, make it concise, make it fast. In that order
+    email: jiaget@outlook.com
     location:
     # Your profile picture located in folder `source/_images/` (development)
     # or in `source/assets/images/` (production)
     # or you can use an external url
     # Overwritten by your gravatar image if `gravatar_email` is filled
-    picture:
+    picture: Avatar.jpg
     # Your Twitter username without the @. E.g : `tranquilpeak`
     twitter:
     # Your personal google plus profile id, not your blog or business page id.
@@ -131,7 +133,7 @@ author:
     google_plus:
     # Your businnes google plus profile id. If not provided, personal will be used instead.
     # E.g : `+Tranquilpeak` or `123812884128439`
-    google_plus_business:
+    google_plus_business: none
 
 
 # -------------
@@ -150,7 +152,7 @@ author:
 # large sidebar is swiped on all lower screens
 # 5: Display header bar on all screens and large sidebar is swiped on large screen
 # 6: Display header bar on all screens and medium sidebar is swiped
-sidebar_behavior: 1
+sidebar_behavior: 2
 # Hide sidebar on all article page to let article take full width to improve reading, and
 # enjoy wide images and cover images. (true: enable, false: disable)
 clear_reading: true
@@ -225,7 +227,7 @@ gitalk:
     post_identifier: path
     # See all options: https://github.com/gitalk/gitalk#options
     options:
-        language: "en"
+        language: "zh-cn"
         perPage: 10
         distractionFreeMode: false
         enableHotKey: true

@@ -1,5 +1,6 @@
 <% /* Define author's picture */ %>
 <% var authorPicture = null; %>
+
 <% if (theme.gravatar_email && theme.gravatar_email.length) { %>
     <% authorPicture = gravatar(theme.gravatar_email, 110); %>
 <% } else if (theme.author.picture && theme.author.picture.length) { %>
@@ -18,14 +19,14 @@
             <img id="about-card-picture" src="<%= authorPicture %>" alt="<%= __('global.author_picture') %>"/>
         <% } %>
             <h4 id="about-card-name"><%= config.author %></h4>
-        <% if (__('author.bio')) { %>
-            <div id="about-card-bio"><%- markdown(__('author.bio')) %></div>
+        <% if (theme.author.bio) { %>
+            <div id="about-card-bio"><%- markdown(theme.author.bio) %></div>
         <% } %>
-        <% if (__('author.job')) { %>
+        <% if (theme.author.job) { %>
             <div id="about-card-job">
                 <i class="fa fa-briefcase"></i>
                 <br/>
-                <%- markdown(__('author.job')) %>
+                <%- markdown(theme.author.job) %>
             </div>
         <% } %>
         <% if (theme.author.location) { %>
