@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2021-05-30T11:02:51.124Z</updated>
+  <updated>2021-06-01T14:09:43.793Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,58 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Redis 深入探讨</title>
+    <link href="http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"/>
+    <id>http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/</id>
+    <published>2021-06-01T12:49:03.000Z</published>
+    <updated>2021-06-01T14:09:43.793Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Redis-与-数据库数据的一致"><a href="#Redis-与-数据库数据的一致" class="headerlink" title="Redis 与 数据库数据的一致"></a>Redis 与 数据库数据的一致</h1><h2 id="抛出问题"><a href="#抛出问题" class="headerlink" title="抛出问题"></a>抛出问题</h2><pre><code>    当对数据进行修改时，应该先删除缓存还是先写入数据库中？</code></pre><h3 id="（方案一）-先删缓存，-后写数据库。"><a href="#（方案一）-先删缓存，-后写数据库。" class="headerlink" title="（方案一） 先删缓存， 后写数据库。"></a>（方案一） 先删缓存， 后写数据库。</h3><ul><li>在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 <code>（cache old : db new)</code></li></ul><table><thead><tr><th></th><th>Thread1</th><th>Thread2</th></tr></thead><tbody><tr><td>t1</td><td>delete cache</td><td></td></tr><tr><td>t2</td><td></td><td>read -&gt; (cache)nil -&gt;（DB）old data</td></tr><tr><td>t3</td><td>write DB -&gt; update cache</td><td></td></tr><tr><td>t4</td><td></td><td>write cache (overwrite)</td></tr></tbody></table><h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><ul><li><ol><li>不删除缓存，而是将缓存改成一个特殊值（比如 <code>locking</code>）。在客户端的设计上，读到该特殊值，就休眠一会，再查Redis</li></ol><ul><li>缺陷：</li><li><ol><li>特殊值对业务的侵入。（必须挑选一个与业务严格无关的值）</li></ol></li><li><ol start="2"><li>休眠时间可能重复，降低性能。</li></ol></li></ul></li><li><ol start="2"><li>延时双删。 删缓存 -&gt; 写数据库 -&gt; 休眠一会 -&gt; 删除缓存</li></ol><ul><li>缺陷</li><li>1.写操作频繁的场景下，仍然无法避免脏数据。</li></ul></li></ul><p>不能在写操作频繁的情况下使用</p><h3 id="（方案二）先写数据，再删缓存"><a href="#（方案二）先写数据，再删缓存" class="headerlink" title="（方案二）先写数据，再删缓存"></a>（方案二）先写数据，再删缓存</h3><ul><li>数据库写完后，缓存删除失败，数据就会不一致。</li></ul><h4 id="解决方案："><a href="#解决方案：" class="headerlink" title="解决方案："></a>解决方案：</h4><ul><li><ol><li>给缓存设置过期时间。</li></ol><ul><li>缺陷</li><li>过期时间内，缓存数据未更新，仍有脏数据风险。</li></ul></li><li><ol start="2"><li>引入MQ, 保证原子性， 删除缓存失败，会重试</li></ol><ul><li>缺陷</li><li>重试时间内，仍然存在脏数据。</li></ul></li><li><ol start="3"><li>业务不再处理脏数据的问题。业务层只需要给value设置一个逻辑过期时间。另开一个线程，用来扫描缓存，并删除过期的缓存。</li></ol></li></ul><p>只能保证最终一致性，而不能保证实时一致。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Redis-与-数据库数据的一致&quot;&gt;&lt;a href=&quot;#Redis-与-数据库数据的一致&quot; class=&quot;headerlink&quot; title=&quot;Redis 与 数据库数据的一致&quot;&gt;&lt;/a&gt;Redis 与 数据库数据的一致&lt;/h1&gt;&lt;h2 id=&quot;抛出问题&quot;&gt;&lt;a </summary>
+      
+    
+    
+    
+    <category term="nosql" scheme="http://example.com/categories/nosql/"/>
+    
+    
+    <category term="nosql" scheme="http://example.com/tags/nosql/"/>
+    
+    <category term="高并发" scheme="http://example.com/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Redis</title>
+    <link href="http://example.com/2021/06/01/Redis/"/>
+    <id>http://example.com/2021/06/01/Redis/</id>
+    <published>2021-06-01T11:18:37.000Z</published>
+    <updated>2021-06-01T12:50:23.613Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h1><h2 id="Redis-简介"><a href="#Redis-简介" class="headerlink" title="Redis 简介"></a>Redis 简介</h2><p>Redis 全称 (REmote DIctionary Serer) 远程字典服务， 是一个键值对数据库。</p><p>与 NoSQL 相对应的 关系型数据库在当今环境存在的问题：</p><ul><li>性能： 磁盘IO性能低</li><li>扩展： 数据之间的关系复杂，扩展性差，不便于大规模集群使用</li></ul><p>NoSQL对其缺点进行了改进：</p><ul><li>内存存储</li><li>不存数据关系，只存数据</li></ul><h2 id="Redis-的特征"><a href="#Redis-的特征" class="headerlink" title="Redis 的特征"></a>Redis 的特征</h2><ol><li>数据之间没有必然联系</li><li>采用单线程机制</li><li>高性能。 </li><li>多数据类型：<ul><li>string</li><li>list</li><li>hash</li><li>set</li><li>sorted_set</li></ul></li></ol><ul><li>持久化。数据灾难恢复。</li></ul><h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><ul><li>热点数据加速查询</li><li>任务队列</li><li>实时信息</li><li>时效信息</li><li>分布式数据功效。分布式集群中的session分离</li><li>消息队列</li><li>分布式锁</li></ul><h2 id="Redis-的一些功能"><a href="#Redis-的一些功能" class="headerlink" title="Redis 的一些功能"></a>Redis 的一些功能</h2><ul><li>缓存<ul><li>针对一些高并发业务的设计</li><li>平台的高频率数据。</li></ul></li><li>单服务器升级集群</li><li>Session 管理</li><li>Token</li></ul><h2 id="Redis-命令"><a href="#Redis-命令" class="headerlink" title="Redis 命令"></a>Redis 命令</h2><ul><li>写 <code>set [key] [value]</code></li><li>读 <code>get [key] ([value])</code> 。 如果取的值不存在，返回 <code>(nil)</code></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Redis&quot;&gt;&lt;a href=&quot;#Redis&quot; class=&quot;headerlink&quot; title=&quot;Redis&quot;&gt;&lt;/a&gt;Redis&lt;/h1&gt;&lt;h2 id=&quot;Redis-简介&quot;&gt;&lt;a href=&quot;#Redis-简介&quot; class=&quot;headerlink&quot; titl</summary>
+      
+    
+    
+    
+    <category term="nosql" scheme="http://example.com/categories/nosql/"/>
+    
+    
+    <category term="nosql" scheme="http://example.com/tags/nosql/"/>
+    
+    <category term="高并发" scheme="http://example.com/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/"/>
+    
+  </entry>
   
   <entry>
     <title>GC</title>

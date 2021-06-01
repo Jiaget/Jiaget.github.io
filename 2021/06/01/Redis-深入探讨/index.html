@@ -1,0 +1,656 @@
+
+<!DOCTYPE html>
+<html lang="zh-cn">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Jiaget&#39;s field">
+    <title>Redis 深入探讨 - Jiaget&#39;s field</title>
+    <meta name="author" content="Jiaget">
+    
+    
+    
+        
+            <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
+        
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"Redis 与 数据库数据的一致抛出问题    当对数据进行修改时，应该先删除缓存还是先写入数据库中？\n\n（方案一） 先删缓存， 后写数据库。\n在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 （cache old : db new)\n\n\n\n\n\nThread1\nThread2\n\n\n\nt1\ndelete cache\n\n\n\nt2\n\nread -&gt; (cache)nil -&gt;（DB）old data\n\n\nt3\nwrite DB -&gt; update cache\n\n\n\nt4\n\nwrite cache (overwrite)\n\n\n解决方案\n\n不删除缓存，而是将缓存改成一个特殊值（比如 locking）。在客户端的设计上，读到该特殊值，就休眠一会，再查Redis\n\n\n缺陷：\n\n特殊值对业务的侵入。（必须挑选一个与业务严格无关的值）\n\n\n\n休眠时间可能重复，降低性能。\n\n\n\n\n\n延时双删。 删缓存 -&gt; 写数据库 -&gt; 休眠一会 -&gt; 删除缓存\n\n\n缺陷\n1.写操作频繁的场景下，仍然无法避免脏数据。\n\n\n\n不能在写操作频繁的情况下使用\n（方案二）先写数据，再删缓存\n数据库写完后，缓存删除失败，数据就会不一致。\n\n解决方案：\n\n给缓存设置过期时间。\n\n\n缺陷\n过期时间内，缓存数据未更新，仍有脏数据风险。\n\n\n\n引入MQ, 保证原子性， 删除缓存失败，会重试\n\n\n缺陷\n重试时间内，仍然存在脏数据。\n\n\n\n业务不再处理脏数据的问题。业务层只需要给value设置一个逻辑过期时间。另开一个线程，用来扫描缓存，并删除过期的缓存。\n\n\n\n只能保证最终一致性，而不能保证实时一致。\n","dateCreated":"2021-06-01T20:49:03+08:00","dateModified":"2021-06-01T22:09:43+08:00","datePublished":"2021-06-01T20:49:03+08:00","description":"","headline":"Redis 深入探讨","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/","keywords":"nosql, 高并发"}</script>
+    <meta name="description" content="Redis 与 数据库数据的一致抛出问题    当对数据进行修改时，应该先删除缓存还是先写入数据库中？  （方案一） 先删缓存， 后写数据库。 在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 （cache ol">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="Redis 深入探讨">
+<meta property="og:url" content="http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/index.html">
+<meta property="og:site_name" content="Jiaget&#39;s field">
+<meta property="og:description" content="Redis 与 数据库数据的一致抛出问题    当对数据进行修改时，应该先删除缓存还是先写入数据库中？  （方案一） 先删缓存， 后写数据库。 在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 （cache ol">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-06-01T12:49:03.000Z">
+<meta property="article:modified_time" content="2021-06-01T14:09:43.793Z">
+<meta property="article:author" content="Jiaget">
+<meta property="article:tag" content="nosql">
+<meta property="article:tag" content="高并发">
+<meta name="twitter:card" content="summary">
+    
+        <link rel="publisher" href="https://plus.google.com/none"/>
+    
+    
+        
+    
+    
+        <meta property="og:image" content="http://example.com/assets/images/Avatar.jpg"/>
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/assets/css/style-sp5xih4wwpbivuctnupxctktdmpz7mk0p2tqxrvmeluf5fjmhxycv6yumqgk.min.css">
+
+    <!--STYLES END-->
+    
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+        
+            
+        
+    
+
+<header id="header" data-behavior="5">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/"
+            aria-label=""
+        >
+            Jiaget&#39;s field
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="打开链接: /#about"
+            >
+        
+        
+            <img class="header-picture" src="/assets/images/Avatar.jpg" alt="作者的图片"/>
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+
+        
+    
+
+<nav id="sidebar" data-behavior="5">
+    <div class="sidebar-container">
+        
+            <div class="sidebar-profile">
+                <a
+                    href="/#about"
+                    aria-label="阅读有关作者的更多信息"
+                >
+                    <img class="sidebar-profile-picture" src="/assets/images/Avatar.jpg" alt="作者的图片"/>
+                </a>
+                <h4 class="sidebar-profile-name">Jiaget</h4>
+                
+                    <h5 class="sidebar-profile-bio"><p>author.bio</p>
+</h5>
+                
+            </div>
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/"
+                            
+                            rel="noopener"
+                            title="首页"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">首页</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-categories"
+                            
+                            rel="noopener"
+                            title="分类"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">分类</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-tags"
+                            
+                            rel="noopener"
+                            title="标签"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">标签</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-archives"
+                            
+                            rel="noopener"
+                            title="归档"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">归档</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link open-algolia-search"
+                            href="#search"
+                            
+                            rel="noopener"
+                            title="搜索"
+                        >
+                        <i class="sidebar-button-icon fa fa-search" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">搜索</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="关于"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">关于</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="5"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            Redis 深入探讨
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2021-06-01T20:49:03+08:00">
+	
+		    6月 01, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/nosql/">nosql</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <h1 id="Redis-与-数据库数据的一致"><a href="#Redis-与-数据库数据的一致" class="headerlink" title="Redis 与 数据库数据的一致"></a>Redis 与 数据库数据的一致</h1><h2 id="抛出问题"><a href="#抛出问题" class="headerlink" title="抛出问题"></a>抛出问题</h2><pre><code>    当对数据进行修改时，应该先删除缓存还是先写入数据库中？
+</code></pre>
+<h3 id="（方案一）-先删缓存，-后写数据库。"><a href="#（方案一）-先删缓存，-后写数据库。" class="headerlink" title="（方案一） 先删缓存， 后写数据库。"></a>（方案一） 先删缓存， 后写数据库。</h3><ul>
+<li>在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 <code>（cache old : db new)</code></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Thread1</th>
+<th>Thread2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>t1</td>
+<td>delete cache</td>
+<td></td>
+</tr>
+<tr>
+<td>t2</td>
+<td></td>
+<td>read -&gt; (cache)nil -&gt;（DB）old data</td>
+</tr>
+<tr>
+<td>t3</td>
+<td>write DB -&gt; update cache</td>
+<td></td>
+</tr>
+<tr>
+<td>t4</td>
+<td></td>
+<td>write cache (overwrite)</td>
+</tr>
+</tbody></table>
+<h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><ul>
+<li><ol>
+<li>不删除缓存，而是将缓存改成一个特殊值（比如 <code>locking</code>）。在客户端的设计上，读到该特殊值，就休眠一会，再查Redis</li>
+</ol>
+<ul>
+<li>缺陷：</li>
+<li><ol>
+<li>特殊值对业务的侵入。（必须挑选一个与业务严格无关的值）</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>休眠时间可能重复，降低性能。</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><ol start="2">
+<li>延时双删。 删缓存 -&gt; 写数据库 -&gt; 休眠一会 -&gt; 删除缓存</li>
+</ol>
+<ul>
+<li>缺陷</li>
+<li>1.写操作频繁的场景下，仍然无法避免脏数据。</li>
+</ul>
+</li>
+</ul>
+<p>不能在写操作频繁的情况下使用</p>
+<h3 id="（方案二）先写数据，再删缓存"><a href="#（方案二）先写数据，再删缓存" class="headerlink" title="（方案二）先写数据，再删缓存"></a>（方案二）先写数据，再删缓存</h3><ul>
+<li>数据库写完后，缓存删除失败，数据就会不一致。</li>
+</ul>
+<h4 id="解决方案："><a href="#解决方案：" class="headerlink" title="解决方案："></a>解决方案：</h4><ul>
+<li><ol>
+<li>给缓存设置过期时间。</li>
+</ol>
+<ul>
+<li>缺陷</li>
+<li>过期时间内，缓存数据未更新，仍有脏数据风险。</li>
+</ul>
+</li>
+<li><ol start="2">
+<li>引入MQ, 保证原子性， 删除缓存失败，会重试</li>
+</ol>
+<ul>
+<li>缺陷</li>
+<li>重试时间内，仍然存在脏数据。</li>
+</ul>
+</li>
+<li><ol start="3">
+<li>业务不再处理脏数据的问题。业务层只需要给value设置一个逻辑过期时间。另开一个线程，用来扫描缓存，并删除过期的缓存。</li>
+</ol>
+</li>
+</ul>
+<p>只能保证最终一致性，而不能保证实时一致。</p>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">标签</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/nosql/" rel="tag">nosql</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" rel="tag">高并发</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/06/01/Redis/"
+                    data-tooltip="Redis"
+                    aria-label="下一篇: Redis"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                    title="分享到 Facebook"
+                    aria-label="分享到 Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                    title="分享到 Twitter"
+                    aria-label="分享到 Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                    title="分享到 Google+"
+                    aria-label="分享到 Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 Jiaget. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/06/01/Redis/"
+                    data-tooltip="Redis"
+                    aria-label="下一篇: Redis"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                    title="分享到 Facebook"
+                    aria-label="分享到 Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                    title="分享到 Twitter"
+                    aria-label="分享到 Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                    title="分享到 Google+"
+                    aria-label="分享到 Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                        aria-label="分享到 Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>分享到 Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                        aria-label="分享到 Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>分享到 Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                        aria-label="分享到 Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>分享到 Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+
+    
+        
+    
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <img id="about-card-picture" src="/assets/images/Avatar.jpg" alt="作者的图片"/>
+        
+            <h4 id="about-card-name">Jiaget</h4>
+        
+            <div id="about-card-bio"><p>Make it correst, make it clear, make it concise, make it fast. In that order</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>Unemployed</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover.jpg');"></div>
+        <!--SCRIPTS-->
+
+<script src="/assets/js/script-vrbxykgb2guqp0d1c0bvofzw2fqgddegscic3ljwk3fce6l7uqstblyu0kfc.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>
