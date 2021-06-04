@@ -4,11 +4,71 @@
   
     
     <entry>
+      <title>虚拟内存地址空间</title>
+      <link href="2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/"/>
+      <url>2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/</url>
+      
+        <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>文章内容相当于对 <code>计算机科学</code> 知识的理解与汇总，阅读理解需要一定的计算机理论知识。</p><h1 id="虚拟内存地址空间的分布"><a href="#虚拟内存地址空间的分布" class="headerlink" title="虚拟内存地址空间的分布"></a>虚拟内存地址空间的分布</h1><p><img src="https://i.loli.net/2021/06/03/geWDOKmTUXCZI31.png" alt="Virtual-memory-address-space.png"></p><p>我们可以对内存空间进行如下分区管理：</p><h2 id="代码段"><a href="#代码段" class="headerlink" title="代码段"></a>代码段</h2><p> 一段程序经过编译器编译成机器指令存储在可执行文件里，程序运行时，程序中的各个函数会被加载存放在虚拟地址空间中的代码段。</p><p> 代码段中指令的执行流程：<br>    - 顺序指令：每个进程只会执行一次<br>    - 循环指令：需要使用跳转指令返回函数的头部<br>    - 递归指令：需要借助栈来实现</p><p>代码段指令由 <code>操作码：操作对象</code> 构成。</p><ul><li>操作码通常包括 <code>MOV</code>， <code>PUSH</code>，<code>POP</code>,<code>XCHG</code></li><li>操作对象可以是<ul><li>立即数： 比如golang中某一段程序 <code>x := 1 + 1</code>， 其中的1就是立即数，它不会被储存在任意寄存器中，它直接包含在代码里。</li><li>局部数据：也就是局部变量，它将在栈区分配空间，代码段会引用该数据地址</li><li>BSS数据与数据段数据：与上同，关于BSS，数据段将在下面详细说明。</li></ul></li></ul><h2 id="数据段"><a href="#数据段" class="headerlink" title="数据段"></a>数据段</h2><p>数据段一般存放<code>已初始化</code>且<code>初值不为0</code>的全局变量和静态局部变量。数据段属于静态内存分配。</p><h2 id="BSS-段"><a href="#BSS-段" class="headerlink" title="BSS 段"></a>BSS 段</h2><p>有些地方可能会和数据段合并，将数据段划分为初始化区和未初始化区。</p><p>未初始化或者初值为0的全局变量和静态局部变量</p><h2 id="堆"><a href="#堆" class="headerlink" title="堆"></a>堆</h2><p>动态分配的内存。</p><p>在go中，我们使用 <code>make</code>, <code>new</code>来分配的就在堆中开辟。这部分的内存可以最终由 GC回收。</p><h2 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h2><p>局部变量，函数参数，返回地址等等</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 内存 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> golang </tag>
+            
+            <tag> 内存 </tag>
+            
+            <tag> 操作系统 </tag>
+            
+            <tag> 汇编 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>浅析golang 闭包</title>
+      <link href="2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"/>
+      <url>2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/</url>
+      
+        <content type="html"><![CDATA[<h1 id=""><a href="#" class="headerlink" title=""></a></h1>]]></content>
+      
+      
+      <categories>
+          
+          <category> golang </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> golang </tag>
+            
+            <tag> 闭包 </tag>
+            
+            <tag> 计算机科学 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Redis 深入探讨</title>
       <link href="2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"/>
       <url>2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/</url>
       
-        <content type="html"><![CDATA[<h1 id="Redis-与-数据库数据的一致"><a href="#Redis-与-数据库数据的一致" class="headerlink" title="Redis 与 数据库数据的一致"></a>Redis 与 数据库数据的一致</h1><h2 id="抛出问题"><a href="#抛出问题" class="headerlink" title="抛出问题"></a>抛出问题</h2><pre><code>    当对数据进行修改时，应该先删除缓存还是先写入数据库中？</code></pre><h3 id="（方案一）-先删缓存，-后写数据库。"><a href="#（方案一）-先删缓存，-后写数据库。" class="headerlink" title="（方案一） 先删缓存， 后写数据库。"></a>（方案一） 先删缓存， 后写数据库。</h3><ul><li>在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 <code>（cache old : db new)</code></li></ul><table><thead><tr><th></th><th>Thread1</th><th>Thread2</th></tr></thead><tbody><tr><td>t1</td><td>delete cache</td><td></td></tr><tr><td>t2</td><td></td><td>read -&gt; (cache)nil -&gt;（DB）old data</td></tr><tr><td>t3</td><td>write DB -&gt; update cache</td><td></td></tr><tr><td>t4</td><td></td><td>write cache (overwrite)</td></tr></tbody></table><h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><ul><li><ol><li>不删除缓存，而是将缓存改成一个特殊值（比如 <code>locking</code>）。在客户端的设计上，读到该特殊值，就休眠一会，再查Redis</li></ol><ul><li>缺陷：</li><li><ol><li>特殊值对业务的侵入。（必须挑选一个与业务严格无关的值）</li></ol></li><li><ol start="2"><li>休眠时间可能重复，降低性能。</li></ol></li></ul></li><li><ol start="2"><li>延时双删。 删缓存 -&gt; 写数据库 -&gt; 休眠一会 -&gt; 删除缓存</li></ol><ul><li>缺陷</li><li>1.写操作频繁的场景下，仍然无法避免脏数据。</li></ul></li></ul><p>不能在写操作频繁的情况下使用</p><h3 id="（方案二）先写数据，再删缓存"><a href="#（方案二）先写数据，再删缓存" class="headerlink" title="（方案二）先写数据，再删缓存"></a>（方案二）先写数据，再删缓存</h3><ul><li>数据库写完后，缓存删除失败，数据就会不一致。</li></ul><h4 id="解决方案："><a href="#解决方案：" class="headerlink" title="解决方案："></a>解决方案：</h4><ul><li><ol><li>给缓存设置过期时间。</li></ol><ul><li>缺陷</li><li>过期时间内，缓存数据未更新，仍有脏数据风险。</li></ul></li><li><ol start="2"><li>引入MQ, 保证原子性， 删除缓存失败，会重试</li></ol><ul><li>缺陷</li><li>重试时间内，仍然存在脏数据。</li></ul></li><li><ol start="3"><li>业务不再处理脏数据的问题。业务层只需要给value设置一个逻辑过期时间。另开一个线程，用来扫描缓存，并删除过期的缓存。</li></ol></li></ul><p>只能保证最终一致性，而不能保证实时一致。</p>]]></content>
+        <content type="html"><![CDATA[<h1 id="Redis-使用的基本使用场景"><a href="#Redis-使用的基本使用场景" class="headerlink" title="Redis 使用的基本使用场景"></a>Redis 使用的基本使用场景</h1><h1 id="Redis-与-数据库数据的一致"><a href="#Redis-与-数据库数据的一致" class="headerlink" title="Redis 与 数据库数据的一致"></a>Redis 与 数据库数据的一致</h1><h2 id="抛出问题"><a href="#抛出问题" class="headerlink" title="抛出问题"></a>抛出问题</h2><pre><code>    当对数据进行修改时，应该先删除缓存还是先写入数据库中？</code></pre><h3 id="（方案一）-先删缓存，-后写数据库。"><a href="#（方案一）-先删缓存，-后写数据库。" class="headerlink" title="（方案一） 先删缓存， 后写数据库。"></a>（方案一） 先删缓存， 后写数据库。</h3><ul><li>在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 <code>（cache old : db new)</code></li></ul><table><thead><tr><th></th><th>Thread1</th><th>Thread2</th></tr></thead><tbody><tr><td>t1</td><td>delete cache</td><td></td></tr><tr><td>t2</td><td></td><td>read -&gt; (cache)nil -&gt;（DB）old data</td></tr><tr><td>t3</td><td>write DB -&gt; update cache</td><td></td></tr><tr><td>t4</td><td></td><td>write cache (overwrite)</td></tr></tbody></table><h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><ul><li><ol><li>不删除缓存，而是将缓存改成一个特殊值（比如 <code>locking</code>）。在客户端的设计上，读到该特殊值，就休眠一会，再查Redis</li></ol><ul><li>缺陷：</li><li><ol><li>特殊值对业务的侵入。（必须挑选一个与业务严格无关的值）</li></ol></li><li><ol start="2"><li>休眠时间可能重复，降低性能。</li></ol></li></ul></li><li><ol start="2"><li>延时双删。 删缓存 -&gt; 写数据库 -&gt; 休眠一会 -&gt; 删除缓存</li></ol><ul><li>缺陷</li><li>1.写操作频繁的场景下，仍然无法避免脏数据。</li></ul></li></ul><p>不能在写操作频繁的情况下使用</p><h3 id="（方案二）先写数据，再删缓存"><a href="#（方案二）先写数据，再删缓存" class="headerlink" title="（方案二）先写数据，再删缓存"></a>（方案二）先写数据，再删缓存</h3><ul><li>数据库写完后，缓存删除失败，数据就会不一致。</li></ul><h4 id="解决方案："><a href="#解决方案：" class="headerlink" title="解决方案："></a>解决方案：</h4><ul><li><ol><li>给缓存设置过期时间。</li></ol><ul><li>缺陷</li><li>过期时间内，缓存数据未更新，仍有脏数据风险。</li></ul></li><li><ol start="2"><li>引入MQ, 保证原子性， 删除缓存失败，会重试</li></ol><ul><li>缺陷</li><li>重试时间内，仍然存在脏数据。</li></ul></li><li><ol start="3"><li>业务不再处理脏数据的问题。业务层只需要给value设置一个逻辑过期时间。另开一个线程，用来扫描缓存，并删除过期的缓存。</li></ol></li></ul><p>只能保证最终一致性，而不能保证实时一致。</p><h1 id="Redis-缓存穿透"><a href="#Redis-缓存穿透" class="headerlink" title="Redis 缓存穿透"></a>Redis 缓存穿透</h1><h1 id="Redis-缓存击穿"><a href="#Redis-缓存击穿" class="headerlink" title="Redis 缓存击穿"></a>Redis 缓存击穿</h1><h1 id="Redis-缓存雪崩"><a href="#Redis-缓存雪崩" class="headerlink" title="Redis 缓存雪崩"></a>Redis 缓存雪崩</h1>]]></content>
       
       
       <categories>
@@ -127,7 +187,7 @@
       
       <categories>
           
-          <category> 杂项 </category>
+          <category> 工具 </category>
           
       </categories>
       

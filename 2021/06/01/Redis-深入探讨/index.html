@@ -15,16 +15,16 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"Redis 与 数据库数据的一致抛出问题    当对数据进行修改时，应该先删除缓存还是先写入数据库中？\n\n（方案一） 先删缓存， 后写数据库。\n在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 （cache old : db new)\n\n\n\n\n\nThread1\nThread2\n\n\n\nt1\ndelete cache\n\n\n\nt2\n\nread -&gt; (cache)nil -&gt;（DB）old data\n\n\nt3\nwrite DB -&gt; update cache\n\n\n\nt4\n\nwrite cache (overwrite)\n\n\n解决方案\n\n不删除缓存，而是将缓存改成一个特殊值（比如 locking）。在客户端的设计上，读到该特殊值，就休眠一会，再查Redis\n\n\n缺陷：\n\n特殊值对业务的侵入。（必须挑选一个与业务严格无关的值）\n\n\n\n休眠时间可能重复，降低性能。\n\n\n\n\n\n延时双删。 删缓存 -&gt; 写数据库 -&gt; 休眠一会 -&gt; 删除缓存\n\n\n缺陷\n1.写操作频繁的场景下，仍然无法避免脏数据。\n\n\n\n不能在写操作频繁的情况下使用\n（方案二）先写数据，再删缓存\n数据库写完后，缓存删除失败，数据就会不一致。\n\n解决方案：\n\n给缓存设置过期时间。\n\n\n缺陷\n过期时间内，缓存数据未更新，仍有脏数据风险。\n\n\n\n引入MQ, 保证原子性， 删除缓存失败，会重试\n\n\n缺陷\n重试时间内，仍然存在脏数据。\n\n\n\n业务不再处理脏数据的问题。业务层只需要给value设置一个逻辑过期时间。另开一个线程，用来扫描缓存，并删除过期的缓存。\n\n\n\n只能保证最终一致性，而不能保证实时一致。\n","dateCreated":"2021-06-01T20:49:03+08:00","dateModified":"2021-06-01T22:09:43+08:00","datePublished":"2021-06-01T20:49:03+08:00","description":"","headline":"Redis 深入探讨","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/","keywords":"nosql, 高并发"}</script>
-    <meta name="description" content="Redis 与 数据库数据的一致抛出问题    当对数据进行修改时，应该先删除缓存还是先写入数据库中？  （方案一） 先删缓存， 后写数据库。 在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 （cache ol">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"Redis 使用的基本使用场景Redis 与 数据库数据的一致抛出问题    当对数据进行修改时，应该先删除缓存还是先写入数据库中？\n\n（方案一） 先删缓存， 后写数据库。\n在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 （cache old : db new)\n\n\n\n\n\nThread1\nThread2\n\n\n\nt1\ndelete cache\n\n\n\nt2\n\nread -&gt; (cache)nil -&gt;（DB）old data\n\n\nt3\nwrite DB -&gt; update cache\n\n\n\nt4\n\nwrite cache (overwrite)\n\n\n解决方案\n\n不删除缓存，而是将缓存改成一个特殊值（比如 locking）。在客户端的设计上，读到该特殊值，就休眠一会，再查Redis\n\n\n缺陷：\n\n特殊值对业务的侵入。（必须挑选一个与业务严格无关的值）\n\n\n\n休眠时间可能重复，降低性能。\n\n\n\n\n\n延时双删。 删缓存 -&gt; 写数据库 -&gt; 休眠一会 -&gt; 删除缓存\n\n\n缺陷\n1.写操作频繁的场景下，仍然无法避免脏数据。\n\n\n\n不能在写操作频繁的情况下使用\n（方案二）先写数据，再删缓存\n数据库写完后，缓存删除失败，数据就会不一致。\n\n解决方案：\n\n给缓存设置过期时间。\n\n\n缺陷\n过期时间内，缓存数据未更新，仍有脏数据风险。\n\n\n\n引入MQ, 保证原子性， 删除缓存失败，会重试\n\n\n缺陷\n重试时间内，仍然存在脏数据。\n\n\n\n业务不再处理脏数据的问题。业务层只需要给value设置一个逻辑过期时间。另开一个线程，用来扫描缓存，并删除过期的缓存。\n\n\n\n只能保证最终一致性，而不能保证实时一致。\nRedis 缓存穿透Redis 缓存击穿Redis 缓存雪崩","dateCreated":"2021-06-01T20:49:03+08:00","dateModified":"2021-06-03T12:25:30+08:00","datePublished":"2021-06-01T20:49:03+08:00","description":"","headline":"Redis 深入探讨","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/","keywords":"nosql, 高并发"}</script>
+    <meta name="description" content="Redis 使用的基本使用场景Redis 与 数据库数据的一致抛出问题    当对数据进行修改时，应该先删除缓存还是先写入数据库中？  （方案一） 先删缓存， 后写数据库。 在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了">
 <meta property="og:type" content="blog">
 <meta property="og:title" content="Redis 深入探讨">
 <meta property="og:url" content="http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/index.html">
 <meta property="og:site_name" content="Jiaget&#39;s field">
-<meta property="og:description" content="Redis 与 数据库数据的一致抛出问题    当对数据进行修改时，应该先删除缓存还是先写入数据库中？  （方案一） 先删缓存， 后写数据库。 在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 （cache ol">
+<meta property="og:description" content="Redis 使用的基本使用场景Redis 与 数据库数据的一致抛出问题    当对数据进行修改时，应该先删除缓存还是先写入数据库中？  （方案一） 先删缓存， 后写数据库。 在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-06-01T12:49:03.000Z">
-<meta property="article:modified_time" content="2021-06-01T14:09:43.793Z">
+<meta property="article:modified_time" content="2021-06-03T04:25:30.361Z">
 <meta property="article:author" content="Jiaget">
 <meta property="article:tag" content="nosql">
 <meta property="article:tag" content="高并发">
@@ -245,7 +245,7 @@
     
     <div class="post-content markdown">
         <div class="main-content-wrap">
-            <h1 id="Redis-与-数据库数据的一致"><a href="#Redis-与-数据库数据的一致" class="headerlink" title="Redis 与 数据库数据的一致"></a>Redis 与 数据库数据的一致</h1><h2 id="抛出问题"><a href="#抛出问题" class="headerlink" title="抛出问题"></a>抛出问题</h2><pre><code>    当对数据进行修改时，应该先删除缓存还是先写入数据库中？
+            <h1 id="Redis-使用的基本使用场景"><a href="#Redis-使用的基本使用场景" class="headerlink" title="Redis 使用的基本使用场景"></a>Redis 使用的基本使用场景</h1><h1 id="Redis-与-数据库数据的一致"><a href="#Redis-与-数据库数据的一致" class="headerlink" title="Redis 与 数据库数据的一致"></a>Redis 与 数据库数据的一致</h1><h2 id="抛出问题"><a href="#抛出问题" class="headerlink" title="抛出问题"></a>抛出问题</h2><pre><code>    当对数据进行修改时，应该先删除缓存还是先写入数据库中？
 </code></pre>
 <h3 id="（方案一）-先删缓存，-后写数据库。"><a href="#（方案一）-先删缓存，-后写数据库。" class="headerlink" title="（方案一） 先删缓存， 后写数据库。"></a>（方案一） 先删缓存， 后写数据库。</h3><ul>
 <li>在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 <code>（cache old : db new)</code></li>
@@ -331,7 +331,7 @@
 </li>
 </ul>
 <p>只能保证最终一致性，而不能保证实时一致。</p>
-
+<h1 id="Redis-缓存穿透"><a href="#Redis-缓存穿透" class="headerlink" title="Redis 缓存穿透"></a>Redis 缓存穿透</h1><h1 id="Redis-缓存击穿"><a href="#Redis-缓存击穿" class="headerlink" title="Redis 缓存击穿"></a>Redis 缓存击穿</h1><h1 id="Redis-缓存雪崩"><a href="#Redis-缓存雪崩" class="headerlink" title="Redis 缓存雪崩"></a>Redis 缓存雪崩</h1>
             
 
 
@@ -352,11 +352,14 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    <a
-                        class="post-action-btn btn btn--disabled"
-                        aria-hidden="true"
-                    >
-                        
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
+                    data-tooltip="浅析golang 闭包"
+                    aria-label="上一篇: 浅析golang 闭包"
+                >
+                    
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
                     </a>
@@ -382,7 +385,7 @@
             <a
                 class="post-action-btn btn btn--default btn-open-shareoptions"
                 href="#btn-open-shareoptions"
-                aria-label="Share this post"
+                aria-label="Diesen Beitrag teilen"
             >
                 <i class="fa fa-share-alt" aria-hidden="true"></i>
             </a>
@@ -432,7 +435,7 @@
         
         <li class="post-action">
             
-                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
             
                 <i class="fa fa-list" aria-hidden="true"></i>
             </a>
@@ -464,11 +467,14 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    <a
-                        class="post-action-btn btn btn--disabled"
-                        aria-hidden="true"
-                    >
-                        
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
+                    data-tooltip="浅析golang 闭包"
+                    aria-label="上一篇: 浅析golang 闭包"
+                >
+                    
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
                     </a>
@@ -494,7 +500,7 @@
             <a
                 class="post-action-btn btn btn--default btn-open-shareoptions"
                 href="#btn-open-shareoptions"
-                aria-label="Share this post"
+                aria-label="Diesen Beitrag teilen"
             >
                 <i class="fa fa-share-alt" aria-hidden="true"></i>
             </a>
@@ -544,7 +550,7 @@
         
         <li class="post-action">
             
-                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
             
                 <i class="fa fa-list" aria-hidden="true"></i>
             </a>

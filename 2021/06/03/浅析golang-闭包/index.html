@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Jiaget&#39;s field">
-    <title>categories - Jiaget&#39;s field</title>
+    <title>浅析golang 闭包 - Jiaget&#39;s field</title>
     <meta name="author" content="Jiaget">
     
     
@@ -15,15 +15,18 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"","dateCreated":"2021-05-28T08:57:54+08:00","dateModified":"2021-05-28T08:57:54+08:00","datePublished":"2021-05-28T08:57:54+08:00","description":"","headline":"categories","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/05/28/categories/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/05/28/categories/"}</script>
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"","dateCreated":"2021-06-03T12:26:10+08:00","dateModified":"2021-06-04T11:20:34+08:00","datePublished":"2021-06-03T12:26:10+08:00","description":"","headline":"浅析golang 闭包","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/","keywords":"golang, 闭包, 计算机科学"}</script>
     <meta property="og:type" content="blog">
-<meta property="og:title" content="categories">
-<meta property="og:url" content="http://example.com/2021/05/28/categories/index.html">
+<meta property="og:title" content="浅析golang 闭包">
+<meta property="og:url" content="http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/index.html">
 <meta property="og:site_name" content="Jiaget&#39;s field">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-05-28T00:57:54.000Z">
-<meta property="article:modified_time" content="2021-05-28T00:57:54.092Z">
+<meta property="article:published_time" content="2021-06-03T04:26:10.000Z">
+<meta property="article:modified_time" content="2021-06-04T03:20:34.057Z">
 <meta property="article:author" content="Jiaget">
+<meta property="article:tag" content="golang">
+<meta property="article:tag" content="闭包">
+<meta property="article:tag" content="计算机科学">
 <meta name="twitter:card" content="summary">
     
         <link rel="publisher" href="https://plus.google.com/none"/>
@@ -216,16 +219,22 @@
         <div class="post-header main-content-wrap text-left">
     
         <h1 class="post-title">
-            categories
+            浅析golang 闭包
         </h1>
     
     
         <div class="post-meta">
-    <time datetime="2021-05-28T08:57:54+08:00">
+    <time datetime="2021-06-03T12:26:10+08:00">
 	
-		    5月 28, 2021
+		    6月 03, 2021
     	
     </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/golang/">golang</a>
+
+
     
 </div>
 
@@ -235,13 +244,20 @@
     
     <div class="post-content markdown">
         <div class="main-content-wrap">
-            
+            <h1 id=""><a href="#" class="headerlink" title=""></a></h1>
             
 
 
         </div>
     </div>
     <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">标签</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/golang/" rel="tag">golang</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/" rel="tag">计算机科学</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/%E9%97%AD%E5%8C%85/" rel="tag">闭包</a>
+
+            </div>
         
         
             <div class="post-actions-wrap">
@@ -252,9 +268,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/2021/05/28/first-blood/"
-                    data-tooltip="first blood"
-                    aria-label="上一篇: first blood"
+                    href="/2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/"
+                    data-tooltip="虚拟内存地址空间"
+                    aria-label="上一篇: 虚拟内存地址空间"
                 >
                     
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
@@ -263,11 +279,14 @@
             </li>
             <li class="post-action">
                 
-                    <a
-                        class="post-action-btn btn btn--disabled"
-                        aria-hidden="true"
-                    >
-                        
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                    data-tooltip="Redis 深入探讨"
+                    aria-label="下一篇: Redis 深入探讨"
+                >
+                    
                         <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
                         <i class="fa fa-angle-right" aria-hidden="true"></i>
                     </a>
@@ -290,7 +309,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/05/28/categories/"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
                     title="分享到 Facebook"
                     aria-label="分享到 Facebook"
                 >
@@ -303,7 +322,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/05/28/categories/"
+                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
                     title="分享到 Twitter"
                     aria-label="分享到 Twitter"
                 >
@@ -316,7 +335,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/05/28/categories/"
+                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
                     title="分享到 Google+"
                     aria-label="分享到 Google+"
                 >
@@ -364,9 +383,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/2021/05/28/first-blood/"
-                    data-tooltip="first blood"
-                    aria-label="上一篇: first blood"
+                    href="/2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/"
+                    data-tooltip="虚拟内存地址空间"
+                    aria-label="上一篇: 虚拟内存地址空间"
                 >
                     
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
@@ -375,11 +394,14 @@
             </li>
             <li class="post-action">
                 
-                    <a
-                        class="post-action-btn btn btn--disabled"
-                        aria-hidden="true"
-                    >
-                        
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                    data-tooltip="Redis 深入探讨"
+                    aria-label="下一篇: Redis 深入探讨"
+                >
+                    
                         <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
                         <i class="fa fa-angle-right" aria-hidden="true"></i>
                     </a>
@@ -402,7 +424,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/05/28/categories/"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
                     title="分享到 Facebook"
                     aria-label="分享到 Facebook"
                 >
@@ -415,7 +437,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/05/28/categories/"
+                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
                     title="分享到 Twitter"
                     aria-label="分享到 Twitter"
                 >
@@ -428,7 +450,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/05/28/categories/"
+                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
                     title="分享到 Google+"
                     aria-label="分享到 Google+"
                 >
@@ -462,7 +484,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/05/28/categories/"
+                        href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
                         aria-label="分享到 Facebook"
                     >
                         <i class="fab fa-facebook" aria-hidden="true"></i><span>分享到 Facebook</span>
@@ -475,7 +497,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://twitter.com/intent/tweet?text=http://example.com/2021/05/28/categories/"
+                        href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
                         aria-label="分享到 Twitter"
                     >
                         <i class="fab fa-twitter" aria-hidden="true"></i><span>分享到 Twitter</span>
@@ -488,7 +510,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://plus.google.com/share?url=http://example.com/2021/05/28/categories/"
+                        href="https://plus.google.com/share?url=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
                         aria-label="分享到 Google+"
                     >
                         <i class="fab fa-google-plus" aria-hidden="true"></i><span>分享到 Google+</span>
