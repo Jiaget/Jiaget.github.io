@@ -15,7 +15,7 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"为什么Golang map 是无序的？现象Golang中每次遍历Map元素，输出的数据顺序不一致。\n比如\nhash := make(map[int]int)\nfor i := 0; i &lt; 10; i++ &#123;\n    hash[i] = i\n&#125;\nfor key := range hash &#123;\n    fmt.Printf(&quot;%d &quot;, key)\n&#125;\n\n我按顺序写入map，但当用 for ... range 遍历，打印出来的却是乱序。\n8 9 0 2 4 6 7 1 3 5\n\nmap遍历源码在 runtime/map.go 中，涉及map遍历有这么一段代码：\nr := uintptr(fastrand())\nif h.B &gt; 31-bucketCntBits &#123;\n    r += uintptr(fastrand()) &lt;&lt; 31\n&#125;\n\n每次遍历都会随机指定一个起始点。\n当然，这不会是真正原因。因为如果只是遍历起始点随机，map的遍历应该是局部有序的，然而事实并非如此。\n无序的本质哈希表golang map的底层实现是用了 哈希表 这类的数据结构。哈希表的特点就是在冲突尽可能少的情况下实现高效性。换句话说，golang需要通过设计来减少冲突的发生。他们使用的其中之一的策略就是随机性。\n下面来讲讲golang设计的哈希表吧。\n写入golang 设计的哈希表，在选择桶的时候，使用了与运算的方法。 =&gt; hash &amp; (m - 1)\n\n\n先对 key 进行 hash，取哈希值的低八位，确定bucket 编号 N\n\n\n\n遍历 N bucket 中的每个位置，当有个没有写入的位置，写入哈希值的高八位\n\n\n\n如果 N bucket 中出现相同的topHash, 比较存入的key和要写入的key是否相同，相同则覆盖值；不同说明发生了冲突，继续往下找空余的空间。（开放地址法）\n\n\n\ngolang 写入的随机性在于，在给map开辟空间之前，会生成一个随机种子存放在 hmap.hash0 中。这种做法就是希望能尽量减少哈希冲突。\n扩容golang在每一个bucket后面都有一块 能存放8个key的 bmap。 bmap 的大小不能设计过大，因为这也会降低哈希表的性能。所以，当我们原先给 map 开辟的 buckets 不够用时，需要扩容。\n当哈希表满了， 会开辟出足够多的新桶。但是，哈希表不会将旧桶数据一次性迁移到新桶上。在 hmap 结构体中 oldbuckets 指向旧桶， nevacuate 标记旧桶迁移进度。哈希表每一次的读写操作，都会进行一次旧数据的迁移。像这种将迁移分摊给每次哈希表的操作中的扩容方式叫做 渐进式扩容。 如果一次性进行数据迁移，哈希表性能必然会出现 抖动 ， 这种 渐进式扩容 就能很好地保证了哈希表的性能稳定性。\n溢出桶先来看一下本哈希表中一个桶的构造是什么样的吧\n\n","dateCreated":"2021-06-04T14:51:43+08:00","dateModified":"2021-06-04T19:23:33+08:00","datePublished":"2021-06-04T14:51:43+08:00","description":"","headline":"探讨一下golang map","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/04/%E6%8E%A2%E8%AE%A8%E4%B8%80%E4%B8%8Bgolang-map/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/04/%E6%8E%A2%E8%AE%A8%E4%B8%80%E4%B8%8Bgolang-map/","keywords":"golang, 哈希"}</script>
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"为什么Golang map 是无序的？现象Golang中每次遍历Map元素，输出的数据顺序不一致。\n比如\nhash := make(map[int]int)\nfor i := 0; i &lt; 10; i++ &#123;\n    hash[i] = i\n&#125;\nfor key := range hash &#123;\n    fmt.Printf(&quot;%d &quot;, key)\n&#125;\n\n我按顺序写入map，但当用 for ... range 遍历，打印出来的却是乱序。\n8 9 0 2 4 6 7 1 3 5\n\nmap遍历源码在 runtime/map.go 中，涉及map遍历有这么一段代码：\nr := uintptr(fastrand())\nif h.B &gt; 31-bucketCntBits &#123;\n    r += uintptr(fastrand()) &lt;&lt; 31\n&#125;\n\n每次遍历都会随机指定一个起始点。\n当然，这不会是真正原因。因为如果只是遍历起始点随机，map的遍历应该是局部有序的，然而事实并非如此。\n无序的本质哈希表golang map的底层实现是用了 哈希表 这类的数据结构。哈希表的特点就是在冲突尽可能少的情况下实现高效性。换句话说，golang需要通过设计来减少冲突的发生。他们使用的其中之一的策略就是随机性。\n下面来讲讲golang设计的哈希表吧。\n写入golang 设计的哈希表，在选择桶的时候，使用了与运算的方法。 =&gt; hash &amp; (m - 1)\n\n\n先对 key 进行 hash，取哈希值的低八位，确定bucket 编号 N\n\n\n\n遍历 N bucket 中的每个位置，当有个没有写入的位置，写入哈希值的高八位\n\n\n\n如果 N bucket 中出现相同的topHash, 比较存入的key和要写入的key是否相同，相同则覆盖值；不同说明发生了冲突，继续往下找空余的空间。（开放地址法）\n\n\n\ngolang 写入的随机性在于，在给map开辟空间之前，会生成一个随机种子存放在 hmap.hash0 中。这种做法就是希望能尽量减少哈希冲突。\n扩容golang在每一个bucket后面都有一块 能存放8个key的 bmap。 bmap 的大小不能设计过大，因为这也会降低哈希表的性能。所以，当我们原先给 map 开辟的 buckets 不够用时，需要扩容。\n当哈希表满了， 会开辟出足够多的新桶。但是，哈希表不会将旧桶数据一次性迁移到新桶上。在 hmap 结构体中 oldbuckets 指向旧桶， nevacuate 标记旧桶迁移进度。哈希表每一次的读写操作，都会进行一次旧数据的迁移。像这种将迁移分摊给每次哈希表的操作中的扩容方式叫做 渐进式扩容。 如果一次性进行数据迁移，哈希表性能必然会出现 抖动 ， 这种 渐进式扩容 就能很好地保证了哈希表的性能稳定性。\n溢出桶先来看一下本哈希表中一个桶的构造是什么样的吧\n\n在一个bucket中，为了数据更加紧凑，会首先存储 k-v 键值对哈希值的高八位，一共只能存八个，也就是说一个bucket只能存8对键值对。当一个bucket存满了，还可以再往后添加一个bucket，这叫溢出桶，溢出桶的结构和bucket一模一样。\n溢出桶的出现是为了一定程度减少扩容的次数，在上面我们介绍了本哈希表的渐进式扩容，虽然将扩容迁移的负担平摊到了每一步的哈希表操作，但如果扩容次数增加，同样会影响哈希表的性能。所以，溢出桶出现，是希望，如果只是少量的数据溢出，只需要再开开辟一个桶来存放，而无需进行扩容操作。\n实际中，哈希表如果分配了超过 2 ^ 4 个桶，会被认为需要溢出桶的概率比较大，会预分配 2 ^ (B-4)个溢出桶。\n溢出桶的相关信息被存放在 mapextra。\n扩容规则翻倍扩容golang默认的负载因子是 6.5。 如果 count / (2^B) 超过这个值，会触发翻倍扩容。翻倍扩容即分配的新桶数目是旧桶数目的两倍。\n哈希表扩容后，旧桶数据需要迁移到新桶中。为了减少新桶哈希冲突，旧桶数据需要均匀分配给新桶中的每一个桶。其策略是，将旧桶中每一个哈希值都再一次进行与运算。 假设我们的旧桶宽度为 4， 新分配的新桶是8。 我们进行  hash &amp; 111 的与操作。0号桶中的数据会被均匀分配给新桶的0 和4号桶，其他桶一次类推。\n等量扩容当哈希表的负载因子没超过上限，但溢出桶比较多， 此时为了减少溢出桶的数量，会采取等量扩容。等量扩容即新开辟的桶的数量和旧桶一致。\n这种机制主要是应对哈希表大量删除操作的场景。\n我们可以想象这样的场景：\n\n哈希表添加了大量数据，产生一些溢出桶。\n之后进行了删除操作，溢出桶大部分的数据都被删除。\n产生了很多较空的溢出桶。\n\n溢出桶同样会影响性能，因此，等量扩容是减少溢出桶的数量，也是为了维持性能的稳定。\n","dateCreated":"2021-06-04T14:51:43+08:00","dateModified":"2021-06-04T19:48:28+08:00","datePublished":"2021-06-04T14:51:43+08:00","description":"","headline":"探讨一下golang map","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/04/%E6%8E%A2%E8%AE%A8%E4%B8%80%E4%B8%8Bgolang-map/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/04/%E6%8E%A2%E8%AE%A8%E4%B8%80%E4%B8%8Bgolang-map/","keywords":"golang, 哈希"}</script>
     <meta name="description" content="为什么Golang map 是无序的？现象Golang中每次遍历Map元素，输出的数据顺序不一致。 比如 hash :&#x3D; make(map[int]int) for i :&#x3D; 0; i &lt; 10; i++ &amp;#123;     hash[i] &#x3D; i &amp;#125; for key :&#x3D; range hash &amp;#123;     fmt.Printf(&quot;%d &quot;, key">
 <meta property="og:type" content="blog">
 <meta property="og:title" content="探讨一下golang map">
@@ -25,7 +25,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://i.loli.net/2021/06/04/gx38I1OpQboA2Gl.png">
 <meta property="article:published_time" content="2021-06-04T06:51:43.000Z">
-<meta property="article:modified_time" content="2021-06-04T11:23:33.174Z">
+<meta property="article:modified_time" content="2021-06-04T11:48:28.405Z">
 <meta property="article:author" content="Jiaget">
 <meta property="article:tag" content="golang">
 <meta property="article:tag" content="哈希">
@@ -290,6 +290,21 @@ if h.B &gt; 31-bucketCntBits &#123;
 <p>当哈希表满了， 会开辟出足够多的新桶。但是，哈希表不会将旧桶数据一次性迁移到新桶上。在 <code>hmap</code> 结构体中 <code>oldbuckets</code> 指向旧桶， <code>nevacuate</code> 标记旧桶迁移进度。哈希表每一次的读写操作，都会进行一次旧数据的迁移。像这种将迁移分摊给每次哈希表的操作中的扩容方式叫做 <code>渐进式扩容</code>。 如果一次性进行数据迁移，哈希表性能必然会出现 <code>抖动</code> ， 这种 <code>渐进式扩容</code> 就能很好地保证了哈希表的性能稳定性。</p>
 <h2 id="溢出桶"><a href="#溢出桶" class="headerlink" title="溢出桶"></a>溢出桶</h2><p>先来看一下本哈希表中一个桶的构造是什么样的吧</p>
 <p><img src="https://i.loli.net/2021/06/04/gx38I1OpQboA2Gl.png" alt="bucket.png"></p>
+<p>在一个bucket中，为了数据更加紧凑，会首先存储 k-v 键值对哈希值的高八位，一共只能存八个，也就是说一个bucket只能存8对键值对。当一个bucket存满了，还可以再往后添加一个bucket，这叫溢出桶，溢出桶的结构和bucket一模一样。</p>
+<p>溢出桶的出现是为了一定程度减少扩容的次数，在上面我们介绍了本哈希表的渐进式扩容，虽然将扩容迁移的负担平摊到了每一步的哈希表操作，但如果扩容次数增加，同样会影响哈希表的性能。所以，溢出桶出现，是希望，如果只是少量的数据溢出，只需要再开开辟一个桶来存放，而无需进行扩容操作。</p>
+<p>实际中，哈希表如果分配了超过 2 ^ 4 个桶，会被认为需要溢出桶的概率比较大，会预分配 2 ^ (B-4)个溢出桶。</p>
+<p>溢出桶的相关信息被存放在 <code>mapextra</code>。</p>
+<h2 id="扩容规则"><a href="#扩容规则" class="headerlink" title="扩容规则"></a>扩容规则</h2><h3 id="翻倍扩容"><a href="#翻倍扩容" class="headerlink" title="翻倍扩容"></a>翻倍扩容</h3><p>golang默认的负载因子是 <code>6.5</code>。 如果 <code>count / (2^B)</code> 超过这个值，会触发翻倍扩容。翻倍扩容即分配的新桶数目是旧桶数目的两倍。</p>
+<p>哈希表扩容后，旧桶数据需要迁移到新桶中。为了减少新桶哈希冲突，旧桶数据需要均匀分配给新桶中的每一个桶。其策略是，将旧桶中每一个哈希值都再一次进行与运算。 假设我们的旧桶宽度为 4， 新分配的新桶是8。 我们进行 <code> hash &amp; 111</code> 的与操作。0号桶中的数据会被均匀分配给新桶的0 和4号桶，其他桶一次类推。</p>
+<h3 id="等量扩容"><a href="#等量扩容" class="headerlink" title="等量扩容"></a>等量扩容</h3><p>当哈希表的负载因子没超过上限，但溢出桶比较多， 此时为了减少溢出桶的数量，会采取等量扩容。等量扩容即新开辟的桶的数量和旧桶一致。</p>
+<p>这种机制主要是应对哈希表大量删除操作的场景。</p>
+<p>我们可以想象这样的场景：</p>
+<ul>
+<li>哈希表添加了大量数据，产生一些溢出桶。</li>
+<li>之后进行了删除操作，溢出桶大部分的数据都被删除。</li>
+<li>产生了很多较空的溢出桶。</li>
+</ul>
+<p>溢出桶同样会影响性能，因此，等量扩容是减少溢出桶的数量，也是为了维持性能的稳定。</p>
 
             
 
