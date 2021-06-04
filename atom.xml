@@ -153,6 +153,35 @@
   </entry>
   
   <entry>
+    <title>kafka</title>
+    <link href="http://example.com/2021/05/30/kafka/"/>
+    <id>http://example.com/2021/05/30/kafka/</id>
+    <published>2021-05-30T12:10:09.000Z</published>
+    <updated>2021-06-04T11:52:10.965Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="什么是kafks"><a href="#什么是kafks" class="headerlink" title="什么是kafks"></a>什么是kafks</h1><p>kafka是一个分布式日志系统（也可以当作MQ系统）。</p><p>常用于：（日志收集系统，消息系统）</p><ul><li>web/nginx日志</li><li>访问日志</li><li>消息服务</li></ul><p>它具备的属性：</p><ul><li>分布式</li><li>分区</li><li>多副本</li><li>多订阅者</li></ul><p>它设计目标是：</p><ul><li>高效率：<ul><li>以时间复杂度为O(1)的方式提供消息持久化的能力， 即使TB级别的数据也能保证常数时间复杂度的访问性能。</li></ul></li><li>高吞吐：<ul><li>在廉价的商用机器上也能保证100k条/s的消息传输。</li></ul></li><li>分布式：<ul><li>支持Kafka Server 之间的消息分区，分布式消费。同时保证每个partition内消息顺序传输</li></ul></li><li>同时支持离线数据处理和实时数据处理</li><li>Scale out: 支持在线的水平拓展</li></ul><h2 id="所谓消息系统"><a href="#所谓消息系统" class="headerlink" title="所谓消息系统"></a>所谓消息系统</h2><p>消息系统负责将数据从一个应用传递到另外一个应用。应用不需要关心消息的传递方式，只需要关心消息的生产与消费。</p><p>分布式消息传递，基于可靠的消息队列，在客户端和消息系统之间异步传递消息。主流的消息传递模式有：</p><ul><li>点对点</li><li>发布-订阅 （观察者模式）</li></ul><p>Kafka使用的是后者。</p><h3 id="点对点"><a href="#点对点" class="headerlink" title="点对点"></a>点对点</h3><p>所谓点对点传递，即在一个消息队列中，每条消息只能被消费一次，虽然一个消息队列有多个生产者和消费者在使用。这能保证数据的顺序。</p><p>tip：生产者发送一条消息，只有一个消费者能够收到。</p><h3 id="发布-订阅"><a href="#发布-订阅" class="headerlink" title="发布-订阅"></a>发布-订阅</h3><p>在这个模式中，消息不再存放在队列中，而是一个 <code>Topic</code>。且消费者可以订阅多个topic，且消费者可以消费订阅的topic中的数据。并且一条数据被一个消费者消费后并不会被马上删除，而还能被另外的消费者消费。</p><p>在这个模式下，生产者被叫做发布者，消费者被叫做订阅者。</p><p>tip：发布者发送消息到topic，所有且只有订阅了该topic的订阅者都会收到消息。</p><h1 id="Kafka的优点"><a href="#Kafka的优点" class="headerlink" title="Kafka的优点"></a>Kafka的优点</h1><ul><li>解耦 / 扩展<ul><li>消息系统在处理过程中插入了一个接口层。发布者和订阅者都需要实现这个接口。这就意味着，双方都可以扩展或修改处理过程代码。方便未来需求的增加与修改。</li></ul></li><li>副本<ul><li>将消息从队列中删除之前，需要保证消息已经处理完成。这是为了避免处理数据失败后，数据已经被删除导致的数据丢失引起的业务失败。</li></ul></li><li>灵活 / 峰值处理能力<ul><li>保证访问量剧增的情况下，系统仍然正常运行。</li></ul></li><li>恢复<ul><li>系统的一部分失效后，整个系统仍然正常运行。</li></ul></li><li>有序</li><li>缓冲<ul><li>当一个系统中有需要处理的时间不同的消息。系统通过缓冲层保证消息以最高效率执行。</li></ul></li><li>异步通信<ul><li>允许消息放入队列，而不立即处理，等需要时再去处理。</li></ul></li></ul><h1 id="Kafka的劣势"><a href="#Kafka的劣势" class="headerlink" title="Kafka的劣势"></a>Kafka的劣势</h1><ul><li>对于整个系统来说，对Kafka的依赖过高，一旦Kafka宕机，整个系统也崩溃了。所以需要保证其高可用</li><li>提高了系统复杂度。从系统间同步远程调用，到现在的异步调用，需要保证消息不丢失。</li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;什么是kafks&quot;&gt;&lt;a href=&quot;#什么是kafks&quot; class=&quot;headerlink&quot; title=&quot;什么是kafks&quot;&gt;&lt;/a&gt;什么是kafks&lt;/h1&gt;&lt;p&gt;kafka是一个分布式日志系统（也可以当作MQ系统）。&lt;/p&gt;
+&lt;p&gt;常用于：（日志收集系统</summary>
+      
+    
+    
+    
+    <category term="消息队列" scheme="http://example.com/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/"/>
+    
+    
+    <category term="分布式" scheme="http://example.com/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
+    
+    <category term="消息系统" scheme="http://example.com/tags/%E6%B6%88%E6%81%AF%E7%B3%BB%E7%BB%9F/"/>
+    
+    <category term="中间件" scheme="http://example.com/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
+    
+  </entry>
+  
+  <entry>
     <title>GC</title>
     <link href="http://example.com/2021/05/30/GC/"/>
     <id>http://example.com/2021/05/30/GC/</id>
