@@ -216,6 +216,106 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/06/04/%E6%8E%A2%E8%AE%A8%E4%B8%80%E4%B8%8Bgolang-map/"
+                            aria-label=": 探讨一下golang map"
+                        >
+                            探讨一下golang map
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-04T14:51:43+08:00">
+	
+		    6月 04, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/golang/">golang</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="为什么Golang-map-是无序的？"><a href="#为什么Golang-map-是无序的？" class="headerlink" title="为什么Golang map 是无序的？"></a>为什么Golang map 是无序的？</h1><h2 id="现象"><a href="#现象" class="headerlink" title="现象"></a>现象</h2><p>Golang中每次遍历Map元素，输出的数据顺序不一致。</p>
+<p>比如</p>
+<pre><code>hash := make(map[int]int)
+for i := 0; i &lt; 10; i++ &#123;
+    hash[i] = i
+&#125;
+for key := range hash &#123;
+    fmt.Printf(&quot;%d &quot;, key)
+&#125;
+</code></pre>
+<p>我按顺序写入map，但当用 <code>for ... range</code> 遍历，打印出来的却是乱序。</p>
+<pre><code>8 9 0 2 4 6 7 1 3 5
+</code></pre>
+<h2 id="map遍历源码"><a href="#map遍历源码" class="headerlink" title="map遍历源码"></a>map遍历源码</h2><p>在 <code>runtime/map.go</code> 中，涉及map遍历有这么一段代码：</p>
+<pre><code>r := uintptr(fastrand())
+if h.B &gt; 31-bucketCntBits &#123;
+    r += uintptr(fastrand()) &lt;&lt; 31
+&#125;
+</code></pre>
+<p>每次遍历都会随机指定一个起始点。</p>
+<p>当然，这不会是真正原因。因为如果只是遍历起始点随机，map的遍历应该是局部有序的，然而事实并非如此。</p>
+<h2 id="无序的本质"><a href="#无序的本质" class="headerlink" title="无序的本质"></a>无序的本质</h2><h3 id="哈希表"><a href="#哈希表" class="headerlink" title="哈希表"></a>哈希表</h3><p>golang map的底层实现是用了 哈希表 这类的数据结构。哈希表的特点就是在冲突尽可能少的情况下实现高效性。换句话说，golang需要通过设计来减少冲突的发生。他们使用的其中之一的策略就是随机性。</p>
+<p>下面来讲讲golang设计的哈希表吧。</p>
+<h2 id="写入"><a href="#写入" class="headerlink" title="写入"></a>写入</h2><p>golang 设计的哈希表，在选择桶的时候，使用了与运算的方法。 =&gt; hash &amp; (m - 1)</p>
+<ul>
+<li><ol>
+<li>先对 <code>key</code> 进行 <code>hash</code>，取哈希值的低八位，确定bucket 编号 N</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>遍历 N bucket 中的每个位置，当有个没有写入的位置，写入哈希值的高八位</li>
+</ol>
+</li>
+<li><ol start="3">
+<li>如果 N bucket 中出现相同的topHash, 比较存入的key和要写入的key是否相同，相同则覆盖值；不同说明发生了冲突，继续往下找空余的空间。（开放地址法）</li>
+</ol>
+</li>
+</ul>
+<p>golang 写入的随机性在于，在给map开辟空间之前，会生成一个随机种子存放在 <code>hmap.hash0</code> 中。这种做法就是希望能尽量减少哈希冲突。</p>
+<h2 id="扩容"><a href="#扩容" class="headerlink" title="扩容"></a>扩容</h2><p>golang在每一个bucket后面都有一块 能存放8个key的 bmap。 bmap 的大小不能设计过大，因为这也会降低哈希表的性能。所以，当我们原先给 map 开辟的 buckets 不够用时，需要扩容。</p>
+<p>当哈希表满了， 会开辟出足够多的新桶。但是，哈希表不会将旧桶数据一次性迁移到新桶上。在 <code>hmap</code> 结构体中 <code>oldbuckets</code> 指向旧桶， <code>nevacuate</code> 标记旧桶迁移进度。哈希表每一次的读写操作，都会进行一次旧数据的迁移。像这种将迁移分摊给每次哈希表的操作中的扩容方式叫做 <code>渐进式扩容</code>。 如果一次性进行数据迁移，哈希表性能必然会出现 <code>抖动</code> ， 这种 <code>渐进式扩容</code> 就能很好地保证了哈希表的性能稳定性。</p>
+<h2 id="溢出桶"><a href="#溢出桶" class="headerlink" title="溢出桶"></a>溢出桶</h2><p>先来看一下本哈希表中一个桶的构造是什么样的吧</p>
+<p><img src="https://i.loli.net/2021/06/04/gx38I1OpQboA2Gl.png" alt="bucket.png"></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/04/%E6%8E%A2%E8%AE%A8%E4%B8%80%E4%B8%8Bgolang-map/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/"
                             aria-label=": 虚拟内存地址空间"
                         >
@@ -241,8 +341,7 @@
             </div>
             
                 <div class="postShorten-content">
-                    <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>文章内容相当于对 <code>计算机科学</code> 知识的理解与汇总，阅读理解需要一定的计算机理论知识。</p>
-<h1 id="虚拟内存地址空间的分布"><a href="#虚拟内存地址空间的分布" class="headerlink" title="虚拟内存地址空间的分布"></a>虚拟内存地址空间的分布</h1><p><img src="https://i.loli.net/2021/06/03/geWDOKmTUXCZI31.png" alt="Virtual-memory-address-space.png"></p>
+                    <h1 id="虚拟内存地址空间的分布"><a href="#虚拟内存地址空间的分布" class="headerlink" title="虚拟内存地址空间的分布"></a>虚拟内存地址空间的分布</h1><p><img src="https://i.loli.net/2021/06/03/geWDOKmTUXCZI31.png" alt="Virtual-memory-address-space.png"></p>
 <p>我们可以对内存空间进行如下分区管理：</p>
 <h2 id="代码段"><a href="#代码段" class="headerlink" title="代码段"></a>代码段</h2><p> 一段程序经过编译器编译成机器指令存储在可执行文件里，程序运行时，程序中的各个函数会被加载存放在虚拟地址空间中的代码段。</p>
 <p> 代码段中指令的执行流程：<br>    - 顺序指令：每个进程只会执行一次<br>    - 循环指令：需要使用跳转指令返回函数的头部<br>    - 递归指令：需要借助栈来实现</p>
@@ -376,7 +475,7 @@
             </div>
             
                 <div class="postShorten-content">
-                    <h1 id="Redis-使用的基本使用场景"><a href="#Redis-使用的基本使用场景" class="headerlink" title="Redis 使用的基本使用场景"></a>Redis 使用的基本使用场景</h1><h1 id="Redis-与-数据库数据的一致"><a href="#Redis-与-数据库数据的一致" class="headerlink" title="Redis 与 数据库数据的一致"></a>Redis 与 数据库数据的一致</h1><h2 id="抛出问题"><a href="#抛出问题" class="headerlink" title="抛出问题"></a>抛出问题</h2><pre><code>    当对数据进行修改时，应该先删除缓存还是先写入数据库中？
+                    <h1 id="Redis-使用的基本使用场景"><a href="#Redis-使用的基本使用场景" class="headerlink" title="Redis 使用的基本使用场景"></a>Redis 使用的基本使用场景</h1><h1 id="Redis-与-数据库数据的一致性问题"><a href="#Redis-与-数据库数据的一致性问题" class="headerlink" title="Redis 与 数据库数据的一致性问题"></a>Redis 与 数据库数据的一致性问题</h1><h2 id="抛出问题"><a href="#抛出问题" class="headerlink" title="抛出问题"></a>抛出问题</h2><pre><code>    当对数据进行修改时，应该先删除缓存还是先写入数据库中？
 </code></pre>
 <h3 id="（方案一）-先删缓存，-后写数据库。"><a href="#（方案一）-先删缓存，-后写数据库。" class="headerlink" title="（方案一） 先删缓存， 后写数据库。"></a>（方案一） 先删缓存， 后写数据库。</h3><ul>
 <li>在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 <code>（cache old : db new)</code></li>

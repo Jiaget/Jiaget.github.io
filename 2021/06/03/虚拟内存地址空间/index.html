@@ -15,17 +15,17 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"前言文章内容相当于对 计算机科学 知识的理解与汇总，阅读理解需要一定的计算机理论知识。\n虚拟内存地址空间的分布\n我们可以对内存空间进行如下分区管理：\n代码段 一段程序经过编译器编译成机器指令存储在可执行文件里，程序运行时，程序中的各个函数会被加载存放在虚拟地址空间中的代码段。\n 代码段中指令的执行流程：    - 顺序指令：每个进程只会执行一次    - 循环指令：需要使用跳转指令返回函数的头部    - 递归指令：需要借助栈来实现\n代码段指令由 操作码：操作对象 构成。\n\n操作码通常包括 MOV， PUSH，POP,XCHG\n操作对象可以是\n立即数： 比如golang中某一段程序 x := 1 + 1， 其中的1就是立即数，它不会被储存在任意寄存器中，它直接包含在代码里。\n局部数据：也就是局部变量，它将在栈区分配空间，代码段会引用该数据地址\nBSS数据与数据段数据：与上同，关于BSS，数据段将在下面详细说明。\n\n\n\n数据段数据段一般存放已初始化且初值不为0的全局变量和静态局部变量。数据段属于静态内存分配。\nBSS 段有些地方可能会和数据段合并，将数据段划分为初始化区和未初始化区。\n未初始化或者初值为0的全局变量和静态局部变量\n堆动态分配的内存。\n在go中，我们使用 make, new来分配的就在堆中开辟。这部分的内存可以最终由 GC回收。\n栈局部变量，函数参数，返回地址等等\n","dateCreated":"2021-06-03T12:30:37+08:00","dateModified":"2021-06-04T11:20:35+08:00","datePublished":"2021-06-03T12:30:37+08:00","description":"","headline":"虚拟内存地址空间","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/","keywords":"golang, 内存, 操作系统, 汇编"}</script>
-    <meta name="description" content="前言文章内容相当于对 计算机科学 知识的理解与汇总，阅读理解需要一定的计算机理论知识。 虚拟内存地址空间的分布 我们可以对内存空间进行如下分区管理： 代码段 一段程序经过编译器编译成机器指令存储在可执行文件里，程序运行时，程序中的各个函数会被加载存放在虚拟地址空间中的代码段。  代码段中指令的执行流程：    - 顺序指令：每个进程只会执行一次    - 循环指令：需要使用跳转指令返回函数的头部">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"虚拟内存地址空间的分布\n我们可以对内存空间进行如下分区管理：\n代码段 一段程序经过编译器编译成机器指令存储在可执行文件里，程序运行时，程序中的各个函数会被加载存放在虚拟地址空间中的代码段。\n 代码段中指令的执行流程：    - 顺序指令：每个进程只会执行一次    - 循环指令：需要使用跳转指令返回函数的头部    - 递归指令：需要借助栈来实现\n代码段指令由 操作码：操作对象 构成。\n\n操作码通常包括 MOV， PUSH，POP,XCHG\n操作对象可以是\n立即数： 比如golang中某一段程序 x := 1 + 1， 其中的1就是立即数，它不会被储存在任意寄存器中，它直接包含在代码里。\n局部数据：也就是局部变量，它将在栈区分配空间，代码段会引用该数据地址\nBSS数据与数据段数据：与上同，关于BSS，数据段将在下面详细说明。\n\n\n\n数据段数据段一般存放已初始化且初值不为0的全局变量和静态局部变量。数据段属于静态内存分配。\nBSS 段有些地方可能会和数据段合并，将数据段划分为初始化区和未初始化区。\n未初始化或者初值为0的全局变量和静态局部变量\n堆动态分配的内存。\n在go中，我们使用 make, new来分配的就在堆中开辟。这部分的内存可以最终由 GC回收。\n栈局部变量，函数参数，返回地址等等\n","dateCreated":"2021-06-03T12:30:37+08:00","dateModified":"2021-06-04T11:31:27+08:00","datePublished":"2021-06-03T12:30:37+08:00","description":"","headline":"虚拟内存地址空间","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/","keywords":"golang, 内存, 操作系统, 汇编"}</script>
+    <meta name="description" content="虚拟内存地址空间的分布 我们可以对内存空间进行如下分区管理： 代码段 一段程序经过编译器编译成机器指令存储在可执行文件里，程序运行时，程序中的各个函数会被加载存放在虚拟地址空间中的代码段。  代码段中指令的执行流程：    - 顺序指令：每个进程只会执行一次    - 循环指令：需要使用跳转指令返回函数的头部    - 递归指令：需要借助栈来实现 代码段指令由 操作码：操作对象 构成。  操作码通">
 <meta property="og:type" content="blog">
 <meta property="og:title" content="虚拟内存地址空间">
 <meta property="og:url" content="http://example.com/2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/index.html">
 <meta property="og:site_name" content="Jiaget&#39;s field">
-<meta property="og:description" content="前言文章内容相当于对 计算机科学 知识的理解与汇总，阅读理解需要一定的计算机理论知识。 虚拟内存地址空间的分布 我们可以对内存空间进行如下分区管理： 代码段 一段程序经过编译器编译成机器指令存储在可执行文件里，程序运行时，程序中的各个函数会被加载存放在虚拟地址空间中的代码段。  代码段中指令的执行流程：    - 顺序指令：每个进程只会执行一次    - 循环指令：需要使用跳转指令返回函数的头部">
+<meta property="og:description" content="虚拟内存地址空间的分布 我们可以对内存空间进行如下分区管理： 代码段 一段程序经过编译器编译成机器指令存储在可执行文件里，程序运行时，程序中的各个函数会被加载存放在虚拟地址空间中的代码段。  代码段中指令的执行流程：    - 顺序指令：每个进程只会执行一次    - 循环指令：需要使用跳转指令返回函数的头部    - 递归指令：需要借助栈来实现 代码段指令由 操作码：操作对象 构成。  操作码通">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://i.loli.net/2021/06/03/geWDOKmTUXCZI31.png">
 <meta property="article:published_time" content="2021-06-03T04:30:37.000Z">
-<meta property="article:modified_time" content="2021-06-04T03:20:35.297Z">
+<meta property="article:modified_time" content="2021-06-04T03:31:27.819Z">
 <meta property="article:author" content="Jiaget">
 <meta property="article:tag" content="golang">
 <meta property="article:tag" content="内存">
@@ -249,8 +249,7 @@
     
     <div class="post-content markdown">
         <div class="main-content-wrap">
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>文章内容相当于对 <code>计算机科学</code> 知识的理解与汇总，阅读理解需要一定的计算机理论知识。</p>
-<h1 id="虚拟内存地址空间的分布"><a href="#虚拟内存地址空间的分布" class="headerlink" title="虚拟内存地址空间的分布"></a>虚拟内存地址空间的分布</h1><p><img src="https://i.loli.net/2021/06/03/geWDOKmTUXCZI31.png" alt="Virtual-memory-address-space.png"></p>
+            <h1 id="虚拟内存地址空间的分布"><a href="#虚拟内存地址空间的分布" class="headerlink" title="虚拟内存地址空间的分布"></a>虚拟内存地址空间的分布</h1><p><img src="https://i.loli.net/2021/06/03/geWDOKmTUXCZI31.png" alt="Virtual-memory-address-space.png"></p>
 <p>我们可以对内存空间进行如下分区管理：</p>
 <h2 id="代码段"><a href="#代码段" class="headerlink" title="代码段"></a>代码段</h2><p> 一段程序经过编译器编译成机器指令存储在可执行文件里，程序运行时，程序中的各个函数会被加载存放在虚拟地址空间中的代码段。</p>
 <p> 代码段中指令的执行流程：<br>    - 顺序指令：每个进程只会执行一次<br>    - 循环指令：需要使用跳转指令返回函数的头部<br>    - 递归指令：需要借助栈来实现</p>
@@ -291,11 +290,14 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    <a
-                        class="post-action-btn btn btn--disabled"
-                        aria-hidden="true"
-                    >
-                        
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/06/04/%E6%8E%A2%E8%AE%A8%E4%B8%80%E4%B8%8Bgolang-map/"
+                    data-tooltip="探讨一下golang map"
+                    aria-label="上一篇: 探讨一下golang map"
+                >
+                    
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
                     </a>
@@ -321,7 +323,7 @@
             <a
                 class="post-action-btn btn btn--default btn-open-shareoptions"
                 href="#btn-open-shareoptions"
-                aria-label="Diesen Beitrag teilen"
+                aria-label="Share this post"
             >
                 <i class="fa fa-share-alt" aria-hidden="true"></i>
             </a>
@@ -371,7 +373,7 @@
         
         <li class="post-action">
             
-                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
             
                 <i class="fa fa-list" aria-hidden="true"></i>
             </a>
@@ -403,11 +405,14 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    <a
-                        class="post-action-btn btn btn--disabled"
-                        aria-hidden="true"
-                    >
-                        
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/06/04/%E6%8E%A2%E8%AE%A8%E4%B8%80%E4%B8%8Bgolang-map/"
+                    data-tooltip="探讨一下golang map"
+                    aria-label="上一篇: 探讨一下golang map"
+                >
+                    
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
                     </a>
@@ -433,7 +438,7 @@
             <a
                 class="post-action-btn btn btn--default btn-open-shareoptions"
                 href="#btn-open-shareoptions"
-                aria-label="Diesen Beitrag teilen"
+                aria-label="Share this post"
             >
                 <i class="fa fa-share-alt" aria-hidden="true"></i>
             </a>
@@ -483,7 +488,7 @@
         
         <li class="post-action">
             
-                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
             
                 <i class="fa fa-list" aria-hidden="true"></i>
             </a>

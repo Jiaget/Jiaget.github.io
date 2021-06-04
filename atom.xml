@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2021-06-04T03:20:35.297Z</updated>
+  <updated>2021-06-04T11:23:33.174Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -17,19 +17,44 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>探讨一下golang map</title>
+    <link href="http://example.com/2021/06/04/%E6%8E%A2%E8%AE%A8%E4%B8%80%E4%B8%8Bgolang-map/"/>
+    <id>http://example.com/2021/06/04/%E6%8E%A2%E8%AE%A8%E4%B8%80%E4%B8%8Bgolang-map/</id>
+    <published>2021-06-04T06:51:43.000Z</published>
+    <updated>2021-06-04T11:23:33.174Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="为什么Golang-map-是无序的？"><a href="#为什么Golang-map-是无序的？" class="headerlink" title="为什么Golang map 是无序的？"></a>为什么Golang map 是无序的？</h1><h2 id="现象"><a href="#现象" class="headerlink" title="现象"></a>现象</h2><p>Golang中每次遍历Map元素，输出的数据顺序不一致。</p><p>比如</p><pre><code>hash := make(map[int]int)for i := 0; i &lt; 10; i++ &#123;    hash[i] = i&#125;for key := range hash &#123;    fmt.Printf(&quot;%d &quot;, key)&#125;</code></pre><p>我按顺序写入map，但当用 <code>for ... range</code> 遍历，打印出来的却是乱序。</p><pre><code>8 9 0 2 4 6 7 1 3 5</code></pre><h2 id="map遍历源码"><a href="#map遍历源码" class="headerlink" title="map遍历源码"></a>map遍历源码</h2><p>在 <code>runtime/map.go</code> 中，涉及map遍历有这么一段代码：</p><pre><code>r := uintptr(fastrand())if h.B &gt; 31-bucketCntBits &#123;    r += uintptr(fastrand()) &lt;&lt; 31&#125;</code></pre><p>每次遍历都会随机指定一个起始点。</p><p>当然，这不会是真正原因。因为如果只是遍历起始点随机，map的遍历应该是局部有序的，然而事实并非如此。</p><h2 id="无序的本质"><a href="#无序的本质" class="headerlink" title="无序的本质"></a>无序的本质</h2><h3 id="哈希表"><a href="#哈希表" class="headerlink" title="哈希表"></a>哈希表</h3><p>golang map的底层实现是用了 哈希表 这类的数据结构。哈希表的特点就是在冲突尽可能少的情况下实现高效性。换句话说，golang需要通过设计来减少冲突的发生。他们使用的其中之一的策略就是随机性。</p><p>下面来讲讲golang设计的哈希表吧。</p><h2 id="写入"><a href="#写入" class="headerlink" title="写入"></a>写入</h2><p>golang 设计的哈希表，在选择桶的时候，使用了与运算的方法。 =&gt; hash &amp; (m - 1)</p><ul><li><ol><li>先对 <code>key</code> 进行 <code>hash</code>，取哈希值的低八位，确定bucket 编号 N</li></ol></li><li><ol start="2"><li>遍历 N bucket 中的每个位置，当有个没有写入的位置，写入哈希值的高八位</li></ol></li><li><ol start="3"><li>如果 N bucket 中出现相同的topHash, 比较存入的key和要写入的key是否相同，相同则覆盖值；不同说明发生了冲突，继续往下找空余的空间。（开放地址法）</li></ol></li></ul><p>golang 写入的随机性在于，在给map开辟空间之前，会生成一个随机种子存放在 <code>hmap.hash0</code> 中。这种做法就是希望能尽量减少哈希冲突。</p><h2 id="扩容"><a href="#扩容" class="headerlink" title="扩容"></a>扩容</h2><p>golang在每一个bucket后面都有一块 能存放8个key的 bmap。 bmap 的大小不能设计过大，因为这也会降低哈希表的性能。所以，当我们原先给 map 开辟的 buckets 不够用时，需要扩容。</p><p>当哈希表满了， 会开辟出足够多的新桶。但是，哈希表不会将旧桶数据一次性迁移到新桶上。在 <code>hmap</code> 结构体中 <code>oldbuckets</code> 指向旧桶， <code>nevacuate</code> 标记旧桶迁移进度。哈希表每一次的读写操作，都会进行一次旧数据的迁移。像这种将迁移分摊给每次哈希表的操作中的扩容方式叫做 <code>渐进式扩容</code>。 如果一次性进行数据迁移，哈希表性能必然会出现 <code>抖动</code> ， 这种 <code>渐进式扩容</code> 就能很好地保证了哈希表的性能稳定性。</p><h2 id="溢出桶"><a href="#溢出桶" class="headerlink" title="溢出桶"></a>溢出桶</h2><p>先来看一下本哈希表中一个桶的构造是什么样的吧</p><p><img src="https://i.loli.net/2021/06/04/gx38I1OpQboA2Gl.png" alt="bucket.png"></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;为什么Golang-map-是无序的？&quot;&gt;&lt;a href=&quot;#为什么Golang-map-是无序的？&quot; class=&quot;headerlink&quot; title=&quot;为什么Golang map 是无序的？&quot;&gt;&lt;/a&gt;为什么Golang map 是无序的？&lt;/h1&gt;&lt;h2 i</summary>
+      
+    
+    
+    
+    <category term="golang" scheme="http://example.com/categories/golang/"/>
+    
+    
+    <category term="golang" scheme="http://example.com/tags/golang/"/>
+    
+    <category term="哈希" scheme="http://example.com/tags/%E5%93%88%E5%B8%8C/"/>
+    
+  </entry>
+  
+  <entry>
     <title>虚拟内存地址空间</title>
     <link href="http://example.com/2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/"/>
     <id>http://example.com/2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/</id>
     <published>2021-06-03T04:30:37.000Z</published>
-    <updated>2021-06-04T03:20:35.297Z</updated>
+    <updated>2021-06-04T03:31:27.819Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>文章内容相当于对 <code>计算机科学</code> 知识的理解与汇总，阅读理解需要一定的计算机理论知识。</p><h1 id="虚拟内存地址空间的分布"><a href="#虚拟内存地址空间的分布" class="headerlink" title="虚拟内存地址空间的分布"></a>虚拟内存地址空间的分布</h1><p><img src="https://i.loli.net/2021/06/03/geWDOKmTUXCZI31.png" alt="Virtual-memory-address-space.png"></p><p>我们可以对内存空间进行如下分区管理：</p><h2 id="代码段"><a href="#代码段" class="headerlink" title="代码段"></a>代码段</h2><p> 一段程序经过编译器编译成机器指令存储在可执行文件里，程序运行时，程序中的各个函数会被加载存放在虚拟地址空间中的代码段。</p><p> 代码段中指令的执行流程：<br>    - 顺序指令：每个进程只会执行一次<br>    - 循环指令：需要使用跳转指令返回函数的头部<br>    - 递归指令：需要借助栈来实现</p><p>代码段指令由 <code>操作码：操作对象</code> 构成。</p><ul><li>操作码通常包括 <code>MOV</code>， <code>PUSH</code>，<code>POP</code>,<code>XCHG</code></li><li>操作对象可以是<ul><li>立即数： 比如golang中某一段程序 <code>x := 1 + 1</code>， 其中的1就是立即数，它不会被储存在任意寄存器中，它直接包含在代码里。</li><li>局部数据：也就是局部变量，它将在栈区分配空间，代码段会引用该数据地址</li><li>BSS数据与数据段数据：与上同，关于BSS，数据段将在下面详细说明。</li></ul></li></ul><h2 id="数据段"><a href="#数据段" class="headerlink" title="数据段"></a>数据段</h2><p>数据段一般存放<code>已初始化</code>且<code>初值不为0</code>的全局变量和静态局部变量。数据段属于静态内存分配。</p><h2 id="BSS-段"><a href="#BSS-段" class="headerlink" title="BSS 段"></a>BSS 段</h2><p>有些地方可能会和数据段合并，将数据段划分为初始化区和未初始化区。</p><p>未初始化或者初值为0的全局变量和静态局部变量</p><h2 id="堆"><a href="#堆" class="headerlink" title="堆"></a>堆</h2><p>动态分配的内存。</p><p>在go中，我们使用 <code>make</code>, <code>new</code>来分配的就在堆中开辟。这部分的内存可以最终由 GC回收。</p><h2 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h2><p>局部变量，函数参数，返回地址等等</p>]]></content>
+    <content type="html"><![CDATA[<h1 id="虚拟内存地址空间的分布"><a href="#虚拟内存地址空间的分布" class="headerlink" title="虚拟内存地址空间的分布"></a>虚拟内存地址空间的分布</h1><p><img src="https://i.loli.net/2021/06/03/geWDOKmTUXCZI31.png" alt="Virtual-memory-address-space.png"></p><p>我们可以对内存空间进行如下分区管理：</p><h2 id="代码段"><a href="#代码段" class="headerlink" title="代码段"></a>代码段</h2><p> 一段程序经过编译器编译成机器指令存储在可执行文件里，程序运行时，程序中的各个函数会被加载存放在虚拟地址空间中的代码段。</p><p> 代码段中指令的执行流程：<br>    - 顺序指令：每个进程只会执行一次<br>    - 循环指令：需要使用跳转指令返回函数的头部<br>    - 递归指令：需要借助栈来实现</p><p>代码段指令由 <code>操作码：操作对象</code> 构成。</p><ul><li>操作码通常包括 <code>MOV</code>， <code>PUSH</code>，<code>POP</code>,<code>XCHG</code></li><li>操作对象可以是<ul><li>立即数： 比如golang中某一段程序 <code>x := 1 + 1</code>， 其中的1就是立即数，它不会被储存在任意寄存器中，它直接包含在代码里。</li><li>局部数据：也就是局部变量，它将在栈区分配空间，代码段会引用该数据地址</li><li>BSS数据与数据段数据：与上同，关于BSS，数据段将在下面详细说明。</li></ul></li></ul><h2 id="数据段"><a href="#数据段" class="headerlink" title="数据段"></a>数据段</h2><p>数据段一般存放<code>已初始化</code>且<code>初值不为0</code>的全局变量和静态局部变量。数据段属于静态内存分配。</p><h2 id="BSS-段"><a href="#BSS-段" class="headerlink" title="BSS 段"></a>BSS 段</h2><p>有些地方可能会和数据段合并，将数据段划分为初始化区和未初始化区。</p><p>未初始化或者初值为0的全局变量和静态局部变量</p><h2 id="堆"><a href="#堆" class="headerlink" title="堆"></a>堆</h2><p>动态分配的内存。</p><p>在go中，我们使用 <code>make</code>, <code>new</code>来分配的就在堆中开辟。这部分的内存可以最终由 GC回收。</p><h2 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h2><p>局部变量，函数参数，返回地址等等</p>]]></content>
     
     
       
       
-    <summary type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;文章内容相当于对 &lt;code&gt;计算机科学&lt;/code&gt; 知识的理解与汇总，阅读理解需要一定的计算机理论知识。&lt;/p&gt;
-&lt;h1 id=&quot;虚拟内</summary>
+    <summary type="html">&lt;h1 id=&quot;虚拟内存地址空间的分布&quot;&gt;&lt;a href=&quot;#虚拟内存地址空间的分布&quot; class=&quot;headerlink&quot; title=&quot;虚拟内存地址空间的分布&quot;&gt;&lt;/a&gt;虚拟内存地址空间的分布&lt;/h1&gt;&lt;p&gt;&lt;img src=&quot;https://i.loli.net/2021/</summary>
       
     
     
@@ -80,9 +105,9 @@
     <link href="http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"/>
     <id>http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/</id>
     <published>2021-06-01T12:49:03.000Z</published>
-    <updated>2021-06-03T04:25:30.361Z</updated>
+    <updated>2021-06-04T03:31:30.000Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="Redis-使用的基本使用场景"><a href="#Redis-使用的基本使用场景" class="headerlink" title="Redis 使用的基本使用场景"></a>Redis 使用的基本使用场景</h1><h1 id="Redis-与-数据库数据的一致"><a href="#Redis-与-数据库数据的一致" class="headerlink" title="Redis 与 数据库数据的一致"></a>Redis 与 数据库数据的一致</h1><h2 id="抛出问题"><a href="#抛出问题" class="headerlink" title="抛出问题"></a>抛出问题</h2><pre><code>    当对数据进行修改时，应该先删除缓存还是先写入数据库中？</code></pre><h3 id="（方案一）-先删缓存，-后写数据库。"><a href="#（方案一）-先删缓存，-后写数据库。" class="headerlink" title="（方案一） 先删缓存， 后写数据库。"></a>（方案一） 先删缓存， 后写数据库。</h3><ul><li>在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 <code>（cache old : db new)</code></li></ul><table><thead><tr><th></th><th>Thread1</th><th>Thread2</th></tr></thead><tbody><tr><td>t1</td><td>delete cache</td><td></td></tr><tr><td>t2</td><td></td><td>read -&gt; (cache)nil -&gt;（DB）old data</td></tr><tr><td>t3</td><td>write DB -&gt; update cache</td><td></td></tr><tr><td>t4</td><td></td><td>write cache (overwrite)</td></tr></tbody></table><h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><ul><li><ol><li>不删除缓存，而是将缓存改成一个特殊值（比如 <code>locking</code>）。在客户端的设计上，读到该特殊值，就休眠一会，再查Redis</li></ol><ul><li>缺陷：</li><li><ol><li>特殊值对业务的侵入。（必须挑选一个与业务严格无关的值）</li></ol></li><li><ol start="2"><li>休眠时间可能重复，降低性能。</li></ol></li></ul></li><li><ol start="2"><li>延时双删。 删缓存 -&gt; 写数据库 -&gt; 休眠一会 -&gt; 删除缓存</li></ol><ul><li>缺陷</li><li>1.写操作频繁的场景下，仍然无法避免脏数据。</li></ul></li></ul><p>不能在写操作频繁的情况下使用</p><h3 id="（方案二）先写数据，再删缓存"><a href="#（方案二）先写数据，再删缓存" class="headerlink" title="（方案二）先写数据，再删缓存"></a>（方案二）先写数据，再删缓存</h3><ul><li>数据库写完后，缓存删除失败，数据就会不一致。</li></ul><h4 id="解决方案："><a href="#解决方案：" class="headerlink" title="解决方案："></a>解决方案：</h4><ul><li><ol><li>给缓存设置过期时间。</li></ol><ul><li>缺陷</li><li>过期时间内，缓存数据未更新，仍有脏数据风险。</li></ul></li><li><ol start="2"><li>引入MQ, 保证原子性， 删除缓存失败，会重试</li></ol><ul><li>缺陷</li><li>重试时间内，仍然存在脏数据。</li></ul></li><li><ol start="3"><li>业务不再处理脏数据的问题。业务层只需要给value设置一个逻辑过期时间。另开一个线程，用来扫描缓存，并删除过期的缓存。</li></ol></li></ul><p>只能保证最终一致性，而不能保证实时一致。</p><h1 id="Redis-缓存穿透"><a href="#Redis-缓存穿透" class="headerlink" title="Redis 缓存穿透"></a>Redis 缓存穿透</h1><h1 id="Redis-缓存击穿"><a href="#Redis-缓存击穿" class="headerlink" title="Redis 缓存击穿"></a>Redis 缓存击穿</h1><h1 id="Redis-缓存雪崩"><a href="#Redis-缓存雪崩" class="headerlink" title="Redis 缓存雪崩"></a>Redis 缓存雪崩</h1>]]></content>
+    <content type="html"><![CDATA[<h1 id="Redis-使用的基本使用场景"><a href="#Redis-使用的基本使用场景" class="headerlink" title="Redis 使用的基本使用场景"></a>Redis 使用的基本使用场景</h1><h1 id="Redis-与-数据库数据的一致性问题"><a href="#Redis-与-数据库数据的一致性问题" class="headerlink" title="Redis 与 数据库数据的一致性问题"></a>Redis 与 数据库数据的一致性问题</h1><h2 id="抛出问题"><a href="#抛出问题" class="headerlink" title="抛出问题"></a>抛出问题</h2><pre><code>    当对数据进行修改时，应该先删除缓存还是先写入数据库中？</code></pre><h3 id="（方案一）-先删缓存，-后写数据库。"><a href="#（方案一）-先删缓存，-后写数据库。" class="headerlink" title="（方案一） 先删缓存， 后写数据库。"></a>（方案一） 先删缓存， 后写数据库。</h3><ul><li>在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 <code>（cache old : db new)</code></li></ul><table><thead><tr><th></th><th>Thread1</th><th>Thread2</th></tr></thead><tbody><tr><td>t1</td><td>delete cache</td><td></td></tr><tr><td>t2</td><td></td><td>read -&gt; (cache)nil -&gt;（DB）old data</td></tr><tr><td>t3</td><td>write DB -&gt; update cache</td><td></td></tr><tr><td>t4</td><td></td><td>write cache (overwrite)</td></tr></tbody></table><h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><ul><li><ol><li>不删除缓存，而是将缓存改成一个特殊值（比如 <code>locking</code>）。在客户端的设计上，读到该特殊值，就休眠一会，再查Redis</li></ol><ul><li>缺陷：</li><li><ol><li>特殊值对业务的侵入。（必须挑选一个与业务严格无关的值）</li></ol></li><li><ol start="2"><li>休眠时间可能重复，降低性能。</li></ol></li></ul></li><li><ol start="2"><li>延时双删。 删缓存 -&gt; 写数据库 -&gt; 休眠一会 -&gt; 删除缓存</li></ol><ul><li>缺陷</li><li>1.写操作频繁的场景下，仍然无法避免脏数据。</li></ul></li></ul><p>不能在写操作频繁的情况下使用</p><h3 id="（方案二）先写数据，再删缓存"><a href="#（方案二）先写数据，再删缓存" class="headerlink" title="（方案二）先写数据，再删缓存"></a>（方案二）先写数据，再删缓存</h3><ul><li>数据库写完后，缓存删除失败，数据就会不一致。</li></ul><h4 id="解决方案："><a href="#解决方案：" class="headerlink" title="解决方案："></a>解决方案：</h4><ul><li><ol><li>给缓存设置过期时间。</li></ol><ul><li>缺陷</li><li>过期时间内，缓存数据未更新，仍有脏数据风险。</li></ul></li><li><ol start="2"><li>引入MQ, 保证原子性， 删除缓存失败，会重试</li></ol><ul><li>缺陷</li><li>重试时间内，仍然存在脏数据。</li></ul></li><li><ol start="3"><li>业务不再处理脏数据的问题。业务层只需要给value设置一个逻辑过期时间。另开一个线程，用来扫描缓存，并删除过期的缓存。</li></ol></li></ul><p>只能保证最终一致性，而不能保证实时一致。</p><h1 id="Redis-缓存穿透"><a href="#Redis-缓存穿透" class="headerlink" title="Redis 缓存穿透"></a>Redis 缓存穿透</h1><h1 id="Redis-缓存击穿"><a href="#Redis-缓存击穿" class="headerlink" title="Redis 缓存击穿"></a>Redis 缓存击穿</h1><h1 id="Redis-缓存雪崩"><a href="#Redis-缓存雪崩" class="headerlink" title="Redis 缓存雪崩"></a>Redis 缓存雪崩</h1>]]></content>
     
     
       
