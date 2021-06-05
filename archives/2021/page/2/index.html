@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Jiaget&#39;s field">
-    <title>分类: nosql - Jiaget&#39;s field</title>
+    <title>归档: 2021 - Jiaget&#39;s field</title>
     <meta name="author" content="Jiaget">
     
     
@@ -18,7 +18,7 @@
     <script type="application/ld+json">{}</script>
     <meta property="og:type" content="blog">
 <meta property="og:title" content="Jiaget&#39;s field">
-<meta property="og:url" content="http://example.com/categories/nosql/index.html">
+<meta property="og:url" content="http://example.com/archives/2021/page/2/index.html">
 <meta property="og:site_name" content="Jiaget&#39;s field">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:author" content="Jiaget">
@@ -217,23 +217,23 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
-                            aria-label=": Redis 深入探讨"
+                            href="/2021/05/28/first-blood/"
+                            aria-label=": first blood"
                         >
-                            Redis 深入探讨
+                            first blood
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time datetime="2021-06-01T20:49:03+08:00">
+    <time datetime="2021-05-28T15:16:52+08:00">
 	
-		    6月 01, 2021
+		    5月 28, 2021
     	
     </time>
     
         <span>发布在 </span>
         
-    <a class="category-link" href="/categories/nosql/">nosql</a>
+    <a class="category-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a>
 
 
     
@@ -242,119 +242,101 @@
             </div>
             
                 <div class="postShorten-content">
-                    <h1 id="Redis-使用的基本使用场景"><a href="#Redis-使用的基本使用场景" class="headerlink" title="Redis 使用的基本使用场景"></a>Redis 使用的基本使用场景</h1><p><img src="https://i.loli.net/2021/06/04/5Xs86n1NctQjK3e.png" alt="redis.png"></p>
-<h1 id="Redis-与-数据库数据的一致性问题"><a href="#Redis-与-数据库数据的一致性问题" class="headerlink" title="Redis 与 数据库数据的一致性问题"></a>Redis 与 数据库数据的一致性问题</h1><h2 id="抛出问题"><a href="#抛出问题" class="headerlink" title="抛出问题"></a>抛出问题</h2><pre><code>    当对数据进行修改时，应该先删除缓存还是先写入数据库中？
+                    <h1 id="0-初次见面"><a href="#0-初次见面" class="headerlink" title="0.初次见面"></a>0.初次见面</h1><p>拖延症患者，拖拖拉拉，终于开始搭建自己的博客。本博客使用 <code>Hexo</code> 和 <code>Github page</code> 。下面是博客搭建的历程。</p>
+<h1 id="1-准备环境"><a href="#1-准备环境" class="headerlink" title="1.准备环境"></a>1.准备环境</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://nodejs.org/en/">NodeJS</a> </li>
+<li>git</li>
+</ul>
+<h1 id="2-安装Hexo"><a href="#2-安装Hexo" class="headerlink" title="2.安装Hexo"></a>2.安装Hexo</h1><p><a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/">Hexo官网</a></p>
+<p><code>npm</code> 是NodeJS的包管理工具，关于Hexo的安装或者依赖的下载都可以交给它完成</p>
+<p><code>npm install -g hexo-cli</code></p>
+<p>安装完成后执行以下命令</p>
+<pre><code>hexo init myBlog
+cd myBlog
+npm install
 </code></pre>
-<h3 id="（方案一）-先删缓存，-后写数据库。"><a href="#（方案一）-先删缓存，-后写数据库。" class="headerlink" title="（方案一） 先删缓存， 后写数据库。"></a>（方案一） 先删缓存， 后写数据库。</h3><ul>
-<li>在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 <code>（cache old : db new)</code></li>
-</ul>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>Thread1</th>
-<th>Thread2</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>t1</td>
-<td>delete cache</td>
-<td></td>
-</tr>
-<tr>
-<td>t2</td>
-<td></td>
-<td>read -&gt; (cache)nil -&gt;（DB）old data</td>
-</tr>
-<tr>
-<td>t3</td>
-<td>write DB -&gt; update cache</td>
-<td></td>
-</tr>
-<tr>
-<td>t4</td>
-<td></td>
-<td>write cache (overwrite)</td>
-</tr>
-</tbody></table>
-<h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><ul>
-<li><ol>
-<li>不删除缓存，而是将缓存改成一个特殊值（比如 <code>locking</code>）。在客户端的设计上，读到该特殊值，就休眠一会，再查Redis</li>
-</ol>
+<h2 id="测试hexo"><a href="#测试hexo" class="headerlink" title="测试hexo"></a>测试hexo</h2><pre><code>hexo s
+</code></pre>
+<p>访问<code>http://localhost:4040</code>可以预览博客效果。</p>
+<h1 id="3-Github-Page-部署"><a href="#3-Github-Page-部署" class="headerlink" title="3.Github Page 部署"></a>3.Github Page 部署</h1><ul>
+<li><p>新建仓库</p>
 <ul>
-<li>缺陷：</li>
-<li><ol>
-<li>特殊值对业务的侵入。（必须挑选一个与业务严格无关的值）</li>
-</ol>
-</li>
-<li><ol start="2">
-<li>休眠时间可能重复，降低性能。</li>
-</ol>
-</li>
+<li>注意仓库名严格按照<code>[用户名].github.io</code>命名</li>
 </ul>
 </li>
-<li><ol start="2">
-<li>延时双删。 删缓存 -&gt; 写数据库 -&gt; 休眠一会 -&gt; 删除缓存</li>
-</ol>
+<li><p>SSH key 配置</p>
+<pre><code>git config --global user.name &quot;用户名&quot;
+git config --global user.email &quot;邮箱地址&quot;
+ssh-keygen -t rsa -C &#39;上面的邮箱&#39;
+cat ~/.ssh/id_rsa.pub
+</code></pre>
+</li>
+<li><p>将生成密钥添加到 Github 上</p>
 <ul>
-<li>缺陷</li>
-<li>1.写操作频繁的场景下，仍然无法避免脏数据。</li>
+<li><code>settings -&gt; SSH and GPG keys -&gt; New SSH key</code></li>
 </ul>
 </li>
-</ul>
-<p>不能在写操作频繁的情况下使用</p>
-<h3 id="（方案二）先写数据，再删缓存"><a href="#（方案二）先写数据，再删缓存" class="headerlink" title="（方案二）先写数据，再删缓存"></a>（方案二）先写数据，再删缓存</h3><ul>
-<li>数据库写完后，缓存删除失败，数据就会不一致。</li>
-</ul>
-<h4 id="解决方案："><a href="#解决方案：" class="headerlink" title="解决方案："></a>解决方案：</h4><ul>
-<li><ol>
-<li>给缓存设置过期时间。</li>
-</ol>
+<li><p>本地部署到Github</p>
 <ul>
-<li>缺陷</li>
-<li>过期时间内，缓存数据未更新，仍有脏数据风险。</li>
+<li>博客目录下 <code>_config.yml</code>,在文件末尾添加：<pre><code>deploy:
+type: git
+repo:
+    github: https://github.com/Jiaget/Jiaget.github.io.git,main
+</code></pre>
+</li>
+<li>安装部署插件 <code>npm install hexo-deployer-git --save</code></li>
+<li>博客页面生成与上传 <code>hexo g -d</code></li>
 </ul>
 </li>
-<li><ol start="2">
-<li>引入MQ, 保证原子性， 删除缓存失败，会重试</li>
-</ol>
+<li><p>上传到github到最后效果的显示有段时间延迟，访问 <code> https://你的用户名.github.io</code>就能看到自己的博客了。</p>
+</li>
+</ul>
+<h1 id="4-写作"><a href="#4-写作" class="headerlink" title="4.写作"></a>4.写作</h1><ul>
+<li><p>新建文章 <code>hexo new &#39;文章标题&#39;</code></p>
 <ul>
-<li>缺陷</li>
-<li>重试时间内，仍然存在脏数据。</li>
+<li>文章会生成在 <code>/source/_posts</code> 下</li>
 </ul>
 </li>
-<li><ol start="3">
-<li>业务不再处理脏数据的问题。业务层只需要给value设置一个逻辑过期时间。另开一个线程，用来扫描缓存，并删除过期的缓存。</li>
-</ol>
+<li><p>执行 </p>
+<pre><code>hexo g
+hexo s
+</code></pre>
+<p>文章在博客中显示</p>
 </li>
-</ul>
-<p>只能保证最终一致性，而不能保证实时一致。</p>
-<h1 id="Redis-缓存穿透"><a href="#Redis-缓存穿透" class="headerlink" title="Redis 缓存穿透"></a>Redis 缓存穿透</h1><p>缓存中查不到，数据库中也查不到。(不断地去查数据库中不存在的数据。)</p>
+<li><p>部署</p>
+<pre><code>hexo clean
+hexo g -d
+</code></pre>
+<p><code>hexo clean </code> 是为了清除缓存文件<code>db.json</code>以及静态文件<code>public</code>。</p>
+</li>
+<li><p>写好的文章暂时不想发布，可以存在草稿里，草稿的生成方法 <code>exo new draft &quot;文章标题&quot;</code></p>
 <ul>
-<li>解决方案<ol>
-<li>对参数进行合法性校验</li>
-<li>将查询不到的数据写入数据库。（Redis会记录很多无效key.可以将不合法数据过期时间设置短一点。）</li>
-<li>引入布隆过滤器（BloomFilter），访问Redis前，数据是否存在。布隆过滤器存在一定误判率，且只能加数据，不能减</li>
-</ol>
+<li>草稿保存在<code>/source/_drafts</code>中，需要发布只需要<code>hexo publicsh [layout]&lt;filename&gt;</code></li>
+</ul>
 </li>
 </ul>
-<h1 id="Redis-缓存击穿"><a href="#Redis-缓存击穿" class="headerlink" title="Redis 缓存击穿"></a>Redis 缓存击穿</h1><p>缓存中没有数据，但是数据库中有数据。（缓存数据初始化，或者key过期。 ）</p>
-<p>高并发场景下，过期key写入缓存的延时中，出现大量访问该key的线程，由于缓存中不存在该key。数据库将承受巨大压力。</p>
+<h2 id="git-源码管理"><a href="#git-源码管理" class="headerlink" title="git 源码管理"></a>git 源码管理</h2><p>hexo会把<code>./deploy_git</code>中的静态页面上传给github, 也就是说我们写的markdown文件以及hexo源码都在本地储存。</p>
+<p>因此我们还需要将源码托管到github。不需要新建仓库，只需要新的分支管理即可。</p>
+<p>关于分支，这里需要提一句，在 <code>github page</code> 部署的静态页面应该在 <code>main</code> 分支，而不是 <code>master</code>分支。github应该是将主分支名称修改了，原先一直是 <code>master</code>。</p>
 <ul>
-<li>解决方案<ol>
-<li>热点缓存永不过期。但是要注意value需要有逻辑过期时间。在另一个线程定期更新该数据。（对系统存在损耗）</li>
-<li>避免DB承受并发压力：DB给redis写入key时，加锁，让访问该key的线程等待，避免压力击穿redis到DB上<h1 id="Redis-缓存雪崩"><a href="#Redis-缓存雪崩" class="headerlink" title="Redis 缓存雪崩"></a>Redis 缓存雪崩</h1></li>
-</ol>
+<li><p>将本地源码和 github 仓库连接 <code>git remote add origin git@github.com:Jiaget/Jiaget.github.io.git</code></p>
+</li>
+<li><p>检查 <code>.gitignore</code>, 忽视无关文件。如果没有该文件，则新建一个。</p>
 </li>
 </ul>
-<p>缓存大面积过期，请求全部转发到DB。</p>
-<ul>
-<li>解决方案：<ol>
-<li>将缓存过期时间分散开。 在原有的统一的过期时间基础上，增加随机值。</li>
-<li>对于分布式系统，可以将热点数据分散到不同节点上。</li>
-</ol>
-</li>
-</ul>
+<pre><code>.DS_Store
+Thumbs.db
+db.json
+*.log
+node_modules/
+public/
+.deploy*/
+</code></pre>
+<p>最后推送给新的分支</p>
+<pre><code>git add .
+git commit -m &quot;hexo source code&quot;
+git push origin master:source
+</code></pre>
 
                     
                         
@@ -364,7 +346,7 @@
                     
                         <p>
                             <a
-                                href="/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/#post-footer"
+                                href="/2021/05/28/first-blood/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -387,82 +369,26 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/2021/06/01/Redis/"
-                            aria-label=": Redis"
+                            href="/2021/05/28/categories/"
+                            aria-label=": categories"
                         >
-                            Redis
+                            categories
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time datetime="2021-06-01T19:18:37+08:00">
+    <time datetime="2021-05-28T08:57:54+08:00">
 	
-		    6月 01, 2021
+		    5月 28, 2021
     	
     </time>
-    
-        <span>发布在 </span>
-        
-    <a class="category-link" href="/categories/nosql/">nosql</a>
-
-
     
 </div>
 
             </div>
             
                 <div class="postShorten-content">
-                    <h1 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h1><h2 id="Redis-简介"><a href="#Redis-简介" class="headerlink" title="Redis 简介"></a>Redis 简介</h2><p>Redis 全称 (REmote DIctionary Serer) 远程字典服务， 是一个键值对数据库。</p>
-<p>与 NoSQL 相对应的 关系型数据库在当今环境存在的问题：</p>
-<ul>
-<li>性能： 磁盘IO性能低</li>
-<li>扩展： 数据之间的关系复杂，扩展性差，不便于大规模集群使用</li>
-</ul>
-<p>NoSQL对其缺点进行了改进：</p>
-<ul>
-<li>内存存储</li>
-<li>不存数据关系，只存数据</li>
-</ul>
-<h2 id="Redis-的特征"><a href="#Redis-的特征" class="headerlink" title="Redis 的特征"></a>Redis 的特征</h2><ol>
-<li>数据之间没有必然联系</li>
-<li>采用单线程机制</li>
-<li>高性能。 </li>
-<li>多数据类型：<ul>
-<li>string</li>
-<li>list</li>
-<li>hash</li>
-<li>set</li>
-<li>sorted_set</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li>持久化。数据灾难恢复。</li>
-</ul>
-<h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><ul>
-<li>热点数据加速查询</li>
-<li>任务队列</li>
-<li>实时信息</li>
-<li>时效信息</li>
-<li>分布式数据功效。分布式集群中的session分离</li>
-<li>消息队列</li>
-<li>分布式锁</li>
-</ul>
-<h2 id="Redis-的一些功能"><a href="#Redis-的一些功能" class="headerlink" title="Redis 的一些功能"></a>Redis 的一些功能</h2><ul>
-<li>缓存<ul>
-<li>针对一些高并发业务的设计</li>
-<li>平台的高频率数据。</li>
-</ul>
-</li>
-<li>单服务器升级集群</li>
-<li>Session 管理</li>
-<li>Token</li>
-</ul>
-<h2 id="Redis-命令"><a href="#Redis-命令" class="headerlink" title="Redis 命令"></a>Redis 命令</h2><ul>
-<li>写 <code>set [key] [value]</code></li>
-<li>读 <code>get [key] ([value])</code> 。 如果取的值不存在，返回 <code>(nil)</code></li>
-</ul>
-
+                    
                     
                         
 
@@ -471,7 +397,7 @@
                     
                         <p>
                             <a
-                                href="/2021/06/01/Redis/#post-footer"
+                                href="/2021/05/28/categories/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -488,8 +414,19 @@
     <div class="pagination-bar">
     <ul class="pagination">
         
+          <li class="pagination-prev">
+            <a
+                class="btn btn--default btn--small"
+                href="/archives/2021/"
+                aria-label="上一页"
+            >
+              <i class="fa fa-angle-left text-base icon-mr"></i>
+              <span>上一页</span>
+            </a>
+          </li>
         
-        <li class="pagination-number">第 1 页 共 1 页</li>
+        
+        <li class="pagination-number">第 2 页 共 2 页</li>
     </ul>
 </div>
 

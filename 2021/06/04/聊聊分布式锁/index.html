@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Jiaget&#39;s field">
-    <title>Redis 深入探讨 - Jiaget&#39;s field</title>
+    <title>聊聊分布式锁 - Jiaget&#39;s field</title>
     <meta name="author" content="Jiaget">
     
     
@@ -15,22 +15,21 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"Redis 使用的基本使用场景\nRedis 与 数据库数据的一致性问题抛出问题    当对数据进行修改时，应该先删除缓存还是先写入数据库中？\n\n（方案一） 先删缓存， 后写数据库。\n在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 （cache old : db new)\n\n\n\n\n\nThread1\nThread2\n\n\n\nt1\ndelete cache\n\n\n\nt2\n\nread -&gt; (cache)nil -&gt;（DB）old data\n\n\nt3\nwrite DB -&gt; update cache\n\n\n\nt4\n\nwrite cache (overwrite)\n\n\n解决方案\n\n不删除缓存，而是将缓存改成一个特殊值（比如 locking）。在客户端的设计上，读到该特殊值，就休眠一会，再查Redis\n\n\n缺陷：\n\n特殊值对业务的侵入。（必须挑选一个与业务严格无关的值）\n\n\n\n休眠时间可能重复，降低性能。\n\n\n\n\n\n延时双删。 删缓存 -&gt; 写数据库 -&gt; 休眠一会 -&gt; 删除缓存\n\n\n缺陷\n1.写操作频繁的场景下，仍然无法避免脏数据。\n\n\n\n不能在写操作频繁的情况下使用\n（方案二）先写数据，再删缓存\n数据库写完后，缓存删除失败，数据就会不一致。\n\n解决方案：\n\n给缓存设置过期时间。\n\n\n缺陷\n过期时间内，缓存数据未更新，仍有脏数据风险。\n\n\n\n引入MQ, 保证原子性， 删除缓存失败，会重试\n\n\n缺陷\n重试时间内，仍然存在脏数据。\n\n\n\n业务不再处理脏数据的问题。业务层只需要给value设置一个逻辑过期时间。另开一个线程，用来扫描缓存，并删除过期的缓存。\n\n\n\n只能保证最终一致性，而不能保证实时一致。\nRedis 缓存穿透缓存中查不到，数据库中也查不到。(不断地去查数据库中不存在的数据。)\n\n解决方案\n对参数进行合法性校验\n将查询不到的数据写入数据库。（Redis会记录很多无效key.可以将不合法数据过期时间设置短一点。）\n引入布隆过滤器（BloomFilter），访问Redis前，数据是否存在。布隆过滤器存在一定误判率，且只能加数据，不能减\n\n\n\nRedis 缓存击穿缓存中没有数据，但是数据库中有数据。（缓存数据初始化，或者key过期。 ）\n高并发场景下，过期key写入缓存的延时中，出现大量访问该key的线程，由于缓存中不存在该key。数据库将承受巨大压力。\n\n解决方案\n热点缓存永不过期。但是要注意value需要有逻辑过期时间。在另一个线程定期更新该数据。（对系统存在损耗）\n避免DB承受并发压力：DB给redis写入key时，加锁，让访问该key的线程等待，避免压力击穿redis到DB上Redis 缓存雪崩\n\n\n\n缓存大面积过期，请求全部转发到DB。\n\n解决方案：\n将缓存过期时间分散开。 在原有的统一的过期时间基础上，增加随机值。\n对于分布式系统，可以将热点数据分散到不同节点上。\n\n\n\n","dateCreated":"2021-06-01T20:49:03+08:00","dateModified":"2021-06-05T12:51:15+08:00","datePublished":"2021-06-01T20:49:03+08:00","description":"","headline":"Redis 深入探讨","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/","keywords":"nosql, 高并发"}</script>
-    <meta name="description" content="Redis 使用的基本使用场景 Redis 与 数据库数据的一致性问题抛出问题    当对数据进行修改时，应该先删除缓存还是先写入数据库中？  （方案一） 先删缓存， 后写数据库。 在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"分布式锁分布式锁就是 对于一个所有进程都能访问到的资源上，设置一个锁资源，让这些进程来竞争这个锁。\n我们希望分布式锁：\n\n响应快\n性能高\n与业务无关\n\n","dateCreated":"2021-06-04T22:49:51+08:00","dateModified":"2021-06-05T12:51:14+08:00","datePublished":"2021-06-04T22:49:51+08:00","description":"","headline":"聊聊分布式锁","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/","keywords":"分布式, redis, 锁"}</script>
+    <meta name="description" content="分布式锁分布式锁就是 对于一个所有进程都能访问到的资源上，设置一个锁资源，让这些进程来竞争这个锁。 我们希望分布式锁：  响应快 性能高 与业务无关">
 <meta property="og:type" content="blog">
-<meta property="og:title" content="Redis 深入探讨">
-<meta property="og:url" content="http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/index.html">
+<meta property="og:title" content="聊聊分布式锁">
+<meta property="og:url" content="http://example.com/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/index.html">
 <meta property="og:site_name" content="Jiaget&#39;s field">
-<meta property="og:description" content="Redis 使用的基本使用场景 Redis 与 数据库数据的一致性问题抛出问题    当对数据进行修改时，应该先删除缓存还是先写入数据库中？  （方案一） 先删缓存， 后写数据库。 在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这">
+<meta property="og:description" content="分布式锁分布式锁就是 对于一个所有进程都能访问到的资源上，设置一个锁资源，让这些进程来竞争这个锁。 我们希望分布式锁：  响应快 性能高 与业务无关">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://i.loli.net/2021/06/04/5Xs86n1NctQjK3e.png">
-<meta property="article:published_time" content="2021-06-01T12:49:03.000Z">
-<meta property="article:modified_time" content="2021-06-05T04:51:15.072Z">
+<meta property="article:published_time" content="2021-06-04T14:49:51.000Z">
+<meta property="article:modified_time" content="2021-06-05T04:51:14.359Z">
 <meta property="article:author" content="Jiaget">
-<meta property="article:tag" content="nosql">
-<meta property="article:tag" content="高并发">
+<meta property="article:tag" content="分布式">
+<meta property="article:tag" content="redis">
+<meta property="article:tag" content="锁">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://i.loli.net/2021/06/04/5Xs86n1NctQjK3e.png">
     
         <link rel="publisher" href="https://plus.google.com/none"/>
     
@@ -222,20 +221,20 @@
         <div class="post-header main-content-wrap text-left">
     
         <h1 class="post-title">
-            Redis 深入探讨
+            聊聊分布式锁
         </h1>
     
     
         <div class="post-meta">
-    <time datetime="2021-06-01T20:49:03+08:00">
+    <time datetime="2021-06-04T22:49:51+08:00">
 	
-		    6月 01, 2021
+		    6月 04, 2021
     	
     </time>
     
         <span>发布在 </span>
         
-    <a class="category-link" href="/categories/nosql/">nosql</a>
+    <a class="category-link" href="/categories/redis/">redis</a>
 
 
     
@@ -247,118 +246,12 @@
     
     <div class="post-content markdown">
         <div class="main-content-wrap">
-            <h1 id="Redis-使用的基本使用场景"><a href="#Redis-使用的基本使用场景" class="headerlink" title="Redis 使用的基本使用场景"></a>Redis 使用的基本使用场景</h1><p><img src="https://i.loli.net/2021/06/04/5Xs86n1NctQjK3e.png" alt="redis.png"></p>
-<h1 id="Redis-与-数据库数据的一致性问题"><a href="#Redis-与-数据库数据的一致性问题" class="headerlink" title="Redis 与 数据库数据的一致性问题"></a>Redis 与 数据库数据的一致性问题</h1><h2 id="抛出问题"><a href="#抛出问题" class="headerlink" title="抛出问题"></a>抛出问题</h2><pre><code>    当对数据进行修改时，应该先删除缓存还是先写入数据库中？
-</code></pre>
-<h3 id="（方案一）-先删缓存，-后写数据库。"><a href="#（方案一）-先删缓存，-后写数据库。" class="headerlink" title="（方案一） 先删缓存， 后写数据库。"></a>（方案一） 先删缓存， 后写数据库。</h3><ul>
-<li>在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 <code>（cache old : db new)</code></li>
-</ul>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>Thread1</th>
-<th>Thread2</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>t1</td>
-<td>delete cache</td>
-<td></td>
-</tr>
-<tr>
-<td>t2</td>
-<td></td>
-<td>read -&gt; (cache)nil -&gt;（DB）old data</td>
-</tr>
-<tr>
-<td>t3</td>
-<td>write DB -&gt; update cache</td>
-<td></td>
-</tr>
-<tr>
-<td>t4</td>
-<td></td>
-<td>write cache (overwrite)</td>
-</tr>
-</tbody></table>
-<h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><ul>
-<li><ol>
-<li>不删除缓存，而是将缓存改成一个特殊值（比如 <code>locking</code>）。在客户端的设计上，读到该特殊值，就休眠一会，再查Redis</li>
-</ol>
+            <h1 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h1><p>分布式锁就是 对于一个所有进程都能访问到的资源上，设置一个锁资源，让这些进程来竞争这个锁。</p>
+<p>我们希望分布式锁：</p>
 <ul>
-<li>缺陷：</li>
-<li><ol>
-<li>特殊值对业务的侵入。（必须挑选一个与业务严格无关的值）</li>
-</ol>
-</li>
-<li><ol start="2">
-<li>休眠时间可能重复，降低性能。</li>
-</ol>
-</li>
-</ul>
-</li>
-<li><ol start="2">
-<li>延时双删。 删缓存 -&gt; 写数据库 -&gt; 休眠一会 -&gt; 删除缓存</li>
-</ol>
-<ul>
-<li>缺陷</li>
-<li>1.写操作频繁的场景下，仍然无法避免脏数据。</li>
-</ul>
-</li>
-</ul>
-<p>不能在写操作频繁的情况下使用</p>
-<h3 id="（方案二）先写数据，再删缓存"><a href="#（方案二）先写数据，再删缓存" class="headerlink" title="（方案二）先写数据，再删缓存"></a>（方案二）先写数据，再删缓存</h3><ul>
-<li>数据库写完后，缓存删除失败，数据就会不一致。</li>
-</ul>
-<h4 id="解决方案："><a href="#解决方案：" class="headerlink" title="解决方案："></a>解决方案：</h4><ul>
-<li><ol>
-<li>给缓存设置过期时间。</li>
-</ol>
-<ul>
-<li>缺陷</li>
-<li>过期时间内，缓存数据未更新，仍有脏数据风险。</li>
-</ul>
-</li>
-<li><ol start="2">
-<li>引入MQ, 保证原子性， 删除缓存失败，会重试</li>
-</ol>
-<ul>
-<li>缺陷</li>
-<li>重试时间内，仍然存在脏数据。</li>
-</ul>
-</li>
-<li><ol start="3">
-<li>业务不再处理脏数据的问题。业务层只需要给value设置一个逻辑过期时间。另开一个线程，用来扫描缓存，并删除过期的缓存。</li>
-</ol>
-</li>
-</ul>
-<p>只能保证最终一致性，而不能保证实时一致。</p>
-<h1 id="Redis-缓存穿透"><a href="#Redis-缓存穿透" class="headerlink" title="Redis 缓存穿透"></a>Redis 缓存穿透</h1><p>缓存中查不到，数据库中也查不到。(不断地去查数据库中不存在的数据。)</p>
-<ul>
-<li>解决方案<ol>
-<li>对参数进行合法性校验</li>
-<li>将查询不到的数据写入数据库。（Redis会记录很多无效key.可以将不合法数据过期时间设置短一点。）</li>
-<li>引入布隆过滤器（BloomFilter），访问Redis前，数据是否存在。布隆过滤器存在一定误判率，且只能加数据，不能减</li>
-</ol>
-</li>
-</ul>
-<h1 id="Redis-缓存击穿"><a href="#Redis-缓存击穿" class="headerlink" title="Redis 缓存击穿"></a>Redis 缓存击穿</h1><p>缓存中没有数据，但是数据库中有数据。（缓存数据初始化，或者key过期。 ）</p>
-<p>高并发场景下，过期key写入缓存的延时中，出现大量访问该key的线程，由于缓存中不存在该key。数据库将承受巨大压力。</p>
-<ul>
-<li>解决方案<ol>
-<li>热点缓存永不过期。但是要注意value需要有逻辑过期时间。在另一个线程定期更新该数据。（对系统存在损耗）</li>
-<li>避免DB承受并发压力：DB给redis写入key时，加锁，让访问该key的线程等待，避免压力击穿redis到DB上<h1 id="Redis-缓存雪崩"><a href="#Redis-缓存雪崩" class="headerlink" title="Redis 缓存雪崩"></a>Redis 缓存雪崩</h1></li>
-</ol>
-</li>
-</ul>
-<p>缓存大面积过期，请求全部转发到DB。</p>
-<ul>
-<li>解决方案：<ol>
-<li>将缓存过期时间分散开。 在原有的统一的过期时间基础上，增加随机值。</li>
-<li>对于分布式系统，可以将热点数据分散到不同节点上。</li>
-</ol>
-</li>
+<li>响应快</li>
+<li>性能高</li>
+<li>与业务无关</li>
 </ul>
 
             
@@ -371,7 +264,7 @@
             <div class="post-footer-tags">
                 <span class="text-color-light text-small">标签</span><br/>
                 
-    <a class="tag tag--primary tag--small t-none-link" href="/tags/nosql/" rel="tag">nosql</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/" rel="tag">高并发</a>
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/redis/" rel="tag">redis</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/%E9%94%81/" rel="tag">锁</a>
 
             </div>
         
@@ -384,9 +277,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
-                    data-tooltip="浅析golang 闭包"
-                    aria-label="上一篇: 浅析golang 闭包"
+                    href="/2021/06/05/%E8%81%8A%E8%81%8AGolang%E4%B9%8Bcontext/"
+                    data-tooltip="聊聊Golang之context"
+                    aria-label="上一篇: 聊聊Golang之context"
                 >
                     
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
@@ -398,9 +291,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/2021/06/01/Redis/"
-                    data-tooltip="Redis"
-                    aria-label="下一篇: Redis"
+                    href="/2021/06/04/%E6%8E%A2%E8%AE%A8%E4%B8%80%E4%B8%8Bgolang-map/"
+                    data-tooltip="探讨一下golang map"
+                    aria-label="下一篇: 探讨一下golang map"
                 >
                     
                         <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
@@ -425,7 +318,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"
                     title="分享到 Facebook"
                     aria-label="分享到 Facebook"
                 >
@@ -438,7 +331,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"
                     title="分享到 Twitter"
                     aria-label="分享到 Twitter"
                 >
@@ -451,7 +344,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"
                     title="分享到 Google+"
                     aria-label="分享到 Google+"
                 >
@@ -499,9 +392,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
-                    data-tooltip="浅析golang 闭包"
-                    aria-label="上一篇: 浅析golang 闭包"
+                    href="/2021/06/05/%E8%81%8A%E8%81%8AGolang%E4%B9%8Bcontext/"
+                    data-tooltip="聊聊Golang之context"
+                    aria-label="上一篇: 聊聊Golang之context"
                 >
                     
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
@@ -513,9 +406,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/2021/06/01/Redis/"
-                    data-tooltip="Redis"
-                    aria-label="下一篇: Redis"
+                    href="/2021/06/04/%E6%8E%A2%E8%AE%A8%E4%B8%80%E4%B8%8Bgolang-map/"
+                    data-tooltip="探讨一下golang map"
+                    aria-label="下一篇: 探讨一下golang map"
                 >
                     
                         <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
@@ -540,7 +433,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"
                     title="分享到 Facebook"
                     aria-label="分享到 Facebook"
                 >
@@ -553,7 +446,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"
                     title="分享到 Twitter"
                     aria-label="分享到 Twitter"
                 >
@@ -566,7 +459,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"
                     title="分享到 Google+"
                     aria-label="分享到 Google+"
                 >
@@ -600,7 +493,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                        href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"
                         aria-label="分享到 Facebook"
                     >
                         <i class="fab fa-facebook" aria-hidden="true"></i><span>分享到 Facebook</span>
@@ -613,7 +506,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                        href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"
                         aria-label="分享到 Twitter"
                     >
                         <i class="fab fa-twitter" aria-hidden="true"></i><span>分享到 Twitter</span>
@@ -626,7 +519,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://plus.google.com/share?url=http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
+                        href="https://plus.google.com/share?url=http://example.com/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"
                         aria-label="分享到 Google+"
                     >
                         <i class="fab fa-google-plus" aria-hidden="true"></i><span>分享到 Google+</span>
