@@ -243,18 +243,37 @@
             
                 <div class="postShorten-content">
                     <ul>
-<li>将下列配置粘到一个新建的 <code>xxx.reg</code> 文件中<br>```<br>Windows Registry Editor Version 5.00</li>
+<li>将下列配置粘到一个新建的 <code>xxx.reg</code> 文件中</li>
 </ul>
-<p>[HKEY_CLASSES_ROOT*\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p>
-<p>[HKEY_CLASSES_ROOT*\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%1&quot;“</p>
-<p>Windows Registry Editor Version 5.00</p>
-<p>[HKEY_CLASSES_ROOT\Directory\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p>
-<p>[HKEY_CLASSES_ROOT\Directory\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%V&quot;“</p>
-<p>Windows Registry Editor Version 5.00</p>
-<p>[HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p>
-<p>[HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%V&quot;“</p>
-<p>```</p>
+<pre><code>Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\*\shell\VSCode]
+@=&quot;Open with Code&quot;
+&quot;Icon&quot;=&quot;C:\\Program Files\\Microsoft VS Code\\Code.exe&quot;
+
+[HKEY_CLASSES_ROOT\*\shell\VSCode\command]
+@=&quot;\&quot;C:\\Program Files\\Microsoft VS Code\\Code.exe\&quot; \&quot;%1\&quot;&quot;
+
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Directory\shell\VSCode]
+@=&quot;Open with Code&quot;
+&quot;Icon&quot;=&quot;C:\\Program Files\\Microsoft VS Code\\Code.exe&quot;
+
+[HKEY_CLASSES_ROOT\Directory\shell\VSCode\command]
+@=&quot;\&quot;C:\\Program Files\\Microsoft VS Code\\Code.exe\&quot; \&quot;%V\&quot;&quot;
+
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode]
+@=&quot;Open with Code&quot;
+&quot;Icon&quot;=&quot;C:\\Program Files\\Microsoft VS Code\\Code.exe&quot;
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode\command]
+@=&quot;\&quot;C:\\Program Files\\Microsoft VS Code\\Code.exe\&quot; \&quot;%V\&quot;&quot;
+</code></pre>
 <p>注意路径和实际是否一致。</p>
+<p>实际就是添加注册表</p>
 
                     
                         

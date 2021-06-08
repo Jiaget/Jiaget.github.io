@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2021-06-08T01:46:41.344Z</updated>
+  <updated>2021-06-08T11:04:52.544Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -21,17 +21,19 @@
     <link href="http://example.com/2021/06/08/vsCode-%E6%B7%BB%E5%8A%A0%E8%87%B3%E5%8F%B3%E9%94%AE/"/>
     <id>http://example.com/2021/06/08/vsCode-%E6%B7%BB%E5%8A%A0%E8%87%B3%E5%8F%B3%E9%94%AE/</id>
     <published>2021-06-08T01:44:07.000Z</published>
-    <updated>2021-06-08T01:46:41.344Z</updated>
+    <updated>2021-06-08T11:04:52.544Z</updated>
     
-    <content type="html"><![CDATA[<ul><li>将下列配置粘到一个新建的 <code>xxx.reg</code> 文件中<br>```<br>Windows Registry Editor Version 5.00</li></ul><p>[HKEY_CLASSES_ROOT*\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p><p>[HKEY_CLASSES_ROOT*\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%1&quot;“</p><p>Windows Registry Editor Version 5.00</p><p>[HKEY_CLASSES_ROOT\Directory\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p><p>[HKEY_CLASSES_ROOT\Directory\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%V&quot;“</p><p>Windows Registry Editor Version 5.00</p><p>[HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p><p>[HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%V&quot;“</p><p>```</p><p>注意路径和实际是否一致。</p>]]></content>
+    <content type="html"><![CDATA[<ul><li>将下列配置粘到一个新建的 <code>xxx.reg</code> 文件中</li></ul><pre><code>Windows Registry Editor Version 5.00[HKEY_CLASSES_ROOT\*\shell\VSCode]@=&quot;Open with Code&quot;&quot;Icon&quot;=&quot;C:\\Program Files\\Microsoft VS Code\\Code.exe&quot;[HKEY_CLASSES_ROOT\*\shell\VSCode\command]@=&quot;\&quot;C:\\Program Files\\Microsoft VS Code\\Code.exe\&quot; \&quot;%1\&quot;&quot;Windows Registry Editor Version 5.00[HKEY_CLASSES_ROOT\Directory\shell\VSCode]@=&quot;Open with Code&quot;&quot;Icon&quot;=&quot;C:\\Program Files\\Microsoft VS Code\\Code.exe&quot;[HKEY_CLASSES_ROOT\Directory\shell\VSCode\command]@=&quot;\&quot;C:\\Program Files\\Microsoft VS Code\\Code.exe\&quot; \&quot;%V\&quot;&quot;Windows Registry Editor Version 5.00[HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode]@=&quot;Open with Code&quot;&quot;Icon&quot;=&quot;C:\\Program Files\\Microsoft VS Code\\Code.exe&quot;[HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode\command]@=&quot;\&quot;C:\\Program Files\\Microsoft VS Code\\Code.exe\&quot; \&quot;%V\&quot;&quot;</code></pre><p>注意路径和实际是否一致。</p><p>实际就是添加注册表</p>]]></content>
     
     
       
       
     <summary type="html">&lt;ul&gt;
-&lt;li&gt;将下列配置粘到一个新建的 &lt;code&gt;xxx.reg&lt;/code&gt; 文件中&lt;br&gt;```&lt;br&gt;Windows Registry Editor Version 5.00&lt;/li&gt;
+&lt;li&gt;将下列配置粘到一个新建的 &lt;code&gt;xxx.reg&lt;/code&gt; 文件中&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;[HKEY_CLASSES_ROOT*\shell\VSCode</summary>
+&lt;pre&gt;&lt;code&gt;Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\*\shell\VSCode</summary>
       
     
     
