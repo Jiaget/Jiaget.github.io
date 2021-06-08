@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2021-06-05T09:44:56.247Z</updated>
+  <updated>2021-06-08T01:46:41.344Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,65 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>vsCode 添加至右键</title>
+    <link href="http://example.com/2021/06/08/vsCode-%E6%B7%BB%E5%8A%A0%E8%87%B3%E5%8F%B3%E9%94%AE/"/>
+    <id>http://example.com/2021/06/08/vsCode-%E6%B7%BB%E5%8A%A0%E8%87%B3%E5%8F%B3%E9%94%AE/</id>
+    <published>2021-06-08T01:44:07.000Z</published>
+    <updated>2021-06-08T01:46:41.344Z</updated>
+    
+    <content type="html"><![CDATA[<ul><li>将下列配置粘到一个新建的 <code>xxx.reg</code> 文件中<br>```<br>Windows Registry Editor Version 5.00</li></ul><p>[HKEY_CLASSES_ROOT*\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p><p>[HKEY_CLASSES_ROOT*\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%1&quot;“</p><p>Windows Registry Editor Version 5.00</p><p>[HKEY_CLASSES_ROOT\Directory\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p><p>[HKEY_CLASSES_ROOT\Directory\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%V&quot;“</p><p>Windows Registry Editor Version 5.00</p><p>[HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p><p>[HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%V&quot;“</p><p>```</p><p>注意路径和实际是否一致。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;ul&gt;
+&lt;li&gt;将下列配置粘到一个新建的 &lt;code&gt;xxx.reg&lt;/code&gt; 文件中&lt;br&gt;```&lt;br&gt;Windows Registry Editor Version 5.00&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;[HKEY_CLASSES_ROOT*\shell\VSCode</summary>
+      
+    
+    
+    
+    <category term="工具" scheme="http://example.com/categories/%E5%B7%A5%E5%85%B7/"/>
+    
+    
+    <category term="vsCode" scheme="http://example.com/tags/vsCode/"/>
+    
+    <category term="windows" scheme="http://example.com/tags/windows/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>mutex 互斥锁</title>
+    <link href="http://example.com/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/"/>
+    <id>http://example.com/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/</id>
+    <published>2021-06-07T15:16:47.000Z</published>
+    <updated>2021-06-07T15:17:52.475Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="mutex"><a href="#mutex" class="headerlink" title="mutex"></a>mutex</h1><pre><code>type Mutex struct &#123;    state int32    sema uint32&#125;</code></pre>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;mutex&quot;&gt;&lt;a href=&quot;#mutex&quot; class=&quot;headerlink&quot; title=&quot;mutex&quot;&gt;&lt;/a&gt;mutex&lt;/h1&gt;&lt;pre&gt;&lt;code&gt;type Mutex struct &amp;#123;
+    state int32
+    sema </summary>
+      
+    
+    
+    
+    <category term="golang" scheme="http://example.com/categories/golang/"/>
+    
+    
+    <category term="golang" scheme="http://example.com/tags/golang/"/>
+    
+    <category term="锁" scheme="http://example.com/tags/%E9%94%81/"/>
+    
+    <category term="mutex" scheme="http://example.com/tags/mutex/"/>
+    
+  </entry>
   
   <entry>
     <title>聊聊Golang之context</title>

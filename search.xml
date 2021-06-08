@@ -4,6 +4,62 @@
   
     
     <entry>
+      <title>vsCode 添加至右键</title>
+      <link href="2021/06/08/vsCode-%E6%B7%BB%E5%8A%A0%E8%87%B3%E5%8F%B3%E9%94%AE/"/>
+      <url>2021/06/08/vsCode-%E6%B7%BB%E5%8A%A0%E8%87%B3%E5%8F%B3%E9%94%AE/</url>
+      
+        <content type="html"><![CDATA[<ul><li>将下列配置粘到一个新建的 <code>xxx.reg</code> 文件中<br>```<br>Windows Registry Editor Version 5.00</li></ul><p>[HKEY_CLASSES_ROOT*\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p><p>[HKEY_CLASSES_ROOT*\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%1&quot;“</p><p>Windows Registry Editor Version 5.00</p><p>[HKEY_CLASSES_ROOT\Directory\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p><p>[HKEY_CLASSES_ROOT\Directory\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%V&quot;“</p><p>Windows Registry Editor Version 5.00</p><p>[HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p><p>[HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%V&quot;“</p><p>```</p><p>注意路径和实际是否一致。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 工具 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> vsCode </tag>
+            
+            <tag> windows </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>mutex 互斥锁</title>
+      <link href="2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/"/>
+      <url>2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/</url>
+      
+        <content type="html"><![CDATA[<h1 id="mutex"><a href="#mutex" class="headerlink" title="mutex"></a>mutex</h1><pre><code>type Mutex struct &#123;    state int32    sema uint32&#125;</code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> golang </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> golang </tag>
+            
+            <tag> 锁 </tag>
+            
+            <tag> mutex </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>聊聊Golang之context</title>
       <link href="2021/06/05/%E8%81%8A%E8%81%8AGolang%E4%B9%8Bcontext/"/>
       <url>2021/06/05/%E8%81%8A%E8%81%8AGolang%E4%B9%8Bcontext/</url>

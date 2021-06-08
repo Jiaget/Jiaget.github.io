@@ -217,6 +217,138 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/06/08/vsCode-%E6%B7%BB%E5%8A%A0%E8%87%B3%E5%8F%B3%E9%94%AE/"
+                            aria-label=": vsCode 添加至右键"
+                        >
+                            vsCode 添加至右键
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-08T09:44:07+08:00">
+	
+		    6月 08, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <ul>
+<li>将下列配置粘到一个新建的 <code>xxx.reg</code> 文件中<br>```<br>Windows Registry Editor Version 5.00</li>
+</ul>
+<p>[HKEY_CLASSES_ROOT*\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p>
+<p>[HKEY_CLASSES_ROOT*\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%1&quot;“</p>
+<p>Windows Registry Editor Version 5.00</p>
+<p>[HKEY_CLASSES_ROOT\Directory\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p>
+<p>[HKEY_CLASSES_ROOT\Directory\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%V&quot;“</p>
+<p>Windows Registry Editor Version 5.00</p>
+<p>[HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p>
+<p>[HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%V&quot;“</p>
+<p>```</p>
+<p>注意路径和实际是否一致。</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/08/vsCode-%E6%B7%BB%E5%8A%A0%E8%87%B3%E5%8F%B3%E9%94%AE/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/"
+                            aria-label=": mutex 互斥锁"
+                        >
+                            mutex 互斥锁
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-07T23:16:47+08:00">
+	
+		    6月 07, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/golang/">golang</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="mutex"><a href="#mutex" class="headerlink" title="mutex"></a>mutex</h1><pre><code>type Mutex struct &#123;
+    state int32
+    sema uint32
+&#125;
+</code></pre>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/06/05/%E8%81%8A%E8%81%8AGolang%E4%B9%8Bcontext/"
                             aria-label=": 聊聊Golang之context"
                         >
@@ -1077,422 +1209,6 @@ if h.B &gt; 31-bucketCntBits &#123;
                         <p>
                             <a
                                 href="/2021/05/30/kafka/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                评论和共享
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/05/30/GC/"
-                            aria-label=": GC"
-                        >
-                            GC
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-05-30T18:58:28+08:00">
-	
-		    5月 30, 2021
-    	
-    </time>
-    
-        <span>发布在 </span>
-        
-    <a class="category-link" href="/categories/golang/">golang</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="golang-的GC"><a href="#golang-的GC" class="headerlink" title="golang 的GC"></a>golang 的GC</h1><ul>
-<li>垃圾回收</li>
-<li>内存管理</li>
-<li>自动释放</li>
-<li>三色标记法</li>
-<li>STW(stop the world)</li>
-</ul>
-<h2 id="（一）-标记清除法-golang-v1-3"><a href="#（一）-标记清除法-golang-v1-3" class="headerlink" title="（一） 标记清除法 (golang v1.3)"></a>（一） 标记清除法 (golang v1.3)</h2><ol>
-<li>STW，暂停程序业务逻辑， 找到可达对象和不可达对象</li>
-<li>标记可达对象</li>
-<li>清除不可达对象</li>
-<li>程序恢复</li>
-</ol>
-<p>循环以上过程，直到程序生命周期结束</p>
-<p><img src="https://i.loli.net/2021/05/30/pWJZUxQDvF6Vsct.png" alt="markAndSweep.png"></p>
-<ul>
-<li>缺点<ul>
-<li>STW 暂停程序，出现卡顿 (严重)<ul>
-<li>后期将 <code>sweep清除</code> 移出STW 暂停范围</li>
-</ul>
-</li>
-<li>需要扫描整个heap</li>
-<li>清除数据会产生heap碎片。</li>
-</ul>
-</li>
-</ul>
-<h2 id="（二）三色标记（golang-v1-4）"><a href="#（二）三色标记（golang-v1-4）" class="headerlink" title="（二）三色标记（golang v1.4）"></a>（二）三色标记（golang v1.4）</h2><ol>
-<li>程序开始创建的对象均标记为白色。</li>
-<li>每次GC开始时，从根节点遍历所有对象，把遍历到的对象从白色集合转移到灰色集合。</li>
-<li>遍历灰色集合，将灰色集合中的对象所引用的对象从白色集合放入灰色集合，并将此灰色对象移入黑色对象。</li>
-<li>重复上述步骤，直至灰色列表中没有任何对象。</li>
-<li>回收所有的白色列表中的对象。</li>
-</ol>
-<ul>
-<li><p>三色标记法会出现的严重问题</p>
-<ul>
-<li><p>条件1 黑色对象引用了一个白色对象。</p>
-</li>
-<li><p>条件2 同时，该白色对象原本可由其他灰色对象引用，但该引用遭到了破坏。</p>
-</li>
-<li><p>满足以上两个条件，会导致一个不是垃圾的白色对象，因为被黑色对象引用，无法转成灰色对象，最后被回收，这就叫做 <code>对象丢失</code></p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="三色不变式"><a href="#三色不变式" class="headerlink" title="三色不变式"></a>三色不变式</h3><ul>
-<li>强三色不变式<ul>
-<li>强制性不允许黑色对象引用白色对象 （ 破坏条件1）</li>
-</ul>
-</li>
-<li>弱三色不变式<ul>
-<li>黑色可以引用白色对象，但该白色对象必须存在一个灰色对象引用它(或该白色对象必须是可达对象) （破坏条件2</li>
-</ul>
-</li>
-</ul>
-<h2 id="三-屏障机制"><a href="#三-屏障机制" class="headerlink" title="(三) 屏障机制"></a>(三) 屏障机制</h2><h3 id="什么叫屏障"><a href="#什么叫屏障" class="headerlink" title="什么叫屏障"></a>什么叫屏障</h3><p>屏障是一个额外的判断机制</p>
-<p>类似下面三种概念</p>
-<ul>
-<li><p>Hook</p>
-</li>
-<li><p>回调</p>
-</li>
-<li><p>handler</p>
-</li>
-<li><p>插入机制</p>
-<ul>
-<li>对象被引用时触发的机制</li>
-</ul>
-</li>
-<li><p>删除屏障</p>
-<ul>
-<li>对象被删除时触发的机制</li>
-</ul>
-</li>
-</ul>
-<h3 id="插入屏障-（不用于栈）"><a href="#插入屏障-（不用于栈）" class="headerlink" title="插入屏障 （不用于栈）"></a>插入屏障 （不用于栈）</h3><ul>
-<li>在A对象引用B对象时，B对象被标记为灰色。（满足：强三色不变式）</li>
-<li>不足： 因为不希望插入写屏障影响栈空间的效率，它不会应用于栈空间。因此，为了避免栈空间出现 <code>对象丢失</code>，我们在结束时（回收对象前）STW并扫描栈空间，这需要花费10 - 100 ms</li>
-</ul>
-<h3 id="删除屏障"><a href="#删除屏障" class="headerlink" title="删除屏障"></a>删除屏障</h3><ul>
-<li>被删除的对象，如果自身为灰色或者白色，都标记为灰色。<br>（换句话说，当要断开一个灰色对象引用一个白色对象之间的通路时，将该白色对象变灰，避免当其他黑色对象引用这个白色对象时，因为灰色对象的断开导致这个白色对象 <code>对象丢失</code>）</li>
-<li>不足：<ul>
-<li>回收精度低，当灰色对象和白色对象断开引用时，该应该被删除的白色对象在这轮GC时最终被标记为黑色，活过了这轮GC</li>
-</ul>
-</li>
-</ul>
-<h3 id="混合写屏障"><a href="#混合写屏障" class="headerlink" title="混合写屏障"></a>混合写屏障</h3><ul>
-<li>GC开始时，栈上的对象全部扫描并标记为黑色（解决了插入屏障栈空间二次扫描和STW问题） <code>这会不会导致内存泄露？</code></li>
-<li>GC期间，栈上创建的新对象均为黑色的。</li>
-<li>[堆] 被删除的对象被标记为灰色</li>
-<li>[堆] 被添加的对象标记为灰色</li>
-</ul>
-<p>这是一个变形的弱三色不变式，结合了插入、删除写屏障两者的优点</p>
-<h1 id="场景分析"><a href="#场景分析" class="headerlink" title="场景分析"></a>场景分析</h1><h2 id="场景1"><a href="#场景1" class="headerlink" title="场景1"></a>场景1</h2><p>一个对象被堆对象删除，并成为了栈对象的下游对象。</p>
-<p>堆中由于开启了混合写屏障，我们要删除该对象，需要先扫描到它的上游对象，并将上游对象标灰。删除该对象后，该对象会变灰，之后又被栈对象引用，成为一个栈对象。</p>
-<h2 id="场景2"><a href="#场景2" class="headerlink" title="场景2"></a>场景2</h2><p>对象被栈对象删除引用， 并成为另一个栈对象下游</p>
-<p>栈空间不启用屏障，该场景的对象一直都是黑色对象</p>
-<h2 id="场景3"><a href="#场景3" class="headerlink" title="场景3"></a>场景3</h2><p>对象被堆对象删除引用， 并成为另一个堆对象下游</p>
-<p>一个黑色堆对象，引用一个灰色堆对象A的下游白对象，白对象B因为写屏障被标记灰色，同时它的上游对象A断开和它的引用。</p>
-<h2 id="场景4"><a href="#场景4" class="headerlink" title="场景4"></a>场景4</h2><p>一个对象从栈对象被删除引用，并成为了另一个堆对象的下游</p>
-<p>该对象仍然为黑，另一个堆对象的原下游对象A本来还是白色的，由于屏障机制，变成灰色，如果该对象成了游离对象，它只会在下轮被回收。</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/05/30/GC/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                评论和共享
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/05/29/Linux-%E7%9A%84%E7%BD%91%E7%BB%9CI-O%E5%A4%8D%E7%94%A8%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/"
-                            aria-label=": Linux 的网络I/O复用并发模型"
-                        >
-                            Linux 的网络I/O复用并发模型
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-05-29T22:51:02+08:00">
-	
-		    5月 29, 2021
-    	
-    </time>
-    
-        <span>发布在 </span>
-        
-    <a class="category-link" href="/categories/linux/">linux</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="Linux-中网络I-O复用并发模型"><a href="#Linux-中网络I-O复用并发模型" class="headerlink" title="Linux 中网络I/O复用并发模型"></a>Linux 中网络I/O复用并发模型</h1><h2 id="什么是阻塞，非阻塞，IO多路复用？"><a href="#什么是阻塞，非阻塞，IO多路复用？" class="headerlink" title="什么是阻塞，非阻塞，IO多路复用？"></a>什么是阻塞，非阻塞，IO多路复用？</h2><ul>
-<li><p>流</p>
-<ul>
-<li>可进行I/O操作的内核对象<ul>
-<li>文字</li>
-<li>管道</li>
-<li>套接字</li>
-</ul>
-</li>
-<li>流的入口：文件描述符(fd)</li>
-</ul>
-</li>
-<li><p>阻塞等待<br>不占用CPU时间片</p>
-<ul>
-<li>缺点<ul>
-<li>不能处理多个I/O请求的问题</li>
-<li>同一个阻塞，同一时间只能处理一个流的阻塞监听</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>非阻塞（忙轮询）<br>占用资源不断去查看资源锁有没有释放</p>
-</li>
-<li><p>多路IO复用<br>既能阻塞等待，不浪费资源，又能同一时刻监听多个IO请求的状态</p>
-</li>
-</ul>
-<h2 id="IO复用解决的问题"><a href="#IO复用解决的问题" class="headerlink" title="IO复用解决的问题"></a>IO复用解决的问题</h2><p>如何解决大量IO读写问题</p>
-<ul>
-<li>忙轮询</li>
-</ul>
-<pre><code>while true &#123;
-    for i in 流[] &#123;
-        if i has 数据 &#123;
-            读 或者 其他处理
-        &#125;
-    &#125;
-&#125;
-</code></pre>
-<p>同时和多个流访问。</p>
-<ul>
-<li>select</li>
-</ul>
-<pre><code>while true &#123;
-    select(流[]); //阻塞
-
-  //有消息抵达
-    for i in 流[] &#123;
-        if i has 数据 &#123;
-            读 或者 其他处理
-        &#125;
-    &#125;
-&#125;
-</code></pre>
-<p>select负责接收IO，但不能精准直到哪些IO可用，还需要遍历。监听的IO有限，一般1024个，与平台无关</p>
-<ul>
-<li>epoll</li>
-</ul>
-<pre><code>while true &#123;
-    可处理的流[] = epoll_wait(epoll_fd); //阻塞
-
-  //有消息抵达，全部放在 “可处理的流[]”中
-    for i in 可处理的流[] &#123;
-        读 或者 其他处理
-    &#125;
-&#125;
-</code></pre>
-<p>类似select,但能返回所有可以处理的流，不必再去遍历确认</p>
-<h2 id="epoll是什么"><a href="#epoll是什么" class="headerlink" title="epoll是什么"></a>epoll是什么</h2><ul>
-<li>linux独有</li>
-<li>一种I/O 多路复用技术</li>
-<li>只关心活跃的链接，无需遍历所有的描述符集合。</li>
-<li>能处理大量链接请求（系统可以打开的文件数目 <code>cat /proc/sys/fs/file-max</code>）</li>
-</ul>
-<h2 id="API"><a href="#API" class="headerlink" title="API"></a>API</h2><ol>
-<li>创建</li>
-</ol>
-<pre><code>/** 
- * @param size 告诉内核监听的数目 
- * 
- * @returns 返回一个epoll句柄（即一个文件描述符） 
- */
-int epoll_create(int size);
-</code></pre>
-<ol start="2">
-<li>控制</li>
-</ol>
-<pre><code>/**
-* @param epfd 用epoll_create所创建的epoll句柄
-* @param op 表示对epoll监控描述符控制的动作
-*
-* EPOLL_CTL_ADD(注册新的fd到epfd)
-* EPOLL_CTL_MOD(修改已经注册的fd的监听事件)
-* EPOLL_CTL_DEL(epfd删除一个fd)
-*
-* @param fd 需要监听的文件描述符
-* @param event 告诉内核需要监听的事件
-*
-* @returns 成功返回0，失败返回-1, errno查看错误信息
-*/
-int epoll_ctl(int epfd, int op, int fd,
-struct epoll_event *event);
-
-
-struct epoll_event &#123;
-    __uint32_t events; /* epoll 事件 */
-    epoll_data_t data; /* 用户传递的数据 */
-&#125;
-
-/*
- * events : &#123;EPOLLIN, EPOLLOUT, EPOLLPRI,
-                         EPOLLHUP, EPOLLET, EPOLLONESHOT&#125;
- */
-typedef union epoll_data &#123;
-    void *ptr;
-    int fd;
-    uint32_t u32;
-    uint64_t u64;
-&#125; epoll_data_t;
-</code></pre>
-<ol start="3">
-<li>等待</li>
-</ol>
-<pre><code>/**
-*
-* @param epfd 用epoll_create所创建的epoll句柄
-* @param event 从内核得到的事件集合
-* @param maxevents 告知内核这个events有多大,
-* 注意: 值 不能大于创建epoll_create()时的size.
-* @param timeout 超时时间
-* -1: 永久阻塞
-* 0: 立即返回，非阻塞
-* &gt;0: 指定微秒
-*
-* @returns 成功: 有多少文件描述符就绪,时间到时返回0
-* 失败: -1, errno 查看错误
-*/
-int epoll_wait(int epfd, struct epoll_event *event,
-                             int maxevents, int timeout);
-</code></pre>
-<h3 id="epoll-基本编程架构"><a href="#epoll-基本编程架构" class="headerlink" title="epoll 基本编程架构"></a>epoll 基本编程架构</h3><pre><code>int epfd = epoll_crete(1000);
-
-//将 listen_fd 添加进 epoll 中
-epoll_ctl(epfd, EPOLL_CTL_ADD, listen_fd,&amp;listen_event);
-
-while (1) &#123;
-    //阻塞等待 epoll 中 的fd 触发
-    int active_cnt = epoll_wait(epfd, events, 1000, -1);
-
-    for (i = 0 ; i &lt; active_cnt; i++) &#123;
-        if (evnets[i].data.fd == listen_fd) &#123;
-            //accept. 并且将新accept 的fd 加进epoll中.
-        &#125;
-        else if (events[i].events &amp; EPOLLIN) &#123;
-            //对此fd 进行读操作
-        &#125;
-        else if (events[i].events &amp; EPOLLOUT) &#123;
-            //对此fd 进行写操作
-        &#125;
-    &#125;
-&#125;
-</code></pre>
-<h2 id="常见模型"><a href="#常见模型" class="headerlink" title="常见模型"></a>常见模型</h2><h3 id="单线程Accept"><a href="#单线程Accept" class="headerlink" title="单线程Accept"></a>单线程Accept</h3><p><img src="https://i.loli.net/2021/05/29/QHCbulfpiFw8Yx5.png" alt="single-accept.png"></p>
-<ul>
-<li>主线程的 <code>Accept（ListenFd）</code> 会阻塞主线程</li>
-<li>连接成功后，会在服务端生成一个连接的套接字</li>
-<li>一次只能形成一个连接，另一个客户端如果尝试连接，会阻塞</li>
-<li>处理完当前客户端，并关闭套接字文件，再去处理下一个客户端</li>
-</ul>
-<h3 id="单线程Accept-多线程读写业务-无I-O复用"><a href="#单线程Accept-多线程读写业务-无I-O复用" class="headerlink" title="单线程Accept + 多线程读写业务 (无I/O复用)"></a>单线程Accept + 多线程读写业务 (无I/O复用)</h3><p><img src="https://i.loli.net/2021/05/29/xTDhEHmgX3cYdvS.png" alt="single_multiple-thread.png"></p>
-<ul>
-<li><code>Accept(ListenFd)</code> 监听客户端请求，阻塞主线程</li>
-<li>接收客户端请求后，开辟一个新线程，进行读写业务。</li>
-<li>主线程继续监听，能处理其他客户端的请求</li>
-</ul>
-<p>这个模型虽然支持了并发，但是：</p>
-<ul>
-<li>高并发情况下，多线程加重服务器负担</li>
-<li>长连接的场景，客户端没有读写业务，但它不关闭，就需要不断进行心跳检测，占用了资源。</li>
-</ul>
-<h3 id="单线程多路I-O复用"><a href="#单线程多路I-O复用" class="headerlink" title="单线程多路I/O复用"></a>单线程多路I/O复用</h3><p><img src="https://i.loli.net/2021/05/29/jR7IJpbGqB58x6s.png" alt="single-reuseIO.png"></p>
-<ul>
-<li>主线程创建 <code>listenFd</code>， 采用多路I/O服用机制，进行IO状态阻塞监控。当client1发送请求，检测到了 <code>listenFd</code> 触发读时间，运行 accept 建立连接，并将 <code>connFd1</code>加入监听集合。</li>
-<li>client1进行读写请求时，多路IO复用机制的监听阻塞释放，并触发套接字读写事件</li>
-<li>client1触发的读写业务会使主线程阻塞，无法处理新的客户端的请求。</li>
-</ul>
-<p>该模型可以监听多个客户端的读写状态。且发生阻塞，处于非忙轮询的状态，不浪费CPU资源</p>
-<p><strong>缺点</strong>：</p>
-<ul>
-<li>能同时监听，但不能同时处理多个客户端的读写请求</li>
-<li>不支持高并发场景</li>
-</ul>
-<h2 id="单线程多路I-O复用-多线程业务工作池"><a href="#单线程多路I-O复用-多线程业务工作池" class="headerlink" title="单线程多路I/O复用 + 多线程业务工作池"></a>单线程多路I/O复用 + 多线程业务工作池</h2><p>该场景使用比较少</p>
-<p><img src="https://i.loli.net/2021/05/29/yLX8YB1SvKU9s5M.png" alt="single-reuse-thread.png"></p>
-<ul>
-<li>主线程采用多路I/O复用机制监听连接请求。当监听到客户端连接请求后，处理连接请求，并将生成的<code>connFd1</code>加入到监听集合中</li>
-<li>当监听到读写事件，则进行读写消息的处理</li>
-<li>主线程处理读写消息，将业务逻辑交给工作线程池处理。工作线程池在server启动前开启的一定数量的线程。他们只处理逻辑业务，不处理套接字读写操作。</li>
-<li>工作线程池处理完业务，再触发<code>connFd1</code>的写事件，将回执消息返回给对方</li>
-</ul>
-<p>优点：<br>    - 将业务处理分离出来，缩短客户端的等待时间。<br>    - 能并发处理客户端业务。</p>
-<p>缺点：<br>    - 读写处理仍然需要单独处理。(排队)<br>    - 业务处理后的结果，也需要按顺序返回给客户端。（排队）</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/05/29/Linux-%E7%9A%84%E7%BD%91%E7%BB%9CI-O%E5%A4%8D%E7%94%A8%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

@@ -217,6 +217,76 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/06/08/vsCode-%E6%B7%BB%E5%8A%A0%E8%87%B3%E5%8F%B3%E9%94%AE/"
+                            aria-label=": vsCode 添加至右键"
+                        >
+                            vsCode 添加至右键
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-08T09:44:07+08:00">
+	
+		    6月 08, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <ul>
+<li>将下列配置粘到一个新建的 <code>xxx.reg</code> 文件中<br>```<br>Windows Registry Editor Version 5.00</li>
+</ul>
+<p>[HKEY_CLASSES_ROOT*\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p>
+<p>[HKEY_CLASSES_ROOT*\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%1&quot;“</p>
+<p>Windows Registry Editor Version 5.00</p>
+<p>[HKEY_CLASSES_ROOT\Directory\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p>
+<p>[HKEY_CLASSES_ROOT\Directory\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%V&quot;“</p>
+<p>Windows Registry Editor Version 5.00</p>
+<p>[HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode]<br>@=”Open with Code”<br>“Icon”=”C:\Program Files\Microsoft VS Code\Code.exe”</p>
+<p>[HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode\command]<br>@=”&quot;C:\Program Files\Microsoft VS Code\Code.exe&quot; &quot;%V&quot;“</p>
+<p>```</p>
+<p>注意路径和实际是否一致。</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/08/vsCode-%E6%B7%BB%E5%8A%A0%E8%87%B3%E5%8F%B3%E9%94%AE/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/05/28/first-blood/"
                             aria-label=": first blood"
                         >
