@@ -235,7 +235,121 @@
             </div>
             
                 <div class="postShorten-content">
-                    
+                    <h1 id="先讲一讲Golang的方法"><a href="#先讲一讲Golang的方法" class="headerlink" title="先讲一讲Golang的方法"></a>先讲一讲Golang的方法</h1><pre><code>type T struct &#123;
+    name string
+&#125;
+func (t T) F1() &#123;
+    fmt.Println(t.name)
+&#125;
+func main()&#123;
+    t := T&#123;name: &quot;a&quot;&#125;
+    t.F1()
+&#125;
+</code></pre>
+<p>像上面这段代码，我们定义了一个结构体，并给这个结构体关联了一个方法， 并使用 <code>t.F1()</code>语句调用了这个方法。</p>
+<p>方法的本质是一个函数，只是这个函数在被调用时，接收者会作为第一个参数传入。（<code>t.F1()</code> 的本质是 <code>T.F1(t)</code>。 前者的写法只是语法糖）</p>
+<p>在编译阶段，我们可以获取变量，类型，方法等参数。</p>
+<p>到了执行阶段，像 <code>反射</code>， <code>接口</code>， <code>类型断言</code> 这类语言特性/ 机制，我们也需要动态获取数据类型信息。</p>
+<h1 id="我们先看看Golang有哪些类型？"><a href="#我们先看看Golang有哪些类型？" class="headerlink" title="我们先看看Golang有哪些类型？"></a>我们先看看Golang有哪些类型？</h1><h2 id="内置类型-build-in"><a href="#内置类型-build-in" class="headerlink" title="内置类型(build-in)"></a>内置类型(build-in)</h2><pre><code>int8
+int16
+int32
+int64
+int
+byte
+string
+slice
+func
+map
+</code></pre>
+<h2 id="自定义类型"><a href="#自定义类型" class="headerlink" title="自定义类型"></a>自定义类型</h2><pre><code>type typ int
+
+type T struct &#123;
+    name string
+&#125;
+
+type I interface&#123;
+    Name() string
+&#125;
+</code></pre>
+<p>在 Golang 官方定义中， 内置类型不能定义方法，接口类型是方法的无效接收者。</p>
+<p>换句话说，我们只能给 <code>type T int</code> 和 <code>type T struct&#123;&#125;</code> 定义方法。</p>
+<h2 id="类型元数据"><a href="#类型元数据" class="headerlink" title="类型元数据"></a>类型元数据</h2><p>无论是内置类型还是自定义类型，每种类型都有全局唯一的 <code>类型元数据</code>。</p>
+<p>类型元数据记录了如下信息:(rutime/type.go)</p>
+<pre><code>type _type struct &#123;
+    size        uintptr
+    hash        uint32
+    tflag       tflag
+    align       uint8
+    fieldAlign  uint8
+    kind        uint8
+    ....
+&#125;
+</code></pre>
+<p>有些类型元数据可能还需要对信息进行扩展，比如切片类型</p>
+<pre><code>type slicetype struct &#123;
+    typ     _type
+    elem    *_type
+&#125;
+</code></pre>
+<p>因为切片类型可以是整型切片，也可以是字符串切片，因此，它还需要一个elem字段来描述储存元素的类型。比如整形切片，它的类型元数据的elem字段需要指向整形的类型元数据。</p>
+<p>对于自定义类型，它们可能还需要更多的描述，这些描述被储存在 <code>uncommontype</code> 结构体中。</p>
+<pre><code>type uncommontype struct &#123;
+    pkgpath nameOff
+    mcount  uint16 // 方法数
+    xcount  uint16 // exported方法数
+    moff    uint32 // 相对于方法元数据数据的偏移值
+    _       uint32 // unused
+&#125;
+</code></pre>
+<h2 id="类型的两种写法区别"><a href="#类型的两种写法区别" class="headerlink" title="类型的两种写法区别"></a>类型的两种写法区别</h2><ul>
+<li><code>type MyType1 = int32</code><ul>
+<li><code>Mytype1</code> 和 <code>int32</code> 会被关联到同一个类型元数据，比如 <code>rune</code> 和 <code>int32</code> 就是这样的关系。</li>
+</ul>
+</li>
+<li><code>type MyType2 int32</code><ul>
+<li><code>MyType2</code> 和 <code>int32</code> 会各自拥有自己的类型元数据。</li>
+</ul>
+</li>
+</ul>
+<h1 id="接口类型"><a href="#接口类型" class="headerlink" title="接口类型"></a>接口类型</h1><h2 id="空接口类型"><a href="#空接口类型" class="headerlink" title="空接口类型"></a>空接口类型</h2><p>空接口类型可以接收任意类型的数据，也就是说它需要记录接收数据的类型和数据的地址。</p>
+<pre><code>type eface struct &#123;
+    _type *_type            // 动态类型
+    data  unsafe.Pointer    // 动态值
+&#125;
+</code></pre>
+<p>下图展示了一个空接口变量赋值后，其元数据的变化。</p>
+<p><img src="https://i.loli.net/2021/06/09/93lIxa4JU6GHAZj.png" alt="interface.png"></p>
+<h2 id="非空接口类型"><a href="#非空接口类型" class="headerlink" title="非空接口类型"></a>非空接口类型</h2><p>非空接口类型即拥有一个方法列表的类型。一个变量要想赋值给一个非空接口类型，它需要实现这个接口所有的方法。</p>
+<pre><code>type iface struct &#123;
+    tab  *itab
+    data unsafe.Pointer // 指向接口的动态值
+&#125;
+</code></pre>
+<p><img src="https://i.loli.net/2021/06/09/NtDmKZUFSEWP2i3.png" alt="non-nil-interface.png"></p>
+<p>非空接口的 </p>
+<ul>
+<li><code>tab.inter</code> 指向了接口类型的元数据，其中的 <code>mhdr</code> 是接口的方法列表。</li>
+<li><code>_type</code> 是接口的动态类型</li>
+<li><code>hash</code> 是类型哈希值，用于接口类型的快速比较</li>
+<li><code>fun</code> 是方法地址数组</li>
+</ul>
+<p>itab 结构体中的值，在它被确定后就不会发生改变，所以它是可复用的。</p>
+<p><img src="https://i.loli.net/2021/06/09/7HebRa1sKAwzqyk.png" alt="itab.png"></p>
+<p>Golang 会将接口类型和动态类型作为一个组合key， itab结构体指针为value, 形成一张轻量级的哈希表。当我们需要一个itab时，会先在哈希表中查找，如果找到了，直接复用，否则会创建一个新的itab，添加到这张哈希表中。</p>
+<h1 id="类型断言"><a href="#类型断言" class="headerlink" title="类型断言"></a>类型断言</h1><p>像上面提到的 <code>空接口</code> 和 <code>非空接口</code> ，被叫做 <code>抽象类型</code>; 与之对应的 int, string, slice 等类型就是具体类型。</p>
+<p>类型断言是作用在抽象类型之上的， 而断言的目标类型，可以是具体类型，也可以是非空接口。两两组合，可以得到4种断言。</p>
+<ul>
+<li>空接口.(具体类型)</li>
+<li>非空接口.(具体类型)</li>
+</ul>
+<h2 id="空接口-具体类型"><a href="#空接口-具体类型" class="headerlink" title="空接口.(具体类型)"></a>空接口.(具体类型)</h2><p><code>r, ok := interface.(*type)</code></p>
+<p>对于这种类型断言，我们只需要检查 interface 元数据中的 <code>_type</code> 字段是否指向 断言的<code>*type</code>， 是则 Ok 为 true, 否则 ok 为 false，且 r 为 nil</p>
+<h2 id="非空接口-具体类型"><a href="#非空接口-具体类型" class="headerlink" title="非空接口.(具体类型)"></a>非空接口.(具体类型)</h2><p>与空接口不同的是，这种断言方法只需检查 itab 是否指向目标类型结构体。</p>
+<h2 id="空接口-非空接口"><a href="#空接口-非空接口" class="headerlink" title="空接口.(非空接口)"></a>空接口.(非空接口)</h2><p>在我们检查接口类型元数据时， 我们需要比对 空接口的方法元数据数组和目标类型的方法列表是否相同。当然我们不通过空接口的类型元数据直接比对，还是通过itab缓存。但是通过itab缓存时，虽然查到了目标itab，但还是需要比对itab中的方法 <code>f[0]</code> 是否为 0。 这是因为，在某次类型断言失败时，itab缓存还是会添加itab到哈希表中，只是会将其方法列表置0，代表断言失败。</p>
+<h2 id="非空接口-非空接口"><a href="#非空接口-非空接口" class="headerlink" title="非空接口.(非空接口)"></a>非空接口.(非空接口)</h2><p>同样，从itab缓存查itab结构体指针，并去查f[0]是否为0.</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>Golang 的类型断言的关键在于明确接口动态类型，与对应类型实现了哪些方法。</p>
+<p>这些明确内容的关键点在于 <code>类型元数据</code> <code>空接口</code> <code>非空接口</code></p>
+
                     
                         
 
