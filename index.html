@@ -216,6 +216,57 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/06/09/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8Golang%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%B3%BB%E7%BB%9F/"
+                            aria-label=": 深入探讨Golang的类型系统"
+                        >
+                            深入探讨Golang的类型系统
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-09T19:33:42+08:00">
+	
+		    6月 09, 2021
+    	
+    </time>
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/09/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8Golang%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%B3%BB%E7%BB%9F/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/06/08/vsCode-%E6%B7%BB%E5%8A%A0%E8%87%B3%E5%8F%B3%E9%94%AE/"
                             aria-label=": vsCode 添加至右键"
                         >
@@ -335,6 +386,43 @@ Windows Registry Editor Version 5.00
     sema uint32
 &#125;
 </code></pre>
+<ul>
+<li>state:<ul>
+<li>代表锁的状态</li>
+<li>mutex的加锁与解锁都是通过 <code>atomic</code> 包提供的函数原子性地操作该字段实现的</li>
+</ul>
+</li>
+<li>sema:<ul>
+<li>一个信号量</li>
+<li>用作等待队列</li>
+</ul>
+</li>
+</ul>
+<h2 id="mutex-的-正常模式"><a href="#mutex-的-正常模式" class="headerlink" title="mutex 的 正常模式"></a>mutex 的 正常模式</h2><p>一个goroutine 会先自旋几次，尝试获得锁，如果仍然没有获得锁，则通过信号量 <code>sema</code> 排队等待（进入等待队列）。</p>
+<p>但是当锁被释放时，队首的goroutine也不会立即获得锁，而是与其他后来的自旋的goroutine竞争。一般情况下，处于自旋状态的goroutine会更先抢到锁，因为它们一直处于运行状态，而队列里出来的goroutine由于刚唤醒，还会因为需要分配cpu资源而需要消耗一点时间。这种情况下，为了保证先进先出，即使竞争失败了，仍然插入队列头部而不是尾部。</p>
+<h2 id="mutex的饥饿模式"><a href="#mutex的饥饿模式" class="headerlink" title="mutex的饥饿模式"></a>mutex的饥饿模式</h2><p>当一个goroutine本次加锁等待时间超过1ms后，它会将mutex从 <code>正常模式</code>切换成 <code>饥饿模式</code> 。</p>
+<p>在饥饿模式下，锁一旦被释放，就会直接传递给等待队列的头部goroutine。而如果有一些后来的goroutine需要这个锁，它们不会像正常模式一样自旋，而是直接被加入到队列尾部。</p>
+<p><code>饥饿模式</code> 也可以再切换回正常模式：</p>
+<ul>
+<li>当一个goroutine获得锁，且等待时间 <code>&lt; 1ms</code>时。</li>
+<li>当等待队列为空时 (即等待队列最后一个goroutine获得锁。)</li>
+</ul>
+<h2 id="两者对比"><a href="#两者对比" class="headerlink" title="两者对比"></a>两者对比</h2><ul>
+<li><p>正常模式</p>
+<ul>
+<li>这是一个自旋和排队共存的模式</li>
+<li>[优点] 由于自旋可以在无需唤醒的状态下直接获得锁，因此，正常模式可以保证Mutex有更好的。</li>
+<li>[缺点] 但是, 这个模式可能导致队列尾端的goroutine一直抢不到锁（尾端延迟）</li>
+</ul>
+</li>
+<li><p>饥饿模式</p>
+<ul>
+<li>这个模式会强制所有goroutine排队</li>
+<li>它在牺牲一定性能的情况下， 解决正常模式的尾端延迟问题</li>
+</ul>
+</li>
+</ul>
+<p>两种模式之间的切换，既保证锁的效率，又能顾及公平性，不会导致某个goroutine过长时间的等待。</p>
 
                     
                         
@@ -1096,137 +1184,6 @@ if h.B &gt; 31-bucketCntBits &#123;
                         <p>
                             <a
                                 href="/2021/06/01/Redis/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                评论和共享
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/05/30/kafka/"
-                            aria-label=": kafka"
-                        >
-                            kafka
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-05-30T20:10:09+08:00">
-	
-		    5月 30, 2021
-    	
-    </time>
-    
-        <span>发布在 </span>
-        
-    <a class="category-link" href="/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="什么是kafks"><a href="#什么是kafks" class="headerlink" title="什么是kafks"></a>什么是kafks</h1><p>kafka是一个分布式日志系统（也可以当作MQ系统）。</p>
-<p>常用于：（日志收集系统，消息系统）</p>
-<ul>
-<li>web/nginx日志</li>
-<li>访问日志</li>
-<li>消息服务</li>
-</ul>
-<p>它具备的属性：</p>
-<ul>
-<li>分布式</li>
-<li>分区</li>
-<li>多副本</li>
-<li>多订阅者</li>
-</ul>
-<p>它设计目标是：</p>
-<ul>
-<li>高效率：<ul>
-<li>以时间复杂度为O(1)的方式提供消息持久化的能力， 即使TB级别的数据也能保证常数时间复杂度的访问性能。</li>
-</ul>
-</li>
-<li>高吞吐：<ul>
-<li>在廉价的商用机器上也能保证100k条/s的消息传输。</li>
-</ul>
-</li>
-<li>分布式：<ul>
-<li>支持Kafka Server 之间的消息分区，分布式消费。同时保证每个partition内消息顺序传输</li>
-</ul>
-</li>
-<li>同时支持离线数据处理和实时数据处理</li>
-<li>Scale out: 支持在线的水平拓展</li>
-</ul>
-<h2 id="所谓消息系统"><a href="#所谓消息系统" class="headerlink" title="所谓消息系统"></a>所谓消息系统</h2><p>消息系统负责将数据从一个应用传递到另外一个应用。应用不需要关心消息的传递方式，只需要关心消息的生产与消费。</p>
-<p>分布式消息传递，基于可靠的消息队列，在客户端和消息系统之间异步传递消息。主流的消息传递模式有：</p>
-<ul>
-<li>点对点</li>
-<li>发布-订阅 （观察者模式）</li>
-</ul>
-<p>Kafka使用的是后者。</p>
-<h3 id="点对点"><a href="#点对点" class="headerlink" title="点对点"></a>点对点</h3><p>所谓点对点传递，即在一个消息队列中，每条消息只能被消费一次，虽然一个消息队列有多个生产者和消费者在使用。这能保证数据的顺序。</p>
-<p>tip：生产者发送一条消息，只有一个消费者能够收到。</p>
-<h3 id="发布-订阅"><a href="#发布-订阅" class="headerlink" title="发布-订阅"></a>发布-订阅</h3><p>在这个模式中，消息不再存放在队列中，而是一个 <code>Topic</code>。且消费者可以订阅多个topic，且消费者可以消费订阅的topic中的数据。并且一条数据被一个消费者消费后并不会被马上删除，而还能被另外的消费者消费。</p>
-<p>在这个模式下，生产者被叫做发布者，消费者被叫做订阅者。</p>
-<p>tip：发布者发送消息到topic，所有且只有订阅了该topic的订阅者都会收到消息。</p>
-<h1 id="Kafka的优点"><a href="#Kafka的优点" class="headerlink" title="Kafka的优点"></a>Kafka的优点</h1><ul>
-<li>解耦 / 扩展<ul>
-<li>消息系统在处理过程中插入了一个接口层。发布者和订阅者都需要实现这个接口。这就意味着，双方都可以扩展或修改处理过程代码。方便未来需求的增加与修改。</li>
-</ul>
-</li>
-<li>副本<ul>
-<li>将消息从队列中删除之前，需要保证消息已经处理完成。这是为了避免处理数据失败后，数据已经被删除导致的数据丢失引起的业务失败。</li>
-</ul>
-</li>
-<li>灵活 / 峰值处理能力<ul>
-<li>保证访问量剧增的情况下，系统仍然正常运行。</li>
-</ul>
-</li>
-<li>恢复<ul>
-<li>系统的一部分失效后，整个系统仍然正常运行。</li>
-</ul>
-</li>
-<li>有序</li>
-<li>缓冲<ul>
-<li>当一个系统中有需要处理的时间不同的消息。系统通过缓冲层保证消息以最高效率执行。</li>
-</ul>
-</li>
-<li>异步通信<ul>
-<li>允许消息放入队列，而不立即处理，等需要时再去处理。</li>
-</ul>
-</li>
-</ul>
-<h1 id="Kafka的劣势"><a href="#Kafka的劣势" class="headerlink" title="Kafka的劣势"></a>Kafka的劣势</h1><ul>
-<li>对于整个系统来说，对Kafka的依赖过高，一旦Kafka宕机，整个系统也崩溃了。所以需要保证其高可用</li>
-<li>提高了系统复杂度。从系统间同步远程调用，到现在的异步调用，需要保证消息不丢失。</li>
-</ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/05/30/kafka/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Jiaget&#39;s field">
-    <title>mutex 互斥锁 - Jiaget&#39;s field</title>
+    <title>深入探讨Golang的类型系统 - Jiaget&#39;s field</title>
     <meta name="author" content="Jiaget">
     
     
@@ -15,20 +15,15 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"mutextype Mutex struct &#123;\n    state int32\n    sema uint32\n&#125;\n\n\nstate:\n代表锁的状态\nmutex的加锁与解锁都是通过 atomic 包提供的函数原子性地操作该字段实现的\n\n\nsema:\n一个信号量\n用作等待队列\n\n\n\nmutex 的 正常模式一个goroutine 会先自旋几次，尝试获得锁，如果仍然没有获得锁，则通过信号量 sema 排队等待（进入等待队列）。\n但是当锁被释放时，队首的goroutine也不会立即获得锁，而是与其他后来的自旋的goroutine竞争。一般情况下，处于自旋状态的goroutine会更先抢到锁，因为它们一直处于运行状态，而队列里出来的goroutine由于刚唤醒，还会因为需要分配cpu资源而需要消耗一点时间。这种情况下，为了保证先进先出，即使竞争失败了，仍然插入队列头部而不是尾部。\nmutex的饥饿模式当一个goroutine本次加锁等待时间超过1ms后，它会将mutex从 正常模式切换成 饥饿模式 。\n在饥饿模式下，锁一旦被释放，就会直接传递给等待队列的头部goroutine。而如果有一些后来的goroutine需要这个锁，它们不会像正常模式一样自旋，而是直接被加入到队列尾部。\n饥饿模式 也可以再切换回正常模式：\n\n当一个goroutine获得锁，且等待时间 &lt; 1ms时。\n当等待队列为空时 (即等待队列最后一个goroutine获得锁。)\n\n两者对比\n正常模式\n\n这是一个自旋和排队共存的模式\n[优点] 由于自旋可以在无需唤醒的状态下直接获得锁，因此，正常模式可以保证Mutex有更好的。\n[缺点] 但是, 这个模式可能导致队列尾端的goroutine一直抢不到锁（尾端延迟）\n\n\n饥饿模式\n\n这个模式会强制所有goroutine排队\n它在牺牲一定性能的情况下， 解决正常模式的尾端延迟问题\n\n\n\n两种模式之间的切换，既保证锁的效率，又能顾及公平性，不会导致某个goroutine过长时间的等待。\n","dateCreated":"2021-06-07T23:16:47+08:00","dateModified":"2021-06-08T19:39:02+08:00","datePublished":"2021-06-07T23:16:47+08:00","description":"","headline":"mutex 互斥锁","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/","keywords":"golang, 锁, mutex"}</script>
-    <meta name="description" content="mutextype Mutex struct &amp;#123;     state int32     sema uint32 &amp;#125;   state: 代表锁的状态 mutex的加锁与解锁都是通过 atomic 包提供的函数原子性地操作该字段实现的   sema: 一个信号量 用作等待队列    mutex 的 正常模式一个goroutine 会先自旋几次，尝试获得锁，如果仍然没有获得锁，则通">
-<meta property="og:type" content="blog">
-<meta property="og:title" content="mutex 互斥锁">
-<meta property="og:url" content="http://example.com/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/index.html">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"","dateCreated":"2021-06-09T19:33:42+08:00","dateModified":"2021-06-09T19:33:42+08:00","datePublished":"2021-06-09T19:33:42+08:00","description":"","headline":"深入探讨Golang的类型系统","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/09/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8Golang%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%B3%BB%E7%BB%9F/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/09/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8Golang%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%B3%BB%E7%BB%9F/"}</script>
+    <meta property="og:type" content="blog">
+<meta property="og:title" content="深入探讨Golang的类型系统">
+<meta property="og:url" content="http://example.com/2021/06/09/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8Golang%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%B3%BB%E7%BB%9F/index.html">
 <meta property="og:site_name" content="Jiaget&#39;s field">
-<meta property="og:description" content="mutextype Mutex struct &amp;#123;     state int32     sema uint32 &amp;#125;   state: 代表锁的状态 mutex的加锁与解锁都是通过 atomic 包提供的函数原子性地操作该字段实现的   sema: 一个信号量 用作等待队列    mutex 的 正常模式一个goroutine 会先自旋几次，尝试获得锁，如果仍然没有获得锁，则通">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-06-07T15:16:47.000Z">
-<meta property="article:modified_time" content="2021-06-08T11:39:02.754Z">
+<meta property="article:published_time" content="2021-06-09T11:33:42.000Z">
+<meta property="article:modified_time" content="2021-06-09T11:33:42.490Z">
 <meta property="article:author" content="Jiaget">
-<meta property="article:tag" content="golang">
-<meta property="article:tag" content="锁">
-<meta property="article:tag" content="mutex">
 <meta name="twitter:card" content="summary">
     
         <link rel="publisher" href="https://plus.google.com/none"/>
@@ -221,22 +216,16 @@
         <div class="post-header main-content-wrap text-left">
     
         <h1 class="post-title">
-            mutex 互斥锁
+            深入探讨Golang的类型系统
         </h1>
     
     
         <div class="post-meta">
-    <time datetime="2021-06-07T23:16:47+08:00">
+    <time datetime="2021-06-09T19:33:42+08:00">
 	
-		    6月 07, 2021
+		    6月 09, 2021
     	
     </time>
-    
-        <span>发布在 </span>
-        
-    <a class="category-link" href="/categories/golang/">golang</a>
-
-
     
 </div>
 
@@ -246,49 +235,7 @@
     
     <div class="post-content markdown">
         <div class="main-content-wrap">
-            <h1 id="mutex"><a href="#mutex" class="headerlink" title="mutex"></a>mutex</h1><pre><code>type Mutex struct &#123;
-    state int32
-    sema uint32
-&#125;
-</code></pre>
-<ul>
-<li>state:<ul>
-<li>代表锁的状态</li>
-<li>mutex的加锁与解锁都是通过 <code>atomic</code> 包提供的函数原子性地操作该字段实现的</li>
-</ul>
-</li>
-<li>sema:<ul>
-<li>一个信号量</li>
-<li>用作等待队列</li>
-</ul>
-</li>
-</ul>
-<h2 id="mutex-的-正常模式"><a href="#mutex-的-正常模式" class="headerlink" title="mutex 的 正常模式"></a>mutex 的 正常模式</h2><p>一个goroutine 会先自旋几次，尝试获得锁，如果仍然没有获得锁，则通过信号量 <code>sema</code> 排队等待（进入等待队列）。</p>
-<p>但是当锁被释放时，队首的goroutine也不会立即获得锁，而是与其他后来的自旋的goroutine竞争。一般情况下，处于自旋状态的goroutine会更先抢到锁，因为它们一直处于运行状态，而队列里出来的goroutine由于刚唤醒，还会因为需要分配cpu资源而需要消耗一点时间。这种情况下，为了保证先进先出，即使竞争失败了，仍然插入队列头部而不是尾部。</p>
-<h2 id="mutex的饥饿模式"><a href="#mutex的饥饿模式" class="headerlink" title="mutex的饥饿模式"></a>mutex的饥饿模式</h2><p>当一个goroutine本次加锁等待时间超过1ms后，它会将mutex从 <code>正常模式</code>切换成 <code>饥饿模式</code> 。</p>
-<p>在饥饿模式下，锁一旦被释放，就会直接传递给等待队列的头部goroutine。而如果有一些后来的goroutine需要这个锁，它们不会像正常模式一样自旋，而是直接被加入到队列尾部。</p>
-<p><code>饥饿模式</code> 也可以再切换回正常模式：</p>
-<ul>
-<li>当一个goroutine获得锁，且等待时间 <code>&lt; 1ms</code>时。</li>
-<li>当等待队列为空时 (即等待队列最后一个goroutine获得锁。)</li>
-</ul>
-<h2 id="两者对比"><a href="#两者对比" class="headerlink" title="两者对比"></a>两者对比</h2><ul>
-<li><p>正常模式</p>
-<ul>
-<li>这是一个自旋和排队共存的模式</li>
-<li>[优点] 由于自旋可以在无需唤醒的状态下直接获得锁，因此，正常模式可以保证Mutex有更好的。</li>
-<li>[缺点] 但是, 这个模式可能导致队列尾端的goroutine一直抢不到锁（尾端延迟）</li>
-</ul>
-</li>
-<li><p>饥饿模式</p>
-<ul>
-<li>这个模式会强制所有goroutine排队</li>
-<li>它在牺牲一定性能的情况下， 解决正常模式的尾端延迟问题</li>
-</ul>
-</li>
-</ul>
-<p>两种模式之间的切换，既保证锁的效率，又能顾及公平性，不会导致某个goroutine过长时间的等待。</p>
-
+            
             
 
 
@@ -296,27 +243,17 @@
     </div>
     <div id="post-footer" class="post-footer main-content-wrap">
         
-            <div class="post-footer-tags">
-                <span class="text-color-light text-small">标签</span><br/>
-                
-    <a class="tag tag--primary tag--small t-none-link" href="/tags/golang/" rel="tag">golang</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/mutex/" rel="tag">mutex</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/%E9%94%81/" rel="tag">锁</a>
-
-            </div>
-        
         
             <div class="post-actions-wrap">
     <nav>
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2021/06/08/vsCode-%E6%B7%BB%E5%8A%A0%E8%87%B3%E5%8F%B3%E9%94%AE/"
-                    data-tooltip="vsCode 添加至右键"
-                    aria-label="上一篇: vsCode 添加至右键"
-                >
-                    
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
                     </a>
@@ -326,9 +263,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/2021/06/05/%E8%81%8A%E8%81%8AGolang%E4%B9%8Bcontext/"
-                    data-tooltip="聊聊Golang之context"
-                    aria-label="下一篇: 聊聊Golang之context"
+                    href="/2021/06/08/vsCode-%E6%B7%BB%E5%8A%A0%E8%87%B3%E5%8F%B3%E9%94%AE/"
+                    data-tooltip="vsCode 添加至右键"
+                    aria-label="下一篇: vsCode 添加至右键"
                 >
                     
                         <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
@@ -353,7 +290,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/09/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8Golang%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%B3%BB%E7%BB%9F/"
                     title="分享到 Facebook"
                     aria-label="分享到 Facebook"
                 >
@@ -366,7 +303,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/"
+                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/09/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8Golang%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%B3%BB%E7%BB%9F/"
                     title="分享到 Twitter"
                     aria-label="分享到 Twitter"
                 >
@@ -379,7 +316,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/"
+                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/09/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8Golang%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%B3%BB%E7%BB%9F/"
                     title="分享到 Google+"
                     aria-label="分享到 Google+"
                 >
@@ -424,14 +361,11 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2021/06/08/vsCode-%E6%B7%BB%E5%8A%A0%E8%87%B3%E5%8F%B3%E9%94%AE/"
-                    data-tooltip="vsCode 添加至右键"
-                    aria-label="上一篇: vsCode 添加至右键"
-                >
-                    
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
                     </a>
@@ -441,9 +375,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/2021/06/05/%E8%81%8A%E8%81%8AGolang%E4%B9%8Bcontext/"
-                    data-tooltip="聊聊Golang之context"
-                    aria-label="下一篇: 聊聊Golang之context"
+                    href="/2021/06/08/vsCode-%E6%B7%BB%E5%8A%A0%E8%87%B3%E5%8F%B3%E9%94%AE/"
+                    data-tooltip="vsCode 添加至右键"
+                    aria-label="下一篇: vsCode 添加至右键"
                 >
                     
                         <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
@@ -468,7 +402,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/09/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8Golang%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%B3%BB%E7%BB%9F/"
                     title="分享到 Facebook"
                     aria-label="分享到 Facebook"
                 >
@@ -481,7 +415,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/"
+                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/09/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8Golang%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%B3%BB%E7%BB%9F/"
                     title="分享到 Twitter"
                     aria-label="分享到 Twitter"
                 >
@@ -494,7 +428,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/"
+                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/09/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8Golang%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%B3%BB%E7%BB%9F/"
                     title="分享到 Google+"
                     aria-label="分享到 Google+"
                 >
@@ -528,7 +462,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/"
+                        href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/09/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8Golang%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%B3%BB%E7%BB%9F/"
                         aria-label="分享到 Facebook"
                     >
                         <i class="fab fa-facebook" aria-hidden="true"></i><span>分享到 Facebook</span>
@@ -541,7 +475,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/"
+                        href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/09/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8Golang%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%B3%BB%E7%BB%9F/"
                         aria-label="分享到 Twitter"
                     >
                         <i class="fab fa-twitter" aria-hidden="true"></i><span>分享到 Twitter</span>
@@ -554,7 +488,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://plus.google.com/share?url=http://example.com/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/"
+                        href="https://plus.google.com/share?url=http://example.com/2021/06/09/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8Golang%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%B3%BB%E7%BB%9F/"
                         aria-label="分享到 Google+"
                     >
                         <i class="fab fa-google-plus" aria-hidden="true"></i><span>分享到 Google+</span>
