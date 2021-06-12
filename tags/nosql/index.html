@@ -218,9 +218,9 @@
                         <a
                             class="link-unstyled"
                             href="/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
-                            aria-label=": Redis 深入探讨"
+                            aria-label=": Redis 相关场景"
                         >
-                            Redis 深入探讨
+                            Redis 相关场景
                         </a>
                     
                 </h1>
@@ -458,9 +458,13 @@
 <li>Session 管理</li>
 <li>Token</li>
 </ul>
-<h2 id="Redis-命令"><a href="#Redis-命令" class="headerlink" title="Redis 命令"></a>Redis 命令</h2><ul>
+<h2 id="Redis-命令"><a href="#Redis-命令" class="headerlink" title="Redis 命令"></a>Redis 命令</h2><h3 id="单值缓存"><a href="#单值缓存" class="headerlink" title="单值缓存"></a>单值缓存</h3><ul>
 <li>写 <code>set [key] [value]</code></li>
 <li>读 <code>get [key] ([value])</code> 。 如果取的值不存在，返回 <code>(nil)</code></li>
+</ul>
+<h3 id="对象缓存"><a href="#对象缓存" class="headerlink" title="对象缓存"></a>对象缓存</h3><ul>
+<li>SET user:1 value(json)</li>
+<li>MSET user:1:name xxx user:1:balance xxx</li>
 </ul>
 
                     

@@ -124,19 +124,19 @@
   </entry>
   
   <entry>
-    <title>聊聊分布式锁</title>
+    <title>聊聊Redis分布式锁</title>
     <link href="http://example.com/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"/>
     <id>http://example.com/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/</id>
     <published>2021-06-04T14:49:51.000Z</published>
-    <updated>2021-06-05T04:51:14.359Z</updated>
+    <updated>2021-06-12T13:08:08.411Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h1><p>分布式锁就是 对于一个所有进程都能访问到的资源上，设置一个锁资源，让这些进程来竞争这个锁。</p><p>我们希望分布式锁：</p><ul><li>响应快</li><li>性能高</li><li>与业务无关</li></ul>]]></content>
+    <content type="html"><![CDATA[<h1 id="涉及指令"><a href="#涉及指令" class="headerlink" title="涉及指令"></a>涉及指令</h1><ul><li><code>SETNX key value</code>: （nx: not exist） key不存在时，设置成value,返回1; 没设置成功，返回0</li><li><code>EXPIRE key locktime</code>: 设置key有效时常</li><li><code>DEL key</code>:删除</li><li><code>GETSET key value</code>: 先GET,再SET,先返回value,没有就返回nil。再实现设置操作。</li></ul><h1 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h1><p>分布式锁就是 对于一个所有进程都能访问到的资源上，设置一个锁资源，让这些进程来竞争这个锁。</p><p>我们希望分布式锁：</p><ul><li>响应快</li><li>性能高</li><li>与业务无关</li></ul>]]></content>
     
     
       
       
-    <summary type="html">&lt;h1 id=&quot;分布式锁&quot;&gt;&lt;a href=&quot;#分布式锁&quot; class=&quot;headerlink&quot; title=&quot;分布式锁&quot;&gt;&lt;/a&gt;分布式锁&lt;/h1&gt;&lt;p&gt;分布式锁就是 对于一个所有进程都能访问到的资源上，设置一个锁资源，让这些进程来竞争这个锁。&lt;/p&gt;
-&lt;p&gt;我们希望分布式锁：</summary>
+    <summary type="html">&lt;h1 id=&quot;涉及指令&quot;&gt;&lt;a href=&quot;#涉及指令&quot; class=&quot;headerlink&quot; title=&quot;涉及指令&quot;&gt;&lt;/a&gt;涉及指令&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;SETNX key value&lt;/code&gt;: （nx: not exist） key不存在时，设置</summary>
       
     
     
@@ -237,11 +237,11 @@
   </entry>
   
   <entry>
-    <title>Redis 深入探讨</title>
+    <title>Redis 相关场景</title>
     <link href="http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"/>
     <id>http://example.com/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/</id>
     <published>2021-06-01T12:49:03.000Z</published>
-    <updated>2021-06-05T04:51:15.072Z</updated>
+    <updated>2021-06-12T13:08:06.304Z</updated>
     
     <content type="html"><![CDATA[<h1 id="Redis-使用的基本使用场景"><a href="#Redis-使用的基本使用场景" class="headerlink" title="Redis 使用的基本使用场景"></a>Redis 使用的基本使用场景</h1><p><img src="https://i.loli.net/2021/06/04/5Xs86n1NctQjK3e.png" alt="redis.png"></p><h1 id="Redis-与-数据库数据的一致性问题"><a href="#Redis-与-数据库数据的一致性问题" class="headerlink" title="Redis 与 数据库数据的一致性问题"></a>Redis 与 数据库数据的一致性问题</h1><h2 id="抛出问题"><a href="#抛出问题" class="headerlink" title="抛出问题"></a>抛出问题</h2><pre><code>    当对数据进行修改时，应该先删除缓存还是先写入数据库中？</code></pre><h3 id="（方案一）-先删缓存，-后写数据库。"><a href="#（方案一）-先删缓存，-后写数据库。" class="headerlink" title="（方案一） 先删缓存， 后写数据库。"></a>（方案一） 先删缓存， 后写数据库。</h3><ul><li>在高并发的场景下，线程1删除缓存，还未写入数据时，线程2开始读数据，它会读到一个nil，并从数据库中读旧数据, 线程2开始更新缓存。此时，线程1数据成功写入，并更新了缓存，之后线程2将旧数据覆盖了线程1写入的新数据。这就造成了数据不一致 <code>（cache old : db new)</code></li></ul><table><thead><tr><th></th><th>Thread1</th><th>Thread2</th></tr></thead><tbody><tr><td>t1</td><td>delete cache</td><td></td></tr><tr><td>t2</td><td></td><td>read -&gt; (cache)nil -&gt;（DB）old data</td></tr><tr><td>t3</td><td>write DB -&gt; update cache</td><td></td></tr><tr><td>t4</td><td></td><td>write cache (overwrite)</td></tr></tbody></table><h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><ul><li><ol><li>不删除缓存，而是将缓存改成一个特殊值（比如 <code>locking</code>）。在客户端的设计上，读到该特殊值，就休眠一会，再查Redis</li></ol><ul><li>缺陷：</li><li><ol><li>特殊值对业务的侵入。（必须挑选一个与业务严格无关的值）</li></ol></li><li><ol start="2"><li>休眠时间可能重复，降低性能。</li></ol></li></ul></li><li><ol start="2"><li>延时双删。 删缓存 -&gt; 写数据库 -&gt; 休眠一会 -&gt; 删除缓存</li></ol><ul><li>缺陷</li><li>1.写操作频繁的场景下，仍然无法避免脏数据。</li></ul></li></ul><p>不能在写操作频繁的情况下使用</p><h3 id="（方案二）先写数据，再删缓存"><a href="#（方案二）先写数据，再删缓存" class="headerlink" title="（方案二）先写数据，再删缓存"></a>（方案二）先写数据，再删缓存</h3><ul><li>数据库写完后，缓存删除失败，数据就会不一致。</li></ul><h4 id="解决方案："><a href="#解决方案：" class="headerlink" title="解决方案："></a>解决方案：</h4><ul><li><ol><li>给缓存设置过期时间。</li></ol><ul><li>缺陷</li><li>过期时间内，缓存数据未更新，仍有脏数据风险。</li></ul></li><li><ol start="2"><li>引入MQ, 保证原子性， 删除缓存失败，会重试</li></ol><ul><li>缺陷</li><li>重试时间内，仍然存在脏数据。</li></ul></li><li><ol start="3"><li>业务不再处理脏数据的问题。业务层只需要给value设置一个逻辑过期时间。另开一个线程，用来扫描缓存，并删除过期的缓存。</li></ol></li></ul><p>只能保证最终一致性，而不能保证实时一致。</p><h1 id="Redis-缓存穿透"><a href="#Redis-缓存穿透" class="headerlink" title="Redis 缓存穿透"></a>Redis 缓存穿透</h1><p>缓存中查不到，数据库中也查不到。(不断地去查数据库中不存在的数据。)</p><ul><li>解决方案<ol><li>对参数进行合法性校验</li><li>将查询不到的数据写入数据库。（Redis会记录很多无效key.可以将不合法数据过期时间设置短一点。）</li><li>引入布隆过滤器（BloomFilter），访问Redis前，数据是否存在。布隆过滤器存在一定误判率，且只能加数据，不能减</li></ol></li></ul><h1 id="Redis-缓存击穿"><a href="#Redis-缓存击穿" class="headerlink" title="Redis 缓存击穿"></a>Redis 缓存击穿</h1><p>缓存中没有数据，但是数据库中有数据。（缓存数据初始化，或者key过期。 ）</p><p>高并发场景下，过期key写入缓存的延时中，出现大量访问该key的线程，由于缓存中不存在该key。数据库将承受巨大压力。</p><ul><li>解决方案<ol><li>热点缓存永不过期。但是要注意value需要有逻辑过期时间。在另一个线程定期更新该数据。（对系统存在损耗）</li><li>避免DB承受并发压力：DB给redis写入key时，加锁，让访问该key的线程等待，避免压力击穿redis到DB上<h1 id="Redis-缓存雪崩"><a href="#Redis-缓存雪崩" class="headerlink" title="Redis 缓存雪崩"></a>Redis 缓存雪崩</h1></li></ol></li></ul><p>缓存大面积过期，请求全部转发到DB。</p><ul><li>解决方案：<ol><li>将缓存过期时间分散开。 在原有的统一的过期时间基础上，增加随机值。</li><li>对于分布式系统，可以将热点数据分散到不同节点上。</li></ol></li></ul>]]></content>
     
@@ -267,9 +267,9 @@
     <link href="http://example.com/2021/06/01/Redis/"/>
     <id>http://example.com/2021/06/01/Redis/</id>
     <published>2021-06-01T11:18:37.000Z</published>
-    <updated>2021-06-01T12:50:23.613Z</updated>
+    <updated>2021-06-12T13:08:09.662Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h1><h2 id="Redis-简介"><a href="#Redis-简介" class="headerlink" title="Redis 简介"></a>Redis 简介</h2><p>Redis 全称 (REmote DIctionary Serer) 远程字典服务， 是一个键值对数据库。</p><p>与 NoSQL 相对应的 关系型数据库在当今环境存在的问题：</p><ul><li>性能： 磁盘IO性能低</li><li>扩展： 数据之间的关系复杂，扩展性差，不便于大规模集群使用</li></ul><p>NoSQL对其缺点进行了改进：</p><ul><li>内存存储</li><li>不存数据关系，只存数据</li></ul><h2 id="Redis-的特征"><a href="#Redis-的特征" class="headerlink" title="Redis 的特征"></a>Redis 的特征</h2><ol><li>数据之间没有必然联系</li><li>采用单线程机制</li><li>高性能。 </li><li>多数据类型：<ul><li>string</li><li>list</li><li>hash</li><li>set</li><li>sorted_set</li></ul></li></ol><ul><li>持久化。数据灾难恢复。</li></ul><h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><ul><li>热点数据加速查询</li><li>任务队列</li><li>实时信息</li><li>时效信息</li><li>分布式数据功效。分布式集群中的session分离</li><li>消息队列</li><li>分布式锁</li></ul><h2 id="Redis-的一些功能"><a href="#Redis-的一些功能" class="headerlink" title="Redis 的一些功能"></a>Redis 的一些功能</h2><ul><li>缓存<ul><li>针对一些高并发业务的设计</li><li>平台的高频率数据。</li></ul></li><li>单服务器升级集群</li><li>Session 管理</li><li>Token</li></ul><h2 id="Redis-命令"><a href="#Redis-命令" class="headerlink" title="Redis 命令"></a>Redis 命令</h2><ul><li>写 <code>set [key] [value]</code></li><li>读 <code>get [key] ([value])</code> 。 如果取的值不存在，返回 <code>(nil)</code></li></ul>]]></content>
+    <content type="html"><![CDATA[<h1 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h1><h2 id="Redis-简介"><a href="#Redis-简介" class="headerlink" title="Redis 简介"></a>Redis 简介</h2><p>Redis 全称 (REmote DIctionary Serer) 远程字典服务， 是一个键值对数据库。</p><p>与 NoSQL 相对应的 关系型数据库在当今环境存在的问题：</p><ul><li>性能： 磁盘IO性能低</li><li>扩展： 数据之间的关系复杂，扩展性差，不便于大规模集群使用</li></ul><p>NoSQL对其缺点进行了改进：</p><ul><li>内存存储</li><li>不存数据关系，只存数据</li></ul><h2 id="Redis-的特征"><a href="#Redis-的特征" class="headerlink" title="Redis 的特征"></a>Redis 的特征</h2><ol><li>数据之间没有必然联系</li><li>采用单线程机制</li><li>高性能。 </li><li>多数据类型：<ul><li>string</li><li>list</li><li>hash</li><li>set</li><li>sorted_set</li></ul></li></ol><ul><li>持久化。数据灾难恢复。</li></ul><h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><ul><li>热点数据加速查询</li><li>任务队列</li><li>实时信息</li><li>时效信息</li><li>分布式数据功效。分布式集群中的session分离</li><li>消息队列</li><li>分布式锁</li></ul><h2 id="Redis-的一些功能"><a href="#Redis-的一些功能" class="headerlink" title="Redis 的一些功能"></a>Redis 的一些功能</h2><ul><li>缓存<ul><li>针对一些高并发业务的设计</li><li>平台的高频率数据。</li></ul></li><li>单服务器升级集群</li><li>Session 管理</li><li>Token</li></ul><h2 id="Redis-命令"><a href="#Redis-命令" class="headerlink" title="Redis 命令"></a>Redis 命令</h2><h3 id="单值缓存"><a href="#单值缓存" class="headerlink" title="单值缓存"></a>单值缓存</h3><ul><li>写 <code>set [key] [value]</code></li><li>读 <code>get [key] ([value])</code> 。 如果取的值不存在，返回 <code>(nil)</code></li></ul><h3 id="对象缓存"><a href="#对象缓存" class="headerlink" title="对象缓存"></a>对象缓存</h3><ul><li>SET user:1 value(json)</li><li>MSET user:1:name xxx user:1:balance xxx</li></ul>]]></content>
     
     
       
