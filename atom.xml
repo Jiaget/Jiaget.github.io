@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2021-06-09T13:12:15.429Z</updated>
+  <updated>2021-06-16T06:04:49.088Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>tpc 粘包</title>
+    <link href="http://example.com/2021/06/16/tpc-%E7%B2%98%E5%8C%85/"/>
+    <id>http://example.com/2021/06/16/tpc-%E7%B2%98%E5%8C%85/</id>
+    <published>2021-06-16T05:24:47.000Z</published>
+    <updated>2021-06-16T06:04:49.088Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="0-背景"><a href="#0-背景" class="headerlink" title="0. 背景"></a>0. 背景</h1><p>socket网络编程采用端对端通信，可以使用 [<code>源IP</code>, <code>源端口</code>， <code>目的IP</code>, <code>目的端口</code>, <code>传输层协议</code>] 这样的五元组来描述一个连接。发送者往往发送多个包给接收者，为了更高效地发送数据包，采用了优化算法（<code>Nagle</code> 算法）， 将<code>多次</code>，<code>间隔小</code>,<code>数据量小</code>的数据，合并成一个数据量大的数据块，然后进行封装包。同时, 接收者也需要使用高效的拆包机制来分辨这些数据</p><h1 id="1-什么是TCP粘包"><a href="#1-什么是TCP粘包" class="headerlink" title="1.什么是TCP粘包"></a>1.什么是TCP粘包</h1><h2 id="发送者"><a href="#发送者" class="headerlink" title="发送者"></a>发送者</h2><p>TCP默认使用 <code>Nagle</code>算法，用于减少网络中报文数量，其主要：</p><ul><li><ol><li>只有当上一个分组得到确认后，才会发送下一个分组</li></ol></li><li><ol start="2"><li>手机多个小分组，当确认到达后，一起发送</li></ol></li></ul><h2 id="接收者"><a href="#接收者" class="headerlink" title="接收者"></a>接收者</h2><p>TPC接收到数据包后，不会马上交给应用层处理，而是将其缓存，而应用程序需要主动从缓存中接收分组。</p><p>在这种情况下，当满足以下条件，就会发生TCP <code>粘包</code>:</p><ul><li>TPC接收数据包到缓存的速度大于应用程序从缓存读取数据包的数据。</li><li>当多个包被缓存，应用程序有可能读取到多个首尾相接的包。</li></ul><h2 id="可能产生的问题"><a href="#可能产生的问题" class="headerlink" title="可能产生的问题"></a>可能产生的问题</h2><p>比如写的一段程序，向服务端发送两次数据，我希望服务端分别对这两个数据进行处理，但是服务器在一次接收时，将两条数据都读出来了。如果没有很好地处理这个场景，数据很容易被错误处理，甚至被认为时错误而被丢掉，导致服务端不能高效处理服务。</p><h1 id="2-TCP粘包的谬误"><a href="#2-TCP粘包的谬误" class="headerlink" title="2.TCP粘包的谬误"></a>2.TCP粘包的谬误</h1><p>实际上<code>TCP粘包</code>这个名词本身就不合理，因为：</p><ul><li>TCP本身就没有包的概念， 它是一个面向流的协议</li><li>而所谓的粘包是指，开发者在应用层封装的数据，开发者希望TCP能将这些数据自动拆分，然而TCP为了节省流量，会将包合并后发送。这并不是TCP的问题。</li></ul><h1 id="3-解决思路"><a href="#3-解决思路" class="headerlink" title="3. 解决思路"></a>3. 解决思路</h1><ol><li>格式化数据：给每条数据都设置固定的格式，（开始符， 结束符）。特点简单，但是要保证开始符结束符不会出现在数据内部。</li><li>设置发送长度：发送数据时，将长度一并发送，这样应用层可以根据长度分辨数据的开始与结束</li></ol><h1 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h1><p>TCP 粘包本身就不是问题，但是通过这个“问题”可以学到一些非常基本的网络编程的规范。（应用开发者应该解决好自己定义的数据包分包的问题，而不是交给TCP解决）</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;0-背景&quot;&gt;&lt;a href=&quot;#0-背景&quot; class=&quot;headerlink&quot; title=&quot;0. 背景&quot;&gt;&lt;/a&gt;0. 背景&lt;/h1&gt;&lt;p&gt;socket网络编程采用端对端通信，可以使用 [&lt;code&gt;源IP&lt;/code&gt;, &lt;code&gt;源端口&lt;/code&gt;， </summary>
+      
+    
+    
+    
+    <category term="网络" scheme="http://example.com/categories/%E7%BD%91%E7%BB%9C/"/>
+    
+    
+    <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+    <category term="tcp" scheme="http://example.com/tags/tcp/"/>
+    
+  </entry>
   
   <entry>
     <title>深入探讨Golang的类型系统</title>
