@@ -1,0 +1,619 @@
+
+<!DOCTYPE html>
+<html lang="zh-cn">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="Jiaget&#39;s field">
+    <title>GC(二) - Jiaget&#39;s field</title>
+    <meta name="author" content="Jiaget">
+    
+    
+    
+        
+            <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
+        
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"之前，主要讲了golang的三色标记法以及混合写屏障机制。这里简略介绍一下一些GC机制。\n简述三色标记法三色标记法是一种追踪式回收机制：\n\n垃圾回收开始时：所有数据标记为白色\n将可以追踪到的root节点标记为灰色（灰色表示由当前节点展开的追踪还未完成）\n当该节点追踪任务完成，该节点标记为黑色，并无需再次基于它展开追踪\n由黑色节点追踪到的节点会被标记为灰色。\n当所有的灰色节点都被标记为黑色时，标记工作完成\n白色节点均为垃圾\n\n标记清除带来的问题内存碎片化，回收的内存很难保证能成片聚在一起。而这些小块内存碎片会导致找出合适的内存空间进行分配的工作将付出更高的代价。甚至一些小块内存永远无法使用\nBibop这是一种管理碎片化内存的机制，它将大小规格相同的内存碎片统一管理。从而快速匹配内存。\n当然这个机制无法解决小内存无法使用的问题\n移动数据在标记清除算法中的标记阶段，会移动非垃圾数据，使它们尽可能紧凑地放在内存中。\n缺点在于移动数据会带来不小的开销\n复制式回收将内存划分为两个相等的空间 From, To。 程序执行使用 From空间，在垃圾回收扫描时，将能追踪的数据复制到 To 空间。所有空间复制完成后，将From 和 To 空间交换，并清除原From空间的数据。\n这种方法会占用一般的内存空间，为了提高内存使用率，只会在一部分的内存空间使用，并搭配其他的回收机制。\n分代回收弱分代假说大部分对象都在年轻时死亡。\n我们将只存活1， 2次回收的对象称为新生代对象。而经历过多次垃圾回收的对象为老年代对象。实践证明，新生代对象成为垃圾的概率要高于老年代对象。\n我们可以将数据分成新生代和老年代，降低老年代数据的垃圾回收扫描频率，这将提升垃圾回收效率。\n引用计数式垃圾回收以上均为追踪式垃圾回收，引用计数式垃圾回收有所不同。\n该垃圾回收在执行过程中，会更新对象的引用计数，当引用计数更新为0时，说明该数据不再有用，可以进行垃圾回收。这种回收机制可以将之前的追踪代价分摊到每次对数据的操作中。\n但是，引用计数的均摊思路，如果在高频率开辟内存的场景下，仍然带来不小的开销。\nSTW每种垃圾回收策略都无法完美解决各式各样的缺陷。同样的，以上的垃圾回收策略均无可避免的需要 Stop the World， 这将会暂停用户程序，为了避免长时间 STW 带给用户影响，我们可以将 STW 分成多次执行，将一次垃圾回收拆分成多次，和用户程序交替执行。这叫做 增量式回收。\n这可能带来的问题是，在某段垃圾回收标记了一个黑色对象，用户程序立马修改它，导致垃圾回收机制的误判，这里就得使用 读写屏障 机制，详见上一篇文章。\n读屏障补充一个读屏障。\n在 FROM TO 复制回收机制中。\n\n当A已经复制到 to 空间上后，用户程序读取了 From 空间的旧数据，B复制到了 A,由于B建立的指针指向了旧的A，当FROM空间被销毁，B指向的旧A也不复存在，此时再去访问旧A，就会出错。\n此时需要引入一个读屏障：\n\n当我们读取的数据有新副本时，直接读取 To 空间的新副本。\n\n多核多线程并行执行垃圾回收的场景，被称为 并行垃圾回收。\n并发GC的问题在于，很容易导致有的协程的GC忙碌，而有的线程空闲。如果使用负载均衡，这也会带来同步的开销。\n同时，并行GC还有的问题是，FROM-TO复制回收还需要避免数据对象被重复复制。\n\n用户程序和GC并行执行的垃圾回收被称为 并发垃圾回收。\n\n在GC的某个阶段进行STW，被称为 主体并发式垃圾回收\n\n再增加增量垃圾回收机制，又会出现 主题并发增量式垃圾回收\n\n\n\nGolang采用了哪些？Golang 采用了 三色标记法 的 标记-清除 算法 + 主体并发增量式回收 + 插入，删除的混合写屏障\n","dateCreated":"2021-06-18T19:12:55+08:00","dateModified":"2021-06-18T22:13:44+08:00","datePublished":"2021-06-18T19:12:55+08:00","description":"","headline":"GC(二)","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/18/golang%E7%9A%84GC-%E4%BA%8C/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/18/golang%E7%9A%84GC-%E4%BA%8C/","keywords":"gc"}</script>
+    <meta name="description" content="之前，主要讲了golang的三色标记法以及混合写屏障机制。这里简略介绍一下一些GC机制。 简述三色标记法三色标记法是一种追踪式回收机制：  垃圾回收开始时：所有数据标记为白色 将可以追踪到的root节点标记为灰色（灰色表示由当前节点展开的追踪还未完成） 当该节点追踪任务完成，该节点标记为黑色，并无需再次基于它展开追踪 由黑色节点追踪到的节点会被标记为灰色。 当所有的灰色节点都被标记为黑色时，标记工">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="GC(二)">
+<meta property="og:url" content="http://example.com/2021/06/18/golang%E7%9A%84GC-%E4%BA%8C/index.html">
+<meta property="og:site_name" content="Jiaget&#39;s field">
+<meta property="og:description" content="之前，主要讲了golang的三色标记法以及混合写屏障机制。这里简略介绍一下一些GC机制。 简述三色标记法三色标记法是一种追踪式回收机制：  垃圾回收开始时：所有数据标记为白色 将可以追踪到的root节点标记为灰色（灰色表示由当前节点展开的追踪还未完成） 当该节点追踪任务完成，该节点标记为黑色，并无需再次基于它展开追踪 由黑色节点追踪到的节点会被标记为灰色。 当所有的灰色节点都被标记为黑色时，标记工">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/06/18/kUBnZb9fpEO1veG.png">
+<meta property="og:image" content="https://i.loli.net/2021/06/18/LP5Fzi1HGnc96AB.png">
+<meta property="og:image" content="https://i.loli.net/2021/06/18/GNYLQxF534jwTaU.png">
+<meta property="article:published_time" content="2021-06-18T11:12:55.000Z">
+<meta property="article:modified_time" content="2021-06-18T14:13:44.398Z">
+<meta property="article:author" content="Jiaget">
+<meta property="article:tag" content="gc">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/06/18/kUBnZb9fpEO1veG.png">
+    
+        <link rel="publisher" href="https://plus.google.com/none"/>
+    
+    
+        
+    
+    
+        <meta property="og:image" content="http://example.com/assets/images/Avatar.jpg"/>
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/assets/css/style-sp5xih4wwpbivuctnupxctktdmpz7mk0p2tqxrvmeluf5fjmhxycv6yumqgk.min.css">
+
+    <!--STYLES END-->
+    
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+        
+            
+        
+    
+
+<header id="header" data-behavior="5">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/"
+            aria-label=""
+        >
+            Jiaget&#39;s field
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="打开链接: /#about"
+            >
+        
+        
+            <img class="header-picture" src="/assets/images/Avatar.jpg" alt="作者的图片"/>
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+
+        
+    
+
+<nav id="sidebar" data-behavior="5">
+    <div class="sidebar-container">
+        
+            <div class="sidebar-profile">
+                <a
+                    href="/#about"
+                    aria-label="阅读有关作者的更多信息"
+                >
+                    <img class="sidebar-profile-picture" src="/assets/images/Avatar.jpg" alt="作者的图片"/>
+                </a>
+                <h4 class="sidebar-profile-name">Jiaget</h4>
+                
+                    <h5 class="sidebar-profile-bio"><p>author.bio</p>
+</h5>
+                
+            </div>
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/"
+                            
+                            rel="noopener"
+                            title="首页"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">首页</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-categories"
+                            
+                            rel="noopener"
+                            title="分类"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">分类</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-tags"
+                            
+                            rel="noopener"
+                            title="标签"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">标签</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-archives"
+                            
+                            rel="noopener"
+                            title="归档"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">归档</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link open-algolia-search"
+                            href="#search"
+                            
+                            rel="noopener"
+                            title="搜索"
+                        >
+                        <i class="sidebar-button-icon fa fa-search" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">搜索</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="关于"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">关于</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="5"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            GC(二)
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2021-06-18T19:12:55+08:00">
+	
+		    6月 18, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/golang/">golang</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <p>之前，主要讲了golang的三色标记法以及混合写屏障机制。这里简略介绍一下一些GC机制。</p>
+<h2 id="简述三色标记法"><a href="#简述三色标记法" class="headerlink" title="简述三色标记法"></a>简述三色标记法</h2><p>三色标记法是一种追踪式回收机制：</p>
+<ul>
+<li>垃圾回收开始时：所有数据标记为白色</li>
+<li>将可以追踪到的root节点标记为灰色（灰色表示由当前节点展开的追踪还未完成）</li>
+<li>当该节点追踪任务完成，该节点标记为黑色，并无需再次基于它展开追踪</li>
+<li>由黑色节点追踪到的节点会被标记为灰色。</li>
+<li>当所有的灰色节点都被标记为黑色时，标记工作完成</li>
+<li>白色节点均为垃圾</li>
+</ul>
+<h2 id="标记清除带来的问题"><a href="#标记清除带来的问题" class="headerlink" title="标记清除带来的问题"></a>标记清除带来的问题</h2><p>内存碎片化，回收的内存很难保证能成片聚在一起。而这些小块内存碎片会导致找出合适的内存空间进行分配的工作将付出更高的代价。甚至一些小块内存永远无法使用</p>
+<h3 id="Bibop"><a href="#Bibop" class="headerlink" title="Bibop"></a>Bibop</h3><p>这是一种管理碎片化内存的机制，它将大小规格相同的内存碎片统一管理。从而快速匹配内存。</p>
+<p>当然这个机制无法解决小内存无法使用的问题</p>
+<h3 id="移动数据"><a href="#移动数据" class="headerlink" title="移动数据"></a>移动数据</h3><p>在标记清除算法中的标记阶段，会移动非垃圾数据，使它们尽可能紧凑地放在内存中。<br><img src="https://i.loli.net/2021/06/18/kUBnZb9fpEO1veG.png" alt="move.png"></p>
+<p>缺点在于移动数据会带来不小的开销</p>
+<h3 id="复制式回收"><a href="#复制式回收" class="headerlink" title="复制式回收"></a>复制式回收</h3><p>将内存划分为两个相等的空间 <code>From</code>, <code>To</code>。 程序执行使用 <code>From</code>空间，在垃圾回收扫描时，将能追踪的数据复制到 <code>To</code> 空间。所有空间复制完成后，将<code>From</code> 和 <code>To</code> 空间交换，并清除原<code>From</code>空间的数据。</p>
+<p>这种方法会占用一般的内存空间，为了提高内存使用率，只会在一部分的内存空间使用，并搭配其他的回收机制。</p>
+<h3 id="分代回收"><a href="#分代回收" class="headerlink" title="分代回收"></a>分代回收</h3><h3 id="弱分代假说"><a href="#弱分代假说" class="headerlink" title="弱分代假说"></a>弱分代假说</h3><p>大部分对象都在年轻时死亡。</p>
+<p>我们将只存活1， 2次回收的对象称为新生代对象。而经历过多次垃圾回收的对象为老年代对象。实践证明，新生代对象成为垃圾的概率要高于老年代对象。</p>
+<p>我们可以将数据分成新生代和老年代，降低老年代数据的垃圾回收扫描频率，这将提升垃圾回收效率。</p>
+<h2 id="引用计数式垃圾回收"><a href="#引用计数式垃圾回收" class="headerlink" title="引用计数式垃圾回收"></a>引用计数式垃圾回收</h2><p>以上均为追踪式垃圾回收，引用计数式垃圾回收有所不同。</p>
+<p>该垃圾回收在执行过程中，会更新对象的引用计数，当引用计数更新为0时，说明该数据不再有用，可以进行垃圾回收。这种回收机制可以将之前的追踪代价分摊到每次对数据的操作中。</p>
+<p>但是，引用计数的均摊思路，如果在高频率开辟内存的场景下，仍然带来不小的开销。</p>
+<h1 id="STW"><a href="#STW" class="headerlink" title="STW"></a>STW</h1><p>每种垃圾回收策略都无法完美解决各式各样的缺陷。同样的，以上的垃圾回收策略均无可避免的需要 <code>Stop the World</code>， 这将会暂停用户程序，为了避免长时间 STW 带给用户影响，我们可以将 STW 分成多次执行，将一次垃圾回收拆分成多次，和用户程序交替执行。这叫做 <code>增量式回收</code>。</p>
+<p>这可能带来的问题是，在某段垃圾回收标记了一个黑色对象，用户程序立马修改它，导致垃圾回收机制的误判，这里就得使用 <code>读写屏障</code> 机制，详见上一篇文章。</p>
+<h2 id="读屏障"><a href="#读屏障" class="headerlink" title="读屏障"></a>读屏障</h2><p>补充一个读屏障。</p>
+<p>在 <code>FROM</code> <code>TO</code> 复制回收机制中。</p>
+<p><img src="https://i.loli.net/2021/06/18/LP5Fzi1HGnc96AB.png" alt="fromti.png"></p>
+<p>当A已经复制到 <code>to</code> 空间上后，用户程序读取了 <code>From</code> 空间的旧数据，B复制到了 A,由于B建立的指针指向了旧的A，当<code>FROM</code>空间被销毁，B指向的旧A也不复存在，此时再去访问旧A，就会出错。</p>
+<p>此时需要引入一个读屏障：</p>
+<ul>
+<li>当我们读取的数据有新副本时，直接读取 <code>To</code> 空间的新副本。</li>
+</ul>
+<h1 id="多核"><a href="#多核" class="headerlink" title="多核"></a>多核</h1><p>多线程并行执行垃圾回收的场景，被称为 <code>并行垃圾回收</code>。</p>
+<p>并发GC的问题在于，很容易导致有的协程的GC忙碌，而有的线程空闲。如果使用负载均衡，这也会带来同步的开销。</p>
+<p>同时，并行GC还有的问题是，<code>FROM-TO</code>复制回收还需要避免数据对象被重复复制。</p>
+<ul>
+<li><p>用户程序和GC并行执行的垃圾回收被称为 <code>并发垃圾回收</code>。</p>
+</li>
+<li><p>在GC的某个阶段进行STW，被称为 <code>主体并发式垃圾回收</code></p>
+</li>
+<li><p>再增加增量垃圾回收机制，又会出现 <code>主题并发增量式垃圾回收</code></p>
+</li>
+</ul>
+<p><img src="https://i.loli.net/2021/06/18/GNYLQxF534jwTaU.png" alt="gc-type.png"></p>
+<h1 id="Golang采用了哪些？"><a href="#Golang采用了哪些？" class="headerlink" title="Golang采用了哪些？"></a>Golang采用了哪些？</h1><p>Golang 采用了 三色标记法 的 <code>标记-清除</code> 算法 + 主体并发增量式回收 + 插入，删除的混合写屏障</p>
+
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">标签</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/gc/" rel="tag">gc</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/06/16/golang%E4%B9%8Bdefer%E5%92%8Cpanic/"
+                    data-tooltip="golang之defer和panic"
+                    aria-label="下一篇: golang之defer和panic"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Diesen Beitrag teilen"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/18/golang%E7%9A%84GC-%E4%BA%8C/"
+                    title="分享到 Facebook"
+                    aria-label="分享到 Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/18/golang%E7%9A%84GC-%E4%BA%8C/"
+                    title="分享到 Twitter"
+                    aria-label="分享到 Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/18/golang%E7%9A%84GC-%E4%BA%8C/"
+                    title="分享到 Google+"
+                    aria-label="分享到 Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2021 Jiaget. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2021/06/16/golang%E4%B9%8Bdefer%E5%92%8Cpanic/"
+                    data-tooltip="golang之defer和panic"
+                    aria-label="下一篇: golang之defer和panic"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Diesen Beitrag teilen"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/18/golang%E7%9A%84GC-%E4%BA%8C/"
+                    title="分享到 Facebook"
+                    aria-label="分享到 Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/18/golang%E7%9A%84GC-%E4%BA%8C/"
+                    title="分享到 Twitter"
+                    aria-label="分享到 Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/18/golang%E7%9A%84GC-%E4%BA%8C/"
+                    title="分享到 Google+"
+                    aria-label="分享到 Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/18/golang%E7%9A%84GC-%E4%BA%8C/"
+                        aria-label="分享到 Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>分享到 Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/18/golang%E7%9A%84GC-%E4%BA%8C/"
+                        aria-label="分享到 Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>分享到 Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=http://example.com/2021/06/18/golang%E7%9A%84GC-%E4%BA%8C/"
+                        aria-label="分享到 Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>分享到 Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+
+    
+        
+    
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <img id="about-card-picture" src="/assets/images/Avatar.jpg" alt="作者的图片"/>
+        
+            <h4 id="about-card-name">Jiaget</h4>
+        
+            <div id="about-card-bio"><p>Make it correst, make it clear, make it concise, make it fast. In that order</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>Unemployed</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover.jpg');"></div>
+        <!--SCRIPTS-->
+
+<script src="/assets/js/script-vrbxykgb2guqp0d1c0bvofzw2fqgddegscic3ljwk3fce6l7uqstblyu0kfc.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    </body>
+</html>

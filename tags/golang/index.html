@@ -217,6 +217,87 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/06/16/golang%E4%B9%8Bdefer%E5%92%8Cpanic/"
+                            aria-label=": golang之defer和panic"
+                        >
+                            golang之defer和panic
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-16T18:12:34+08:00">
+	
+		    6月 16, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/golang/">golang</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="panic-和-defer-的一般执行流程"><a href="#panic-和-defer-的一般执行流程" class="headerlink" title="panic 和 defer 的一般执行流程"></a>panic 和 defer 的一般执行流程</h1><p>Golang的每一个goroutine上都会有 <code>*_defer</code>, <code>*_panic</code> 的头指针，每次发生新的panic， 都会在链表头上加入panic。defer与之类似。</p>
+<p><img src="https://i.loli.net/2021/06/16/Y84sWgIQvpVmxwG.png" alt="case1.png"></p>
+<p>在这个场景下，当程序执行到panic时，goroutine的defer链表已经储存了两个defer函数。此时，程序会先将panic储存到panic链表中，再从defer链表中取出defer函数执行。</p>
+<p><img src="https://i.loli.net/2021/06/16/QYjncWOBK65s4gx.png" alt="link.png"></p>
+<p>由panic触发的defer，在执行中有所不同。先看下defer的结构：</p>
+<p><img src="https://i.loli.net/2021/06/16/NT9a4d5yDlSpOqh.png" alt="_defer.png"></p>
+<ul>
+<li>先将 <code>started</code> 置 <code>true</code></li>
+<li>将 <code>_panic</code> 指向当前panic</li>
+</ul>
+<p>这种设计，是为了应对defer函数的执行失败。比如：</p>
+<p><img src="https://i.loli.net/2021/06/16/5CMwiJmxZHaELfS.png" alt="case2.png"></p>
+<p>我们让A1也发生panic。当程序执行到 <code>A1</code> 的 <code>panic</code> 时, <code>goroutine</code> 的 <code>_panic</code>链表又会增加一个 <code>panic</code> 。</p>
+<p>此时，新的 <code>panic</code> 也会触发执行 <code>_defer</code> 链表中的函数，并发现第一个defer函数上标记的 <code>panic</code> 不是自己，此时，程序会将 <code>_panic</code> 链表中对应的 <code>panic</code> 中止。</p>
+<p><img src="https://i.loli.net/2021/06/16/gHTuS8jRka1L4eh.png" alt="panic-shutdown.png"></p>
+<p>此时，需要展示一下 <code>panic</code> 的结构体。</p>
+<p><img src="https://i.loli.net/2021/06/16/EedOavxV5HyzwNk.png" alt="panic-struct.png"></p>
+<p>最后， 在没有 <code>recover</code> 的情况下，<code>panic</code> 打印会从链表尾部，打印至头部。</p>
+<h2 id="小结1"><a href="#小结1" class="headerlink" title="小结1"></a>小结1</h2><p>无 recover 的 panic 执行流程的要点在于：</p>
+<ul>
+<li><code>panic</code> 执行 <code>defer</code> 函数会先标记defer函数，目的是嵌套的 <code>panic</code> 可以中止之前的 <code>panic</code></li>
+<li>所有的panic 都会输出，且顺序输出。</li>
+</ul>
+<h1 id="recover"><a href="#recover" class="headerlink" title="recover"></a>recover</h1><p><code>recover</code> 只会把 <code>panic</code> 结构体上的 <code>recovered</code> 字段置 <code>true</code>。</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/16/golang%E4%B9%8Bdefer%E5%92%8Cpanic/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/"
                             aria-label=": mutex 互斥锁"
                         >
