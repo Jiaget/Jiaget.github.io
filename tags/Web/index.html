@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Jiaget&#39;s field">
-    <title>标签: 闭包 - Jiaget&#39;s field</title>
+    <title>标签: Web - Jiaget&#39;s field</title>
     <meta name="author" content="Jiaget">
     
     
@@ -18,7 +18,7 @@
     <script type="application/ld+json">{}</script>
     <meta property="og:type" content="blog">
 <meta property="og:title" content="Jiaget&#39;s field">
-<meta property="og:url" content="http://example.com/tags/%E9%97%AD%E5%8C%85/index.html">
+<meta property="og:url" content="http://example.com/tags/Web/index.html">
 <meta property="og:site_name" content="Jiaget&#39;s field">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:author" content="Jiaget">
@@ -217,23 +217,23 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
-                            aria-label=": 浅析golang 闭包"
+                            href="/2021/06/20/%E7%AA%A5%E6%8E%A2Gin%E6%A1%86%E6%9E%B6/"
+                            aria-label=": 窥探Gin框架"
                         >
-                            浅析golang 闭包
+                            窥探Gin框架
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time datetime="2021-06-03T12:26:10+08:00">
+    <time datetime="2021-06-20T14:25:35+08:00">
 	
-		    6月 03, 2021
+		    6月 20, 2021
     	
     </time>
     
         <span>发布在 </span>
         
-    <a class="category-link" href="/categories/golang/">golang</a>
+    <a class="category-link" href="/categories/Gin/">Gin</a>
 
 
     
@@ -242,9 +242,36 @@
             </div>
             
                 <div class="postShorten-content">
-                    <h1 id="什么是闭包"><a href="#什么是闭包" class="headerlink" title="什么是闭包"></a>什么是闭包</h1><pre><code>闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉时的上下文也能照常运行。
-    --- 摘自维基百科
-</code></pre>
+                    <p>几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的客户端服务端 – <img src="https://github.com/Jiaget/simplebank" alt="一个简易的银行系统"></p>
+<p>作为练手项目，Gin有很多特性与功能都没有研究与使用过， 这次的学习希望可以从深度和广度两个方面，更加全面的一窥Gin框架，这个活跃在社区广受好评的web框架。</p>
+<h1 id="回顾-HTTP-服务开发的基本流程"><a href="#回顾-HTTP-服务开发的基本流程" class="headerlink" title="回顾 HTTP 服务开发的基本流程"></a>回顾 HTTP 服务开发的基本流程</h1><ul>
+<li>开启TCP 监听</li>
+<li>初始化一些 <code>handler</code> 处理具体的业务逻辑</li>
+<li>将业务逻辑和相关的 <code>Method</code>, <code>URL</code> 绑定，对外暴露一些具体功能服务</li>
+</ul>
+<h1 id="Gin-的几个重要模型："><a href="#Gin-的几个重要模型：" class="headerlink" title="Gin 的几个重要模型："></a>Gin 的几个重要模型：</h1><ul>
+<li><p>Engine </p>
+<ul>
+<li>初始化一个 <code>gin</code> 对象实例，该对象实例中包含一些框架的基础功能， <code>日志</code>, <code>中间件设置</code>, <code>路由控制</code>, <code>handlercontext</code></li>
+</ul>
+</li>
+<li><p>Router:</p>
+<ul>
+<li>定义路由规则与条件，通过HTTP服务将具体路由注册到一个 <code>context</code> 实现的Handler 中</li>
+</ul>
+</li>
+<li><p>Context:</p>
+<ul>
+<li>该模块是框架中重要的一环，它可以让我们在中间件中共享变量，管理整个流程，验证请求的json， 提供一个json的响应。</li>
+</ul>
+</li>
+<li><p>Bind:</p>
+<ul>
+<li>context 中，可以获取到请求的详细信息（ HTTP 的 head 和 body）</li>
+<li>但是我们需要根据不同的HTTP协议参数获取相应的格式化数据，来处理底层的业务逻辑，这需要我们使用 <code>bind</code> 相关的方法来解析 HTTP数据。</li>
+</ul>
+</li>
+</ul>
 
                     
                         
@@ -254,7 +281,7 @@
                     
                         <p>
                             <a
-                                href="/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/#post-footer"
+                                href="/2021/06/20/%E7%AA%A5%E6%8E%A2Gin%E6%A1%86%E6%9E%B6/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

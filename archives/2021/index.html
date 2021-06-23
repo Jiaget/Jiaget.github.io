@@ -217,6 +217,229 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/06/23/Golang%E4%B9%8B%E5%8F%8D%E5%B0%84/"
+                            aria-label=": Golang之反射"
+                        >
+                            Golang之反射
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-23T09:12:59+08:00">
+	
+		    6月 23, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/golang/">golang</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <p>反射的作用只是将类型元数据返回给用户。</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/23/Golang%E4%B9%8B%E5%8F%8D%E5%B0%84/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/06/20/%E7%AA%A5%E6%8E%A2Gin%E6%A1%86%E6%9E%B6/"
+                            aria-label=": 窥探Gin框架"
+                        >
+                            窥探Gin框架
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-20T14:25:35+08:00">
+	
+		    6月 20, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/Gin/">Gin</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <p>几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的客户端服务端 – <img src="https://github.com/Jiaget/simplebank" alt="一个简易的银行系统"></p>
+<p>作为练手项目，Gin有很多特性与功能都没有研究与使用过， 这次的学习希望可以从深度和广度两个方面，更加全面的一窥Gin框架，这个活跃在社区广受好评的web框架。</p>
+<h1 id="回顾-HTTP-服务开发的基本流程"><a href="#回顾-HTTP-服务开发的基本流程" class="headerlink" title="回顾 HTTP 服务开发的基本流程"></a>回顾 HTTP 服务开发的基本流程</h1><ul>
+<li>开启TCP 监听</li>
+<li>初始化一些 <code>handler</code> 处理具体的业务逻辑</li>
+<li>将业务逻辑和相关的 <code>Method</code>, <code>URL</code> 绑定，对外暴露一些具体功能服务</li>
+</ul>
+<h1 id="Gin-的几个重要模型："><a href="#Gin-的几个重要模型：" class="headerlink" title="Gin 的几个重要模型："></a>Gin 的几个重要模型：</h1><ul>
+<li><p>Engine </p>
+<ul>
+<li>初始化一个 <code>gin</code> 对象实例，该对象实例中包含一些框架的基础功能， <code>日志</code>, <code>中间件设置</code>, <code>路由控制</code>, <code>handlercontext</code></li>
+</ul>
+</li>
+<li><p>Router:</p>
+<ul>
+<li>定义路由规则与条件，通过HTTP服务将具体路由注册到一个 <code>context</code> 实现的Handler 中</li>
+</ul>
+</li>
+<li><p>Context:</p>
+<ul>
+<li>该模块是框架中重要的一环，它可以让我们在中间件中共享变量，管理整个流程，验证请求的json， 提供一个json的响应。</li>
+</ul>
+</li>
+<li><p>Bind:</p>
+<ul>
+<li>context 中，可以获取到请求的详细信息（ HTTP 的 head 和 body）</li>
+<li>但是我们需要根据不同的HTTP协议参数获取相应的格式化数据，来处理底层的业务逻辑，这需要我们使用 <code>bind</code> 相关的方法来解析 HTTP数据。</li>
+</ul>
+</li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/20/%E7%AA%A5%E6%8E%A2Gin%E6%A1%86%E6%9E%B6/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/06/19/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"
+                            aria-label=": 设计模式"
+                        >
+                            设计模式
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-19T13:01:41+08:00">
+	
+		    6月 19, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <p>简述一下各个设计模式，顺便用Golang实现。</p>
+<h1 id="创建型模式"><a href="#创建型模式" class="headerlink" title="创建型模式"></a>创建型模式</h1><h2 id="简单工厂模式"><a href="#简单工厂模式" class="headerlink" title="简单工厂模式"></a>简单工厂模式</h2><p>根据参数的不同，返回不同类的实例。简单工厂模式定义一个类来负责创建其他类的实例。</p>
+<p>Golang的设计理念弱化了面向对象的概念，它没有构造函数的概念，但规范化的代码会使用Newxx的函数来初始化类。</p>
+<h3 id="简单工厂的优点"><a href="#简单工厂的优点" class="headerlink" title="简单工厂的优点"></a>简单工厂的优点</h3><ul>
+<li>客户端不需要直接创建对象实例，会有专门的工厂类用于这类工作</li>
+<li>换句话说，客户端无需知道产品类的类名，只需要知道对应参数，而对应参数名的命名只需要规范，易读</li>
+<li>可以引入配置文件，在不修改代码的情况下更改产品类。</li>
+</ul>
+<h3 id="简单工厂的缺点"><a href="#简单工厂的缺点" class="headerlink" title="简单工厂的缺点"></a>简单工厂的缺点</h3><ul>
+<li>工厂类担负的责任过重，一旦不能工作，整个系统都会被影响</li>
+<li>增加了系统类的个数，复杂度增加（虽然在工厂模式中是简单的实现）</li>
+<li>扩展困难，增加新的产品类，就要修改工厂逻辑</li>
+</ul>
+<p><img src="https://github.com/Jiaget/notes/blob/main/patterns/simple/simple.go" alt="简单工厂demo"></p>
+<h2 id="工厂方法模式"><a href="#工厂方法模式" class="headerlink" title="工厂方法模式"></a>工厂方法模式</h2><p>简单方法模式将代码逻辑压力集中在了一个工厂类上面，工厂方法模式显然希望缓解工厂类的压力而设计出来的。</p>
+<p>我们会先定义一个抽象工厂类，再定义具体的工厂类来实现不同的产品。这种模式下，当出现新的产品，只需要为这个产品创建一个具体的工厂类即可获取新的实例。</p>
+<p><img src="https://github.com/Jiaget/notes/blob/main/patterns/factory_method/factory_method.go" alt="工厂方法demo"></p>
+<h3 id="工厂方法优点"><a href="#工厂方法优点" class="headerlink" title="工厂方法优点"></a>工厂方法优点</h3><ul>
+<li>工厂方法模式中，工厂方法创建产品，并隐藏产品类将被实例化的细节。只需关系产品对应的工厂，无需知道类名。</li>
+<li>多态，可以使工厂自主确定创建何种产品。所有的具体工厂都有同一个抽象的父类。（Golang实现继承需要通过接口的特性，使用组合来实现。）</li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/19/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/06/18/golang%E7%9A%84GC-%E4%BA%8C/"
                             aria-label=": GC(二)"
                         >
@@ -500,6 +723,12 @@
 		    6月 09, 2021
     	
     </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/golang/">golang</a>
+
+
     
 </div>
 
@@ -992,268 +1221,6 @@ var key1 keyType1 = &quot;key1&quot;
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"
-                            aria-label=": Redis分布式锁"
-                        >
-                            Redis分布式锁
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-06-04T22:49:51+08:00">
-	
-		    6月 04, 2021
-    	
-    </time>
-    
-        <span>发布在 </span>
-        
-    <a class="category-link" href="/categories/redis/">redis</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="涉及指令"><a href="#涉及指令" class="headerlink" title="涉及指令"></a>涉及指令</h1><ul>
-<li><code>SETNX key value</code>: （nx: not exist） key不存在时，设置成value,返回1; 没设置成功，返回0</li>
-<li><code>EXPIRE key locktime</code>: 设置key有效时常</li>
-<li><code>DEL key</code>:删除</li>
-<li><code>GETSET key value</code>: 先GET,再SET,先返回value,没有就返回nil。再实现设置操作。</li>
-</ul>
-<h1 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h1><p>分布式锁就是 对于一个所有进程都能访问到的资源上，设置一个锁资源，让这些进程来竞争这个锁。</p>
-<p>我们希望分布式锁：</p>
-<ul>
-<li>响应快</li>
-<li>性能高</li>
-<li>与业务无关</li>
-</ul>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                评论和共享
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/06/04/%E6%8E%A2%E8%AE%A8%E4%B8%80%E4%B8%8Bgolang-map/"
-                            aria-label=": 探讨一下golang map"
-                        >
-                            探讨一下golang map
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-06-04T14:51:43+08:00">
-	
-		    6月 04, 2021
-    	
-    </time>
-    
-        <span>发布在 </span>
-        
-    <a class="category-link" href="/categories/golang/">golang</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="为什么Golang-map-是无序的？"><a href="#为什么Golang-map-是无序的？" class="headerlink" title="为什么Golang map 是无序的？"></a>为什么Golang map 是无序的？</h1><h2 id="现象"><a href="#现象" class="headerlink" title="现象"></a>现象</h2><p>Golang中每次遍历Map元素，输出的数据顺序不一致。</p>
-<p>比如</p>
-<pre><code>hash := make(map[int]int)
-for i := 0; i &lt; 10; i++ &#123;
-    hash[i] = i
-&#125;
-for key := range hash &#123;
-    fmt.Printf(&quot;%d &quot;, key)
-&#125;
-</code></pre>
-<p>我按顺序写入map，但当用 <code>for ... range</code> 遍历，打印出来的却是乱序。</p>
-<pre><code>8 9 0 2 4 6 7 1 3 5
-</code></pre>
-<h2 id="map遍历源码"><a href="#map遍历源码" class="headerlink" title="map遍历源码"></a>map遍历源码</h2><p>在 <code>runtime/map.go</code> 中，涉及map遍历有这么一段代码：</p>
-<pre><code>r := uintptr(fastrand())
-if h.B &gt; 31-bucketCntBits &#123;
-    r += uintptr(fastrand()) &lt;&lt; 31
-&#125;
-</code></pre>
-<p>每次遍历都会随机指定一个起始点。</p>
-<p>当然，这不会是真正原因。因为如果只是遍历起始点随机，map的遍历应该是局部有序的，然而事实并非如此。</p>
-<h2 id="无序的本质"><a href="#无序的本质" class="headerlink" title="无序的本质"></a>无序的本质</h2><h3 id="哈希表"><a href="#哈希表" class="headerlink" title="哈希表"></a>哈希表</h3><p>golang map的底层实现是用了 哈希表 这类的数据结构。哈希表的特点就是在冲突尽可能少的情况下实现高效性。换句话说，golang需要通过设计来减少冲突的发生。他们使用的其中之一的策略就是随机性。</p>
-<p>下面来讲讲golang设计的哈希表吧。</p>
-<h2 id="写入"><a href="#写入" class="headerlink" title="写入"></a>写入</h2><p>golang 设计的哈希表，在选择桶的时候，使用了与运算的方法。 =&gt; hash &amp; (m - 1)</p>
-<ul>
-<li><ol>
-<li>先对 <code>key</code> 进行 <code>hash</code>，取哈希值的低八位，确定bucket 编号 N</li>
-</ol>
-</li>
-<li><ol start="2">
-<li>遍历 N bucket 中的每个位置，当有个没有写入的位置，写入哈希值的高八位</li>
-</ol>
-</li>
-<li><ol start="3">
-<li>如果 N bucket 中出现相同的topHash, 比较存入的key和要写入的key是否相同，相同则覆盖值；不同说明发生了冲突，继续往下找空余的空间。（开放地址法）</li>
-</ol>
-</li>
-</ul>
-<p>golang 写入的随机性在于，在给map开辟空间之前，会生成一个随机种子存放在 <code>hmap.hash0</code> 中。这种做法就是希望能尽量减少哈希冲突。</p>
-<h2 id="扩容"><a href="#扩容" class="headerlink" title="扩容"></a>扩容</h2><p>golang在每一个bucket后面都有一块 能存放8个key的 bmap。 bmap 的大小不能设计过大，因为这也会降低哈希表的性能。所以，当我们原先给 map 开辟的 buckets 不够用时，需要扩容。</p>
-<p>当哈希表满了， 会开辟出足够多的新桶。但是，哈希表不会将旧桶数据一次性迁移到新桶上。在 <code>hmap</code> 结构体中 <code>oldbuckets</code> 指向旧桶， <code>nevacuate</code> 标记旧桶迁移进度。哈希表每一次的读写操作，都会进行一次旧数据的迁移。像这种将迁移分摊给每次哈希表的操作中的扩容方式叫做 <code>渐进式扩容</code>。 如果一次性进行数据迁移，哈希表性能必然会出现 <code>抖动</code> ， 这种 <code>渐进式扩容</code> 就能很好地保证了哈希表的性能稳定性。</p>
-<h2 id="溢出桶"><a href="#溢出桶" class="headerlink" title="溢出桶"></a>溢出桶</h2><p>先来看一下本哈希表中一个桶的构造是什么样的吧</p>
-<p><img src="https://i.loli.net/2021/06/04/gx38I1OpQboA2Gl.png" alt="bucket.png"></p>
-<p>在一个bucket中，为了数据更加紧凑，会首先存储 k-v 键值对哈希值的高八位，一共只能存八个，也就是说一个bucket只能存8对键值对。当一个bucket存满了，还可以再往后添加一个bucket，这叫溢出桶，溢出桶的结构和bucket一模一样。</p>
-<p>溢出桶的出现是为了一定程度减少扩容的次数，在上面我们介绍了本哈希表的渐进式扩容，虽然将扩容迁移的负担平摊到了每一步的哈希表操作，但如果扩容次数增加，同样会影响哈希表的性能。所以，溢出桶出现，是希望，如果只是少量的数据溢出，只需要再开开辟一个桶来存放，而无需进行扩容操作。</p>
-<p>实际中，哈希表如果分配了超过 2 ^ 4 个桶，会被认为需要溢出桶的概率比较大，会预分配 2 ^ (B-4)个溢出桶。</p>
-<p>溢出桶的相关信息被存放在 <code>mapextra</code>。</p>
-<h2 id="扩容规则"><a href="#扩容规则" class="headerlink" title="扩容规则"></a>扩容规则</h2><h3 id="翻倍扩容"><a href="#翻倍扩容" class="headerlink" title="翻倍扩容"></a>翻倍扩容</h3><p>golang默认的负载因子是 <code>6.5</code>。 如果 <code>count / (2^B)</code> 超过这个值，会触发翻倍扩容。翻倍扩容即分配的新桶数目是旧桶数目的两倍。</p>
-<p>哈希表扩容后，旧桶数据需要迁移到新桶中。为了减少新桶哈希冲突，旧桶数据需要均匀分配给新桶中的每一个桶。其策略是，将旧桶中每一个哈希值都再一次进行与运算。 假设我们的旧桶宽度为 4， 新分配的新桶是8。 我们进行 <code> hash &amp; 111</code> 的与操作。0号桶中的数据会被均匀分配给新桶的0 和4号桶，其他桶一次类推。</p>
-<h3 id="等量扩容"><a href="#等量扩容" class="headerlink" title="等量扩容"></a>等量扩容</h3><p>当哈希表的负载因子没超过上限，但溢出桶比较多， 此时为了减少溢出桶的数量，会采取等量扩容。等量扩容即新开辟的桶的数量和旧桶一致。</p>
-<p>这种机制主要是应对哈希表大量删除操作的场景。</p>
-<p>我们可以想象这样的场景：</p>
-<ul>
-<li>哈希表添加了大量数据，产生一些溢出桶。</li>
-<li>之后进行了删除操作，溢出桶大部分的数据都被删除。</li>
-<li>产生了很多较空的溢出桶。</li>
-</ul>
-<p>溢出桶同样会影响性能，因此，等量扩容是减少溢出桶的数量，也是为了维持性能的稳定。</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/06/04/%E6%8E%A2%E8%AE%A8%E4%B8%80%E4%B8%8Bgolang-map/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                评论和共享
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/"
-                            aria-label=": 虚拟内存地址空间"
-                        >
-                            虚拟内存地址空间
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-06-03T12:30:37+08:00">
-	
-		    6月 03, 2021
-    	
-    </time>
-    
-        <span>发布在 </span>
-        
-    <a class="category-link" href="/categories/%E5%86%85%E5%AD%98/">内存</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="虚拟内存地址空间的分布"><a href="#虚拟内存地址空间的分布" class="headerlink" title="虚拟内存地址空间的分布"></a>虚拟内存地址空间的分布</h1><p><img src="https://i.loli.net/2021/06/03/geWDOKmTUXCZI31.png" alt="Virtual-memory-address-space.png"></p>
-<p>我们可以对内存空间进行如下分区管理：</p>
-<h2 id="代码段"><a href="#代码段" class="headerlink" title="代码段"></a>代码段</h2><p> 一段程序经过编译器编译成机器指令存储在可执行文件里，程序运行时，程序中的各个函数会被加载存放在虚拟地址空间中的代码段。</p>
-<p> 代码段中指令的执行流程：<br>    - 顺序指令：每个进程只会执行一次<br>    - 循环指令：需要使用跳转指令返回函数的头部<br>    - 递归指令：需要借助栈来实现</p>
-<p>代码段指令由 <code>操作码：操作对象</code> 构成。</p>
-<ul>
-<li>操作码通常包括 <code>MOV</code>， <code>PUSH</code>，<code>POP</code>,<code>XCHG</code></li>
-<li>操作对象可以是<ul>
-<li>立即数： 比如golang中某一段程序 <code>x := 1 + 1</code>， 其中的1就是立即数，它不会被储存在任意寄存器中，它直接包含在代码里。</li>
-<li>局部数据：也就是局部变量，它将在栈区分配空间，代码段会引用该数据地址</li>
-<li>BSS数据与数据段数据：与上同，关于BSS，数据段将在下面详细说明。</li>
-</ul>
-</li>
-</ul>
-<h2 id="数据段"><a href="#数据段" class="headerlink" title="数据段"></a>数据段</h2><p>数据段一般存放<code>已初始化</code>且<code>初值不为0</code>的全局变量和静态局部变量。数据段属于静态内存分配。</p>
-<h2 id="BSS-段"><a href="#BSS-段" class="headerlink" title="BSS 段"></a>BSS 段</h2><p>有些地方可能会和数据段合并，将数据段划分为初始化区和未初始化区。</p>
-<p>未初始化或者初值为0的全局变量和静态局部变量</p>
-<h2 id="堆"><a href="#堆" class="headerlink" title="堆"></a>堆</h2><p>动态分配的内存。</p>
-<p>在go中，我们使用 <code>make</code>, <code>new</code>来分配的就在堆中开辟。这部分的内存可以最终由 GC回收。</p>
-<h2 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h2><p>局部变量，函数参数，返回地址等等</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                评论和共享
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
@@ -1269,7 +1236,7 @@ if h.B &gt; 31-bucketCntBits &#123;
             </a>
           </li>
         
-        <li class="pagination-number">第 1 页 共 2 页</li>
+        <li class="pagination-number">第 1 页 共 3 页</li>
     </ul>
 </div>
 

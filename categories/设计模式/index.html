@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Jiaget&#39;s field">
-    <title>标签: 闭包 - Jiaget&#39;s field</title>
+    <title>分类: 设计模式 - Jiaget&#39;s field</title>
     <meta name="author" content="Jiaget">
     
     
@@ -18,7 +18,7 @@
     <script type="application/ld+json">{}</script>
     <meta property="og:type" content="blog">
 <meta property="og:title" content="Jiaget&#39;s field">
-<meta property="og:url" content="http://example.com/tags/%E9%97%AD%E5%8C%85/index.html">
+<meta property="og:url" content="http://example.com/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/index.html">
 <meta property="og:site_name" content="Jiaget&#39;s field">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:author" content="Jiaget">
@@ -217,23 +217,23 @@
                     
                         <a
                             class="link-unstyled"
-                            href="/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
-                            aria-label=": 浅析golang 闭包"
+                            href="/2021/06/19/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"
+                            aria-label=": 设计模式"
                         >
-                            浅析golang 闭包
+                            设计模式
                         </a>
                     
                 </h1>
                 <div class="postShorten-meta">
-    <time datetime="2021-06-03T12:26:10+08:00">
+    <time datetime="2021-06-19T13:01:41+08:00">
 	
-		    6月 03, 2021
+		    6月 19, 2021
     	
     </time>
     
         <span>发布在 </span>
         
-    <a class="category-link" href="/categories/golang/">golang</a>
+    <a class="category-link" href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
 
 
     
@@ -242,9 +242,27 @@
             </div>
             
                 <div class="postShorten-content">
-                    <h1 id="什么是闭包"><a href="#什么是闭包" class="headerlink" title="什么是闭包"></a>什么是闭包</h1><pre><code>闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉时的上下文也能照常运行。
-    --- 摘自维基百科
-</code></pre>
+                    <p>简述一下各个设计模式，顺便用Golang实现。</p>
+<h1 id="创建型模式"><a href="#创建型模式" class="headerlink" title="创建型模式"></a>创建型模式</h1><h2 id="简单工厂模式"><a href="#简单工厂模式" class="headerlink" title="简单工厂模式"></a>简单工厂模式</h2><p>根据参数的不同，返回不同类的实例。简单工厂模式定义一个类来负责创建其他类的实例。</p>
+<p>Golang的设计理念弱化了面向对象的概念，它没有构造函数的概念，但规范化的代码会使用Newxx的函数来初始化类。</p>
+<h3 id="简单工厂的优点"><a href="#简单工厂的优点" class="headerlink" title="简单工厂的优点"></a>简单工厂的优点</h3><ul>
+<li>客户端不需要直接创建对象实例，会有专门的工厂类用于这类工作</li>
+<li>换句话说，客户端无需知道产品类的类名，只需要知道对应参数，而对应参数名的命名只需要规范，易读</li>
+<li>可以引入配置文件，在不修改代码的情况下更改产品类。</li>
+</ul>
+<h3 id="简单工厂的缺点"><a href="#简单工厂的缺点" class="headerlink" title="简单工厂的缺点"></a>简单工厂的缺点</h3><ul>
+<li>工厂类担负的责任过重，一旦不能工作，整个系统都会被影响</li>
+<li>增加了系统类的个数，复杂度增加（虽然在工厂模式中是简单的实现）</li>
+<li>扩展困难，增加新的产品类，就要修改工厂逻辑</li>
+</ul>
+<p><img src="https://github.com/Jiaget/notes/blob/main/patterns/simple/simple.go" alt="简单工厂demo"></p>
+<h2 id="工厂方法模式"><a href="#工厂方法模式" class="headerlink" title="工厂方法模式"></a>工厂方法模式</h2><p>简单方法模式将代码逻辑压力集中在了一个工厂类上面，工厂方法模式显然希望缓解工厂类的压力而设计出来的。</p>
+<p>我们会先定义一个抽象工厂类，再定义具体的工厂类来实现不同的产品。这种模式下，当出现新的产品，只需要为这个产品创建一个具体的工厂类即可获取新的实例。</p>
+<p><img src="https://github.com/Jiaget/notes/blob/main/patterns/factory_method/factory_method.go" alt="工厂方法demo"></p>
+<h3 id="工厂方法优点"><a href="#工厂方法优点" class="headerlink" title="工厂方法优点"></a>工厂方法优点</h3><ul>
+<li>工厂方法模式中，工厂方法创建产品，并隐藏产品类将被实例化的细节。只需关系产品对应的工厂，无需知道类名。</li>
+<li>多态，可以使工厂自主确定创建何种产品。所有的具体工厂都有同一个抽象的父类。（Golang实现继承需要通过接口的特性，使用组合来实现。）</li>
+</ul>
 
                     
                         
@@ -254,7 +272,7 @@
                     
                         <p>
                             <a
-                                href="/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/#post-footer"
+                                href="/2021/06/19/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -277,6 +295,7 @@
 </div>
 
 </section>
+
 
 
                 <footer id="footer" class="main-content-wrap">

@@ -217,6 +217,229 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/06/23/Golang%E4%B9%8B%E5%8F%8D%E5%B0%84/"
+                            aria-label=": Golang之反射"
+                        >
+                            Golang之反射
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-23T09:12:59+08:00">
+	
+		    6月 23, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/golang/">golang</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <p>反射的作用只是将类型元数据返回给用户。</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/23/Golang%E4%B9%8B%E5%8F%8D%E5%B0%84/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/06/20/%E7%AA%A5%E6%8E%A2Gin%E6%A1%86%E6%9E%B6/"
+                            aria-label=": 窥探Gin框架"
+                        >
+                            窥探Gin框架
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-20T14:25:35+08:00">
+	
+		    6月 20, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/Gin/">Gin</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <p>几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的客户端服务端 – <img src="https://github.com/Jiaget/simplebank" alt="一个简易的银行系统"></p>
+<p>作为练手项目，Gin有很多特性与功能都没有研究与使用过， 这次的学习希望可以从深度和广度两个方面，更加全面的一窥Gin框架，这个活跃在社区广受好评的web框架。</p>
+<h1 id="回顾-HTTP-服务开发的基本流程"><a href="#回顾-HTTP-服务开发的基本流程" class="headerlink" title="回顾 HTTP 服务开发的基本流程"></a>回顾 HTTP 服务开发的基本流程</h1><ul>
+<li>开启TCP 监听</li>
+<li>初始化一些 <code>handler</code> 处理具体的业务逻辑</li>
+<li>将业务逻辑和相关的 <code>Method</code>, <code>URL</code> 绑定，对外暴露一些具体功能服务</li>
+</ul>
+<h1 id="Gin-的几个重要模型："><a href="#Gin-的几个重要模型：" class="headerlink" title="Gin 的几个重要模型："></a>Gin 的几个重要模型：</h1><ul>
+<li><p>Engine </p>
+<ul>
+<li>初始化一个 <code>gin</code> 对象实例，该对象实例中包含一些框架的基础功能， <code>日志</code>, <code>中间件设置</code>, <code>路由控制</code>, <code>handlercontext</code></li>
+</ul>
+</li>
+<li><p>Router:</p>
+<ul>
+<li>定义路由规则与条件，通过HTTP服务将具体路由注册到一个 <code>context</code> 实现的Handler 中</li>
+</ul>
+</li>
+<li><p>Context:</p>
+<ul>
+<li>该模块是框架中重要的一环，它可以让我们在中间件中共享变量，管理整个流程，验证请求的json， 提供一个json的响应。</li>
+</ul>
+</li>
+<li><p>Bind:</p>
+<ul>
+<li>context 中，可以获取到请求的详细信息（ HTTP 的 head 和 body）</li>
+<li>但是我们需要根据不同的HTTP协议参数获取相应的格式化数据，来处理底层的业务逻辑，这需要我们使用 <code>bind</code> 相关的方法来解析 HTTP数据。</li>
+</ul>
+</li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/20/%E7%AA%A5%E6%8E%A2Gin%E6%A1%86%E6%9E%B6/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/06/19/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"
+                            aria-label=": 设计模式"
+                        >
+                            设计模式
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-19T13:01:41+08:00">
+	
+		    6月 19, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <p>简述一下各个设计模式，顺便用Golang实现。</p>
+<h1 id="创建型模式"><a href="#创建型模式" class="headerlink" title="创建型模式"></a>创建型模式</h1><h2 id="简单工厂模式"><a href="#简单工厂模式" class="headerlink" title="简单工厂模式"></a>简单工厂模式</h2><p>根据参数的不同，返回不同类的实例。简单工厂模式定义一个类来负责创建其他类的实例。</p>
+<p>Golang的设计理念弱化了面向对象的概念，它没有构造函数的概念，但规范化的代码会使用Newxx的函数来初始化类。</p>
+<h3 id="简单工厂的优点"><a href="#简单工厂的优点" class="headerlink" title="简单工厂的优点"></a>简单工厂的优点</h3><ul>
+<li>客户端不需要直接创建对象实例，会有专门的工厂类用于这类工作</li>
+<li>换句话说，客户端无需知道产品类的类名，只需要知道对应参数，而对应参数名的命名只需要规范，易读</li>
+<li>可以引入配置文件，在不修改代码的情况下更改产品类。</li>
+</ul>
+<h3 id="简单工厂的缺点"><a href="#简单工厂的缺点" class="headerlink" title="简单工厂的缺点"></a>简单工厂的缺点</h3><ul>
+<li>工厂类担负的责任过重，一旦不能工作，整个系统都会被影响</li>
+<li>增加了系统类的个数，复杂度增加（虽然在工厂模式中是简单的实现）</li>
+<li>扩展困难，增加新的产品类，就要修改工厂逻辑</li>
+</ul>
+<p><img src="https://github.com/Jiaget/notes/blob/main/patterns/simple/simple.go" alt="简单工厂demo"></p>
+<h2 id="工厂方法模式"><a href="#工厂方法模式" class="headerlink" title="工厂方法模式"></a>工厂方法模式</h2><p>简单方法模式将代码逻辑压力集中在了一个工厂类上面，工厂方法模式显然希望缓解工厂类的压力而设计出来的。</p>
+<p>我们会先定义一个抽象工厂类，再定义具体的工厂类来实现不同的产品。这种模式下，当出现新的产品，只需要为这个产品创建一个具体的工厂类即可获取新的实例。</p>
+<p><img src="https://github.com/Jiaget/notes/blob/main/patterns/factory_method/factory_method.go" alt="工厂方法demo"></p>
+<h3 id="工厂方法优点"><a href="#工厂方法优点" class="headerlink" title="工厂方法优点"></a>工厂方法优点</h3><ul>
+<li>工厂方法模式中，工厂方法创建产品，并隐藏产品类将被实例化的细节。只需关系产品对应的工厂，无需知道类名。</li>
+<li>多态，可以使工厂自主确定创建何种产品。所有的具体工厂都有同一个抽象的父类。（Golang实现继承需要通过接口的特性，使用组合来实现。）</li>
+</ul>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/19/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/06/16/golang%E4%B9%8Bdefer%E5%92%8Cpanic/"
                             aria-label=": golang之defer和panic"
                         >
@@ -276,6 +499,177 @@
                         <p>
                             <a
                                 href="/2021/06/16/golang%E4%B9%8Bdefer%E5%92%8Cpanic/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
+                            href="/2021/06/09/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8Golang%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%B3%BB%E7%BB%9F/"
+                            aria-label=": 深入探讨Golang的类型系统"
+                        >
+                            深入探讨Golang的类型系统
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-09T19:33:42+08:00">
+	
+		    6月 09, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/golang/">golang</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="先讲一讲Golang的方法"><a href="#先讲一讲Golang的方法" class="headerlink" title="先讲一讲Golang的方法"></a>先讲一讲Golang的方法</h1><pre><code>type T struct &#123;
+    name string
+&#125;
+func (t T) F1() &#123;
+    fmt.Println(t.name)
+&#125;
+func main()&#123;
+    t := T&#123;name: &quot;a&quot;&#125;
+    t.F1()
+&#125;
+</code></pre>
+<p>像上面这段代码，我们定义了一个结构体，并给这个结构体关联了一个方法， 并使用 <code>t.F1()</code>语句调用了这个方法。</p>
+<p>方法的本质是一个函数，只是这个函数在被调用时，接收者会作为第一个参数传入。（<code>t.F1()</code> 的本质是 <code>T.F1(t)</code>。 前者的写法只是语法糖）</p>
+<p>在编译阶段，我们可以获取变量，类型，方法等参数。</p>
+<p>到了执行阶段，像 <code>反射</code>， <code>接口</code>， <code>类型断言</code> 这类语言特性/ 机制，我们也需要动态获取数据类型信息。</p>
+<h1 id="我们先看看Golang有哪些类型？"><a href="#我们先看看Golang有哪些类型？" class="headerlink" title="我们先看看Golang有哪些类型？"></a>我们先看看Golang有哪些类型？</h1><h2 id="内置类型-build-in"><a href="#内置类型-build-in" class="headerlink" title="内置类型(build-in)"></a>内置类型(build-in)</h2><pre><code>int8
+int16
+int32
+int64
+int
+byte
+string
+slice
+func
+map
+</code></pre>
+<h2 id="自定义类型"><a href="#自定义类型" class="headerlink" title="自定义类型"></a>自定义类型</h2><pre><code>type typ int
+
+type T struct &#123;
+    name string
+&#125;
+
+type I interface&#123;
+    Name() string
+&#125;
+</code></pre>
+<p>在 Golang 官方定义中， 内置类型不能定义方法，接口类型是方法的无效接收者。</p>
+<p>换句话说，我们只能给 <code>type T int</code> 和 <code>type T struct&#123;&#125;</code> 定义方法。</p>
+<h2 id="类型元数据"><a href="#类型元数据" class="headerlink" title="类型元数据"></a>类型元数据</h2><p>无论是内置类型还是自定义类型，每种类型都有全局唯一的 <code>类型元数据</code>。</p>
+<p>类型元数据记录了如下信息:(rutime/type.go)</p>
+<pre><code>type _type struct &#123;
+    size        uintptr
+    hash        uint32
+    tflag       tflag
+    align       uint8
+    fieldAlign  uint8
+    kind        uint8
+    ....
+&#125;
+</code></pre>
+<p>有些类型元数据可能还需要对信息进行扩展，比如切片类型</p>
+<pre><code>type slicetype struct &#123;
+    typ     _type
+    elem    *_type
+&#125;
+</code></pre>
+<p>因为切片类型可以是整型切片，也可以是字符串切片，因此，它还需要一个elem字段来描述储存元素的类型。比如整形切片，它的类型元数据的elem字段需要指向整形的类型元数据。</p>
+<p>对于自定义类型，它们可能还需要更多的描述，这些描述被储存在 <code>uncommontype</code> 结构体中。</p>
+<pre><code>type uncommontype struct &#123;
+    pkgpath nameOff
+    mcount  uint16 // 方法数
+    xcount  uint16 // exported方法数
+    moff    uint32 // 相对于方法元数据数据的偏移值
+    _       uint32 // unused
+&#125;
+</code></pre>
+<h2 id="类型的两种写法区别"><a href="#类型的两种写法区别" class="headerlink" title="类型的两种写法区别"></a>类型的两种写法区别</h2><ul>
+<li><code>type MyType1 = int32</code><ul>
+<li><code>Mytype1</code> 和 <code>int32</code> 会被关联到同一个类型元数据，比如 <code>rune</code> 和 <code>int32</code> 就是这样的关系。</li>
+</ul>
+</li>
+<li><code>type MyType2 int32</code><ul>
+<li><code>MyType2</code> 和 <code>int32</code> 会各自拥有自己的类型元数据。</li>
+</ul>
+</li>
+</ul>
+<h1 id="接口类型"><a href="#接口类型" class="headerlink" title="接口类型"></a>接口类型</h1><h2 id="空接口类型"><a href="#空接口类型" class="headerlink" title="空接口类型"></a>空接口类型</h2><p>空接口类型可以接收任意类型的数据，也就是说它需要记录接收数据的类型和数据的地址。</p>
+<pre><code>type eface struct &#123;
+    _type *_type            // 动态类型
+    data  unsafe.Pointer    // 动态值
+&#125;
+</code></pre>
+<p>下图展示了一个空接口变量赋值后，其元数据的变化。</p>
+<p><img src="https://i.loli.net/2021/06/09/93lIxa4JU6GHAZj.png" alt="interface.png"></p>
+<h2 id="非空接口类型"><a href="#非空接口类型" class="headerlink" title="非空接口类型"></a>非空接口类型</h2><p>非空接口类型即拥有一个方法列表的类型。一个变量要想赋值给一个非空接口类型，它需要实现这个接口所有的方法。</p>
+<pre><code>type iface struct &#123;
+    tab  *itab
+    data unsafe.Pointer // 指向接口的动态值
+&#125;
+</code></pre>
+<p><img src="https://i.loli.net/2021/06/09/NtDmKZUFSEWP2i3.png" alt="non-nil-interface.png"></p>
+<p>非空接口的 </p>
+<ul>
+<li><code>tab.inter</code> 指向了接口类型的元数据，其中的 <code>mhdr</code> 是接口的方法列表。</li>
+<li><code>_type</code> 是接口的动态类型</li>
+<li><code>hash</code> 是类型哈希值，用于接口类型的快速比较</li>
+<li><code>fun</code> 是方法地址数组</li>
+</ul>
+<p>itab 结构体中的值，在它被确定后就不会发生改变，所以它是可复用的。</p>
+<p><img src="https://i.loli.net/2021/06/09/7HebRa1sKAwzqyk.png" alt="itab.png"></p>
+<p>Golang 会将接口类型和动态类型作为一个组合key， itab结构体指针为value, 形成一张轻量级的哈希表。当我们需要一个itab时，会先在哈希表中查找，如果找到了，直接复用，否则会创建一个新的itab，添加到这张哈希表中。</p>
+<h1 id="类型断言"><a href="#类型断言" class="headerlink" title="类型断言"></a>类型断言</h1><p>像上面提到的 <code>空接口</code> 和 <code>非空接口</code> ，被叫做 <code>抽象类型</code>; 与之对应的 int, string, slice 等类型就是具体类型。</p>
+<p>类型断言是作用在抽象类型之上的， 而断言的目标类型，可以是具体类型，也可以是非空接口。两两组合，可以得到4种断言。</p>
+<ul>
+<li>空接口.(具体类型)</li>
+<li>非空接口.(具体类型)</li>
+</ul>
+<h2 id="空接口-具体类型"><a href="#空接口-具体类型" class="headerlink" title="空接口.(具体类型)"></a>空接口.(具体类型)</h2><p><code>r, ok := interface.(*type)</code></p>
+<p>对于这种类型断言，我们只需要检查 interface 元数据中的 <code>_type</code> 字段是否指向 断言的<code>*type</code>， 是则 Ok 为 true, 否则 ok 为 false，且 r 为 nil</p>
+<h2 id="非空接口-具体类型"><a href="#非空接口-具体类型" class="headerlink" title="非空接口.(具体类型)"></a>非空接口.(具体类型)</h2><p>与空接口不同的是，这种断言方法只需检查 itab 是否指向目标类型结构体。</p>
+<h2 id="空接口-非空接口"><a href="#空接口-非空接口" class="headerlink" title="空接口.(非空接口)"></a>空接口.(非空接口)</h2><p>在我们检查接口类型元数据时， 我们需要比对 空接口的方法元数据数组和目标类型的方法列表是否相同。当然我们不通过空接口的类型元数据直接比对，还是通过itab缓存。但是通过itab缓存时，虽然查到了目标itab，但还是需要比对itab中的方法 <code>f[0]</code> 是否为 0。 这是因为，在某次类型断言失败时，itab缓存还是会添加itab到哈希表中，只是会将其方法列表置0，代表断言失败。</p>
+<h2 id="非空接口-非空接口"><a href="#非空接口-非空接口" class="headerlink" title="非空接口.(非空接口)"></a>非空接口.(非空接口)</h2><p>同样，从itab缓存查itab结构体指针，并去查f[0]是否为0.</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>Golang 的类型断言的关键在于明确接口动态类型，与对应类型实现了哪些方法。</p>
+<p>这些明确内容的关键点在于 <code>类型元数据</code> <code>空接口</code> <code>非空接口</code></p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/09/%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8Golang%E7%9A%84%E7%B1%BB%E5%9E%8B%E7%B3%BB%E7%BB%9F/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >
@@ -775,7 +1169,10 @@ if h.B &gt; 31-bucketCntBits &#123;
             </div>
             
                 <div class="postShorten-content">
-                    <h1 id=""><a href="#" class="headerlink" title=""></a></h1>
+                    <h1 id="什么是闭包"><a href="#什么是闭包" class="headerlink" title="什么是闭包"></a>什么是闭包</h1><pre><code>闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉时的上下文也能照常运行。
+    --- 摘自维基百科
+</code></pre>
+
                     
                         
 
@@ -798,169 +1195,22 @@ if h.B &gt; 31-bucketCntBits &#123;
         
     </article>
     
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/05/30/GC/"
-                            aria-label=": GC"
-                        >
-                            GC
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-05-30T18:58:28+08:00">
-	
-		    5月 30, 2021
-    	
-    </time>
-    
-        <span>发布在 </span>
-        
-    <a class="category-link" href="/categories/golang/">golang</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="golang-的GC"><a href="#golang-的GC" class="headerlink" title="golang 的GC"></a>golang 的GC</h1><ul>
-<li>垃圾回收</li>
-<li>内存管理</li>
-<li>自动释放</li>
-<li>三色标记法</li>
-<li>STW(stop the world)</li>
-</ul>
-<h2 id="（一）-标记清除法-golang-v1-3"><a href="#（一）-标记清除法-golang-v1-3" class="headerlink" title="（一） 标记清除法 (golang v1.3)"></a>（一） 标记清除法 (golang v1.3)</h2><ol>
-<li>STW，暂停程序业务逻辑， 找到可达对象和不可达对象</li>
-<li>标记可达对象</li>
-<li>清除不可达对象</li>
-<li>程序恢复</li>
-</ol>
-<p>循环以上过程，直到程序生命周期结束</p>
-<p><img src="https://i.loli.net/2021/05/30/pWJZUxQDvF6Vsct.png" alt="markAndSweep.png"></p>
-<ul>
-<li>缺点<ul>
-<li>STW 暂停程序，出现卡顿 (严重)<ul>
-<li>后期将 <code>sweep清除</code> 移出STW 暂停范围</li>
-</ul>
-</li>
-<li>需要扫描整个heap</li>
-<li>清除数据会产生heap碎片。</li>
-</ul>
-</li>
-</ul>
-<h2 id="（二）三色标记（golang-v1-4）"><a href="#（二）三色标记（golang-v1-4）" class="headerlink" title="（二）三色标记（golang v1.4）"></a>（二）三色标记（golang v1.4）</h2><ol>
-<li>程序开始创建的对象均标记为白色。</li>
-<li>每次GC开始时，从根节点遍历所有对象，把遍历到的对象从白色集合转移到灰色集合。</li>
-<li>遍历灰色集合，将灰色集合中的对象所引用的对象从白色集合放入灰色集合，并将此灰色对象移入黑色对象。</li>
-<li>重复上述步骤，直至灰色列表中没有任何对象。</li>
-<li>回收所有的白色列表中的对象。</li>
-</ol>
-<ul>
-<li><p>三色标记法会出现的严重问题</p>
-<ul>
-<li><p>条件1 黑色对象引用了一个白色对象。</p>
-</li>
-<li><p>条件2 同时，该白色对象原本可由其他灰色对象引用，但该引用遭到了破坏。</p>
-</li>
-<li><p>满足以上两个条件，会导致一个不是垃圾的白色对象，因为被黑色对象引用，无法转成灰色对象，最后被回收，这就叫做 <code>对象丢失</code></p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="三色不变式"><a href="#三色不变式" class="headerlink" title="三色不变式"></a>三色不变式</h3><ul>
-<li>强三色不变式<ul>
-<li>强制性不允许黑色对象引用白色对象 （ 破坏条件1）</li>
-</ul>
-</li>
-<li>弱三色不变式<ul>
-<li>黑色可以引用白色对象，但该白色对象必须存在一个灰色对象引用它(或该白色对象必须是可达对象) （破坏条件2</li>
-</ul>
-</li>
-</ul>
-<h2 id="三-屏障机制"><a href="#三-屏障机制" class="headerlink" title="(三) 屏障机制"></a>(三) 屏障机制</h2><h3 id="什么叫屏障"><a href="#什么叫屏障" class="headerlink" title="什么叫屏障"></a>什么叫屏障</h3><p>屏障是一个额外的判断机制</p>
-<p>类似下面三种概念</p>
-<ul>
-<li><p>Hook</p>
-</li>
-<li><p>回调</p>
-</li>
-<li><p>handler</p>
-</li>
-<li><p>插入机制</p>
-<ul>
-<li>对象被引用时触发的机制</li>
-</ul>
-</li>
-<li><p>删除屏障</p>
-<ul>
-<li>对象被删除时触发的机制</li>
-</ul>
-</li>
-</ul>
-<h3 id="插入屏障-（不用于栈）"><a href="#插入屏障-（不用于栈）" class="headerlink" title="插入屏障 （不用于栈）"></a>插入屏障 （不用于栈）</h3><ul>
-<li>在A对象引用B对象时，B对象被标记为灰色。（满足：强三色不变式）</li>
-<li>不足： 因为不希望插入写屏障影响栈空间的效率，它不会应用于栈空间。因此，为了避免栈空间出现 <code>对象丢失</code>，我们在结束时（回收对象前）STW并扫描栈空间，这需要花费10 - 100 ms</li>
-</ul>
-<h3 id="删除屏障"><a href="#删除屏障" class="headerlink" title="删除屏障"></a>删除屏障</h3><ul>
-<li>被删除的对象，如果自身为灰色或者白色，都标记为灰色。<br>（换句话说，当要断开一个灰色对象引用一个白色对象之间的通路时，将该白色对象变灰，避免当其他黑色对象引用这个白色对象时，因为灰色对象的断开导致这个白色对象 <code>对象丢失</code>）</li>
-<li>不足：<ul>
-<li>回收精度低，当灰色对象和白色对象断开引用时，该应该被删除的白色对象在这轮GC时最终被标记为黑色，活过了这轮GC</li>
-</ul>
-</li>
-</ul>
-<h3 id="混合写屏障"><a href="#混合写屏障" class="headerlink" title="混合写屏障"></a>混合写屏障</h3><ul>
-<li>GC开始时，栈上的对象全部扫描并标记为黑色（解决了插入屏障栈空间二次扫描和STW问题） <code>这会不会导致内存泄露？</code></li>
-<li>GC期间，栈上创建的新对象均为黑色的。</li>
-<li>[堆] 被删除的对象被标记为灰色</li>
-<li>[堆] 被添加的对象标记为灰色</li>
-</ul>
-<p>这是一个变形的弱三色不变式，结合了插入、删除写屏障两者的优点</p>
-<h1 id="场景分析"><a href="#场景分析" class="headerlink" title="场景分析"></a>场景分析</h1><h2 id="场景1"><a href="#场景1" class="headerlink" title="场景1"></a>场景1</h2><p>一个对象被堆对象删除，并成为了栈对象的下游对象。</p>
-<p>堆中由于开启了混合写屏障，我们要删除该对象，需要先扫描到它的上游对象，并将上游对象标灰。删除该对象后，该对象会变灰，之后又被栈对象引用，成为一个栈对象。</p>
-<h2 id="场景2"><a href="#场景2" class="headerlink" title="场景2"></a>场景2</h2><p>对象被栈对象删除引用， 并成为另一个栈对象下游</p>
-<p>栈空间不启用屏障，该场景的对象一直都是黑色对象</p>
-<h2 id="场景3"><a href="#场景3" class="headerlink" title="场景3"></a>场景3</h2><p>对象被堆对象删除引用， 并成为另一个堆对象下游</p>
-<p>一个黑色堆对象，引用一个灰色堆对象A的下游白对象，白对象B因为写屏障被标记灰色，同时它的上游对象A断开和它的引用。</p>
-<h2 id="场景4"><a href="#场景4" class="headerlink" title="场景4"></a>场景4</h2><p>一个对象从栈对象被删除引用，并成为了另一个堆对象的下游</p>
-<p>该对象仍然为黑，另一个堆对象的原下游对象A本来还是白色的，由于屏障机制，变成灰色，如果该对象成了游离对象，它只会在下轮被回收。</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/05/30/GC/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                评论和共享
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
         
-        <li class="pagination-number">第 1 页 共 1 页</li>
+          <li class="pagination-next">
+            <a
+                class="btn btn--default btn--small"
+                href="/tags/golang/page/2/"
+                aria-label="下一页"
+            >
+              <span>下一页</span>
+              <i class="fa fa-angle-right text-base icon-ml"></i>
+            </a>
+          </li>
+        
+        <li class="pagination-number">第 1 页 共 2 页</li>
     </ul>
 </div>
 
