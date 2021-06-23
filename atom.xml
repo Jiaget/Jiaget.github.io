@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2021-06-23T01:26:59.182Z</updated>
+  <updated>2021-06-23T03:22:08.036Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,35 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>记撸一个双链表快排</title>
+    <link href="http://example.com/2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/"/>
+    <id>http://example.com/2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/</id>
+    <published>2021-06-23T03:00:45.000Z</published>
+    <updated>2021-06-23T03:22:08.036Z</updated>
+    
+    <content type="html"><![CDATA[<p>刷面筋的时候看到有问双链表排序问题。</p><p>正想着用快排怎么排序双链表，写的时候各种空指针。写完后顺便记录一下爬坑过程吧。</p><p>双链表的结构体构思很简单。一开始就简单构造了一下，没想别的。</p><pre><code>type dLinkedList struct &#123;    Data  int    Prev  *dLinkedList    Next  *dLinkedList&#125;</code></pre><p>顺便写一下构造函数，包括随机数的生成呀，什么的。因为建链表的时候不想把for循环拆开讨论，直接建了一个前置节点，只要后面销毁就好了。顺便写好打印函数，测试一下。双链表就这么构造好了，一切都很顺利。</p><pre><code>func NewNode(x int) *dLinkedList &#123;    return &amp;dLinkedList&#123;        Data:  x,    &#125;&#125;func (d *dLinkedList) AddNode(x) &#123;    node := NewNode(x)    d.Next = node    node.Prev = d&#125;func (d *dLinkedList) Print() &#123;    cur := d    for cur != nil &#123;        fmt.Printf(&quot;%d &quot;, cur.Data)        cur = cur.Next    &#125;    fmt.Println()&#125;func GenDLL(size, min, max int) *dLinkedList &#123;    nums := Generate(size, min, max)    head := NewNode(0)    cur := head    for i := 0; i &lt; len(nums); i++ &#123;        cur.AddNode(nums[i])        cur = cur.Next    &#125;    head = head.Next    head.Prev = nil    return head&#125;</code></pre><p>数组的快排非常简单，分治的思想，首尾指针不断向中心移动，和 <code>pivot</code> 对比决定是否交换。</p><p>到了链表这里，一些细节就需要处理，比如，首尾指针怎么判断是否相交？pivot 取哪个？</p><p>懒人总是想用莫名奇妙的方法去实现，明明知道它不合理，但不想修改原来的代码，就算只是加个索引，这么简单的事情也懒得去做。（我也是服了自己了）。为了不想修改原先的代码，判断首尾指针相交，我只是简单比较了两个节点是否相等，并考虑到两个节点错位一格的情况，实际细想，也有错位两格的特殊情况。</p><p>果然，这种脆弱的代码根本不会给我老老实实排好序，因为我就算解决了首尾指针相交的问题，在进入递归的部分，选取递归范围又犯了难，不使用索引来判断范围是否合法是不简单的事情，当然可以写一个函数来判断范围是否合法，但是链表的遍历是非常耗费时间的事情。增加时间复杂度很显然不应该去做。最后，还是老老实实给每一个节点增加了索引。</p><p>接着就是 pivot 的选取了。</p><p>最开始学的算法书写的 pivot 取数组第一个值就可以了。当然这在数组里倒是没什么问题，到了链表，就会出现空指针引用的问题。当然，没有思考这是为什么，只是简单的把 pivot 换成了链表中心的值，我只是希望 pivot 尽可能不要跑到两边的位置。</p><p>要在脑子里模拟快排的每一步细节是很吃力的事情，天生犯懒的我也就这样过了。</p><p>最后就是<img src="https://github.com/Jiaget/notes/blob/main/algorithm/d-linked-list.go" alt="双向链表的代码了"></p><p>唉，算法苦手~</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;刷面筋的时候看到有问双链表排序问题。&lt;/p&gt;
+&lt;p&gt;正想着用快排怎么排序双链表，写的时候各种空指针。写完后顺便记录一下爬坑过程吧。&lt;/p&gt;
+&lt;p&gt;双链表的结构体构思很简单。一开始就简单构造了一下，没想别的。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;type dLinkedList s</summary>
+      
+    
+    
+    
+    <category term="算法" scheme="http://example.com/categories/%E7%AE%97%E6%B3%95/"/>
+    
+    
+    <category term="双链表" scheme="http://example.com/tags/%E5%8F%8C%E9%93%BE%E8%A1%A8/"/>
+    
+    <category term="快排" scheme="http://example.com/tags/%E5%BF%AB%E6%8E%92/"/>
+    
+  </entry>
   
   <entry>
     <title>Golang之反射</title>
@@ -537,32 +566,6 @@
     <category term="并发模型" scheme="http://example.com/tags/%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/"/>
     
     <category term="epoll" scheme="http://example.com/tags/epoll/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>first blood</title>
-    <link href="http://example.com/2021/05/28/first-blood/"/>
-    <id>http://example.com/2021/05/28/first-blood/</id>
-    <published>2021-05-28T07:16:52.000Z</published>
-    <updated>2021-06-03T04:25:39.074Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="0-初次见面"><a href="#0-初次见面" class="headerlink" title="0.初次见面"></a>0.初次见面</h1><p>拖延症患者，拖拖拉拉，终于开始搭建自己的博客。本博客使用 <code>Hexo</code> 和 <code>Github page</code> 。下面是博客搭建的历程。</p><h1 id="1-准备环境"><a href="#1-准备环境" class="headerlink" title="1.准备环境"></a>1.准备环境</h1><ul><li><a href="https://nodejs.org/en/">NodeJS</a> </li><li>git</li></ul><h1 id="2-安装Hexo"><a href="#2-安装Hexo" class="headerlink" title="2.安装Hexo"></a>2.安装Hexo</h1><p><a href="https://hexo.io/zh-cn/">Hexo官网</a></p><p><code>npm</code> 是NodeJS的包管理工具，关于Hexo的安装或者依赖的下载都可以交给它完成</p><p><code>npm install -g hexo-cli</code></p><p>安装完成后执行以下命令</p><pre><code>hexo init myBlogcd myBlognpm install</code></pre><h2 id="测试hexo"><a href="#测试hexo" class="headerlink" title="测试hexo"></a>测试hexo</h2><pre><code>hexo s</code></pre><p>访问<code>http://localhost:4040</code>可以预览博客效果。</p><h1 id="3-Github-Page-部署"><a href="#3-Github-Page-部署" class="headerlink" title="3.Github Page 部署"></a>3.Github Page 部署</h1><ul><li><p>新建仓库</p><ul><li>注意仓库名严格按照<code>[用户名].github.io</code>命名</li></ul></li><li><p>SSH key 配置</p><pre><code>git config --global user.name &quot;用户名&quot;git config --global user.email &quot;邮箱地址&quot;ssh-keygen -t rsa -C &#39;上面的邮箱&#39;cat ~/.ssh/id_rsa.pub</code></pre></li><li><p>将生成密钥添加到 Github 上</p><ul><li><code>settings -&gt; SSH and GPG keys -&gt; New SSH key</code></li></ul></li><li><p>本地部署到Github</p><ul><li>博客目录下 <code>_config.yml</code>,在文件末尾添加：<pre><code>deploy:type: gitrepo:    github: https://github.com/Jiaget/Jiaget.github.io.git,main</code></pre></li><li>安装部署插件 <code>npm install hexo-deployer-git --save</code></li><li>博客页面生成与上传 <code>hexo g -d</code></li></ul></li><li><p>上传到github到最后效果的显示有段时间延迟，访问 <code> https://你的用户名.github.io</code>就能看到自己的博客了。</p></li></ul><h1 id="4-写作"><a href="#4-写作" class="headerlink" title="4.写作"></a>4.写作</h1><ul><li><p>新建文章 <code>hexo new &#39;文章标题&#39;</code></p><ul><li>文章会生成在 <code>/source/_posts</code> 下</li></ul></li><li><p>执行 </p><pre><code>hexo ghexo s</code></pre><p>文章在博客中显示</p></li><li><p>部署</p><pre><code>hexo cleanhexo g -d</code></pre><p><code>hexo clean </code> 是为了清除缓存文件<code>db.json</code>以及静态文件<code>public</code>。</p></li><li><p>写好的文章暂时不想发布，可以存在草稿里，草稿的生成方法 <code>exo new draft &quot;文章标题&quot;</code></p><ul><li>草稿保存在<code>/source/_drafts</code>中，需要发布只需要<code>hexo publicsh [layout]&lt;filename&gt;</code></li></ul></li></ul><h2 id="git-源码管理"><a href="#git-源码管理" class="headerlink" title="git 源码管理"></a>git 源码管理</h2><p>hexo会把<code>./deploy_git</code>中的静态页面上传给github, 也就是说我们写的markdown文件以及hexo源码都在本地储存。</p><p>因此我们还需要将源码托管到github。不需要新建仓库，只需要新的分支管理即可。</p><p>关于分支，这里需要提一句，在 <code>github page</code> 部署的静态页面应该在 <code>main</code> 分支，而不是 <code>master</code>分支。github应该是将主分支名称修改了，原先一直是 <code>master</code>。</p><ul><li><p>将本地源码和 github 仓库连接 <code>git remote add origin git@github.com:Jiaget/Jiaget.github.io.git</code></p></li><li><p>检查 <code>.gitignore</code>, 忽视无关文件。如果没有该文件，则新建一个。</p></li></ul><pre><code>.DS_StoreThumbs.dbdb.json*.lognode_modules/public/.deploy*/</code></pre><p>最后推送给新的分支</p><pre><code>git add .git commit -m &quot;hexo source code&quot;git push origin master:source</code></pre>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;0-初次见面&quot;&gt;&lt;a href=&quot;#0-初次见面&quot; class=&quot;headerlink&quot; title=&quot;0.初次见面&quot;&gt;&lt;/a&gt;0.初次见面&lt;/h1&gt;&lt;p&gt;拖延症患者，拖拖拉拉，终于开始搭建自己的博客。本博客使用 &lt;code&gt;Hexo&lt;/code&gt; 和 &lt;code</summary>
-      
-    
-    
-    
-    <category term="工具" scheme="http://example.com/categories/%E5%B7%A5%E5%85%B7/"/>
-    
-    
-    <category term="hexo" scheme="http://example.com/tags/hexo/"/>
-    
-    <category term="博客" scheme="http://example.com/tags/%E5%8D%9A%E5%AE%A2/"/>
     
   </entry>
   

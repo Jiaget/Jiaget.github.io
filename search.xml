@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>记撸一个双链表快排</title>
+      <link href="2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/"/>
+      <url>2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/</url>
+      
+        <content type="html"><![CDATA[<p>刷面筋的时候看到有问双链表排序问题。</p><p>正想着用快排怎么排序双链表，写的时候各种空指针。写完后顺便记录一下爬坑过程吧。</p><p>双链表的结构体构思很简单。一开始就简单构造了一下，没想别的。</p><pre><code>type dLinkedList struct &#123;    Data  int    Prev  *dLinkedList    Next  *dLinkedList&#125;</code></pre><p>顺便写一下构造函数，包括随机数的生成呀，什么的。因为建链表的时候不想把for循环拆开讨论，直接建了一个前置节点，只要后面销毁就好了。顺便写好打印函数，测试一下。双链表就这么构造好了，一切都很顺利。</p><pre><code>func NewNode(x int) *dLinkedList &#123;    return &amp;dLinkedList&#123;        Data:  x,    &#125;&#125;func (d *dLinkedList) AddNode(x) &#123;    node := NewNode(x)    d.Next = node    node.Prev = d&#125;func (d *dLinkedList) Print() &#123;    cur := d    for cur != nil &#123;        fmt.Printf(&quot;%d &quot;, cur.Data)        cur = cur.Next    &#125;    fmt.Println()&#125;func GenDLL(size, min, max int) *dLinkedList &#123;    nums := Generate(size, min, max)    head := NewNode(0)    cur := head    for i := 0; i &lt; len(nums); i++ &#123;        cur.AddNode(nums[i])        cur = cur.Next    &#125;    head = head.Next    head.Prev = nil    return head&#125;</code></pre><p>数组的快排非常简单，分治的思想，首尾指针不断向中心移动，和 <code>pivot</code> 对比决定是否交换。</p><p>到了链表这里，一些细节就需要处理，比如，首尾指针怎么判断是否相交？pivot 取哪个？</p><p>懒人总是想用莫名奇妙的方法去实现，明明知道它不合理，但不想修改原来的代码，就算只是加个索引，这么简单的事情也懒得去做。（我也是服了自己了）。为了不想修改原先的代码，判断首尾指针相交，我只是简单比较了两个节点是否相等，并考虑到两个节点错位一格的情况，实际细想，也有错位两格的特殊情况。</p><p>果然，这种脆弱的代码根本不会给我老老实实排好序，因为我就算解决了首尾指针相交的问题，在进入递归的部分，选取递归范围又犯了难，不使用索引来判断范围是否合法是不简单的事情，当然可以写一个函数来判断范围是否合法，但是链表的遍历是非常耗费时间的事情。增加时间复杂度很显然不应该去做。最后，还是老老实实给每一个节点增加了索引。</p><p>接着就是 pivot 的选取了。</p><p>最开始学的算法书写的 pivot 取数组第一个值就可以了。当然这在数组里倒是没什么问题，到了链表，就会出现空指针引用的问题。当然，没有思考这是为什么，只是简单的把 pivot 换成了链表中心的值，我只是希望 pivot 尽可能不要跑到两边的位置。</p><p>要在脑子里模拟快排的每一步细节是很吃力的事情，天生犯懒的我也就这样过了。</p><p>最后就是<img src="https://github.com/Jiaget/notes/blob/main/algorithm/d-linked-list.go" alt="双向链表的代码了"></p><p>唉，算法苦手~</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 算法 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 双链表 </tag>
+            
+            <tag> 快排 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Golang之反射</title>
       <link href="2021/06/23/Golang%E4%B9%8B%E5%8F%8D%E5%B0%84/"/>
       <url>2021/06/23/Golang%E4%B9%8B%E5%8F%8D%E5%B0%84/</url>

@@ -217,6 +217,167 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/06/05/%E8%81%8A%E8%81%8AGolang%E4%B9%8Bcontext/"
+                            aria-label=": 聊聊Golang之context"
+                        >
+                            聊聊Golang之context
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-05T12:51:06+08:00">
+	
+		    6月 05, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/golang/">golang</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="context-解决的问题"><a href="#context-解决的问题" class="headerlink" title="context 解决的问题"></a>context 解决的问题</h1><p>在实际开发中，经常会出现一个goroutine创建多个goroutine的场景。<br><img src="https://i.loli.net/2021/06/05/nrJzT1Si4PAHBxR.png" alt="goroutine.png"></p>
+<p>context 用于解决多goroutine之前的通信问题，比如 G 可以控制它的子线程超时退出，取消，传递信息等。</p>
+<p>当然，控制goroutine的方法有很多，最常见的就是通过 select + channel 实现超时与取消。</p>
+<pre><code>    done := make(chan struct&#123;&#125;, 1)
+    go func() &#123;
+        // 发送请求等任务
+        done &lt;- struct&#123;&#125;&#123;&#125;
+    &#125;(ctx)
+
+    select &#123;
+    case &lt;-done:
+        fmt.Println(&quot;call successfully!!!&quot;)
+        return
+    case &lt;-time.After(time.Duration(800 * time.Millisecond)):
+        fmt.Println(&quot;timeout!!!&quot;)
+        return
+    &#125;
+</code></pre>
+<p>之所以还需要context,就是因为 简单的 select + channel 无法解决更复杂的场景：<br>正如图中协程G开启的协程g2，它也会开启g4, g5。 协程G希望给g2设置超时，取消机制，但如果g2没有及时将g4, g5 关闭，协程G将无法和g4, g5 建立联系，也就是说g4, g5会一直开启并占用系统资源。当然，只需要在g2中写好关闭它的子协程的业务逻辑，可以避免这个问题，但是如果协程更多，更复杂，那么需要额外添加的代码就更多，也更容易出错。</p>
+<h1 id="Context-一个接口，四个实现，六个函数"><a href="#Context-一个接口，四个实现，六个函数" class="headerlink" title="Context 一个接口，四个实现，六个函数"></a>Context 一个接口，四个实现，六个函数</h1><p>一个接口</p>
+<ul>
+<li>Context</li>
+</ul>
+<p>四个实现</p>
+<ul>
+<li>emptyCtx</li>
+<li>cancelCtx</li>
+<li>timerCtx</li>
+<li>valueCtx</li>
+</ul>
+<p>六个函数</p>
+<ul>
+<li>Background</li>
+<li>TODO</li>
+<li>WithCancel</li>
+<li>WithDeadline</li>
+<li>WithTimeout</li>
+<li>WithValue</li>
+</ul>
+<h2 id="context-接口"><a href="#context-接口" class="headerlink" title="context 接口"></a>context 接口</h2><pre><code>type Context interface &#123;
+    Deadline() (deadline time.Time, ok bool)
+    Done() &lt;-chan struct&#123;&#125;
+    Err() error
+    Value(key interface&#123;&#125;) interface&#123;&#125;
+&#125;
+</code></pre>
+<h2 id="emptyCtx"><a href="#emptyCtx" class="headerlink" title="emptyCtx"></a>emptyCtx</h2><p><code>emptyCtx</code> 是一个整型变量， 它实现了 <code>context</code> 接口，但是什么也没做。<code>Background</code> 和 <code>TODO</code> 两个函数都会创建 <code>emptyCtx</code>。</p>
+<p><code>Background()</code> 用于初始化一个 ctx。它的接口类型是 <code>Context</code>, 动态类型是 <code>emptyCtx</code>， 值的本质是一个0。</p>
+<p><code>TODO()</code> 虽然底层实现和 <code>Background()</code> 一模一样，但官方希望它被用在，当我们不知道使用哪个context或者函数当前并不需要引入一个 context。换句话说，它被用在代码还没写完的部分，类似我们经常在注释里写的 TODO。</p>
+<h2 id="cancelCtx"><a href="#cancelCtx" class="headerlink" title="cancelCtx"></a>cancelCtx</h2><p>这是可取消的context。</p>
+<pre><code>type cancelCtx struct &#123;
+    Context
+
+    mu       sync.Mutex            
+    done     chan struct&#123;&#125;
+    children map[canceler]struct&#123;&#125;
+    err      error
+&#125;
+</code></pre>
+<ul>
+<li>mu: 保证线程安全</li>
+<li>done：context取消通知</li>
+<li>children：记录以当前context为根节点的所有可取消的子context，便于级联取消</li>
+<li>err：存储取消时的错误信息</li>
+</ul>
+<p><code>WithCancel</code> 能将一个context包装成可取消的。</p>
+<pre><code>ctx := context.Background()
+ctx1, cancel := context.WithCancel(ctx)
+</code></pre>
+<h2 id="timerCtx"><a href="#timerCtx" class="headerlink" title="timerCtx"></a>timerCtx</h2><pre><code>timer *time.Timer // Under cancelCtx.mu.
+
+deadline time.Time
+</code></pre>
+<p><code>timerCtx</code> 也是一个可取消的 context。 它在 <code>cancelCtx</code> 的基础上又封装了一个计时器和一个截止时间。</p>
+<p>它可以用 <code>WithDeadline</code> 和 <code>WithTimeout</code> 创建。</p>
+<ul>
+<li>WithDeadline: 指定一个时间点</li>
+<li>WithTimeout: 指定时间段</li>
+</ul>
+<h2 id="valueCtx"><a href="#valueCtx" class="headerlink" title="valueCtx"></a>valueCtx</h2><p>valueCtx 能打包键值对</p>
+<pre><code>ctx := context.Background()
+key1 := &quot;key1&quot;
+ctx1 := context.WithValue(ctx, key1, &quot;value1&quot;)
+</code></pre>
+<p>使用valueCtx打包键值对时会出现这样的问题：<br>当对同一个key赋值的两个context, 它们最终的键值对是相同的。</p>
+<pre><code>ctx := context.Background()
+key1 := &quot;key1&quot;
+key2 := &quot;key2&quot;
+
+ctx1 := context.WithValue(ctx, key1, &quot;value1&quot;)
+ctx2 := context.WithValue(ctx1, key2, &quot;value2&quot;)
+
+fmt.Println(&quot;key1 -&gt;&quot;, ctx2.Value(key1))
+fmt.Println(&quot;key1 -&gt;&quot;, ctx2.Value(key2))
+----
+key1 -&gt; value2
+key2 -&gt; value2
+</code></pre>
+<p>这是因为 <code>Value()</code> 在查找前回去比对要 <code>查找的key</code> 和 <code>当前context中的key</code>。如果相同，直接返回当前context的key。</p>
+<p>为了规避这个情况，我们可以将key的类型换成自定义类型，使 <code>Value()</code>中的 <code>c.key == key</code> 失效。</p>
+<pre><code>type keyType1 string
+var key1 keyType1 = &quot;key1&quot;
+</code></pre>
+<p>另外，context 储存的键值对不支持修改。</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/05/%E8%81%8A%E8%81%8AGolang%E4%B9%8Bcontext/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"
                             aria-label=": Redis分布式锁"
                         >
@@ -1345,158 +1506,6 @@ while (1) &#123;
                         <p>
                             <a
                                 href="/2021/05/29/Linux-%E7%9A%84%E7%BD%91%E7%BB%9CI-O%E5%A4%8D%E7%94%A8%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                评论和共享
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/05/28/first-blood/"
-                            aria-label=": first blood"
-                        >
-                            first blood
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-05-28T15:16:52+08:00">
-	
-		    5月 28, 2021
-    	
-    </time>
-    
-        <span>发布在 </span>
-        
-    <a class="category-link" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="0-初次见面"><a href="#0-初次见面" class="headerlink" title="0.初次见面"></a>0.初次见面</h1><p>拖延症患者，拖拖拉拉，终于开始搭建自己的博客。本博客使用 <code>Hexo</code> 和 <code>Github page</code> 。下面是博客搭建的历程。</p>
-<h1 id="1-准备环境"><a href="#1-准备环境" class="headerlink" title="1.准备环境"></a>1.准备环境</h1><ul>
-<li><a target="_blank" rel="noopener" href="https://nodejs.org/en/">NodeJS</a> </li>
-<li>git</li>
-</ul>
-<h1 id="2-安装Hexo"><a href="#2-安装Hexo" class="headerlink" title="2.安装Hexo"></a>2.安装Hexo</h1><p><a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/">Hexo官网</a></p>
-<p><code>npm</code> 是NodeJS的包管理工具，关于Hexo的安装或者依赖的下载都可以交给它完成</p>
-<p><code>npm install -g hexo-cli</code></p>
-<p>安装完成后执行以下命令</p>
-<pre><code>hexo init myBlog
-cd myBlog
-npm install
-</code></pre>
-<h2 id="测试hexo"><a href="#测试hexo" class="headerlink" title="测试hexo"></a>测试hexo</h2><pre><code>hexo s
-</code></pre>
-<p>访问<code>http://localhost:4040</code>可以预览博客效果。</p>
-<h1 id="3-Github-Page-部署"><a href="#3-Github-Page-部署" class="headerlink" title="3.Github Page 部署"></a>3.Github Page 部署</h1><ul>
-<li><p>新建仓库</p>
-<ul>
-<li>注意仓库名严格按照<code>[用户名].github.io</code>命名</li>
-</ul>
-</li>
-<li><p>SSH key 配置</p>
-<pre><code>git config --global user.name &quot;用户名&quot;
-git config --global user.email &quot;邮箱地址&quot;
-ssh-keygen -t rsa -C &#39;上面的邮箱&#39;
-cat ~/.ssh/id_rsa.pub
-</code></pre>
-</li>
-<li><p>将生成密钥添加到 Github 上</p>
-<ul>
-<li><code>settings -&gt; SSH and GPG keys -&gt; New SSH key</code></li>
-</ul>
-</li>
-<li><p>本地部署到Github</p>
-<ul>
-<li>博客目录下 <code>_config.yml</code>,在文件末尾添加：<pre><code>deploy:
-type: git
-repo:
-    github: https://github.com/Jiaget/Jiaget.github.io.git,main
-</code></pre>
-</li>
-<li>安装部署插件 <code>npm install hexo-deployer-git --save</code></li>
-<li>博客页面生成与上传 <code>hexo g -d</code></li>
-</ul>
-</li>
-<li><p>上传到github到最后效果的显示有段时间延迟，访问 <code> https://你的用户名.github.io</code>就能看到自己的博客了。</p>
-</li>
-</ul>
-<h1 id="4-写作"><a href="#4-写作" class="headerlink" title="4.写作"></a>4.写作</h1><ul>
-<li><p>新建文章 <code>hexo new &#39;文章标题&#39;</code></p>
-<ul>
-<li>文章会生成在 <code>/source/_posts</code> 下</li>
-</ul>
-</li>
-<li><p>执行 </p>
-<pre><code>hexo g
-hexo s
-</code></pre>
-<p>文章在博客中显示</p>
-</li>
-<li><p>部署</p>
-<pre><code>hexo clean
-hexo g -d
-</code></pre>
-<p><code>hexo clean </code> 是为了清除缓存文件<code>db.json</code>以及静态文件<code>public</code>。</p>
-</li>
-<li><p>写好的文章暂时不想发布，可以存在草稿里，草稿的生成方法 <code>exo new draft &quot;文章标题&quot;</code></p>
-<ul>
-<li>草稿保存在<code>/source/_drafts</code>中，需要发布只需要<code>hexo publicsh [layout]&lt;filename&gt;</code></li>
-</ul>
-</li>
-</ul>
-<h2 id="git-源码管理"><a href="#git-源码管理" class="headerlink" title="git 源码管理"></a>git 源码管理</h2><p>hexo会把<code>./deploy_git</code>中的静态页面上传给github, 也就是说我们写的markdown文件以及hexo源码都在本地储存。</p>
-<p>因此我们还需要将源码托管到github。不需要新建仓库，只需要新的分支管理即可。</p>
-<p>关于分支，这里需要提一句，在 <code>github page</code> 部署的静态页面应该在 <code>main</code> 分支，而不是 <code>master</code>分支。github应该是将主分支名称修改了，原先一直是 <code>master</code>。</p>
-<ul>
-<li><p>将本地源码和 github 仓库连接 <code>git remote add origin git@github.com:Jiaget/Jiaget.github.io.git</code></p>
-</li>
-<li><p>检查 <code>.gitignore</code>, 忽视无关文件。如果没有该文件，则新建一个。</p>
-</li>
-</ul>
-<pre><code>.DS_Store
-Thumbs.db
-db.json
-*.log
-node_modules/
-public/
-.deploy*/
-</code></pre>
-<p>最后推送给新的分支</p>
-<pre><code>git add .
-git commit -m &quot;hexo source code&quot;
-git push origin master:source
-</code></pre>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/05/28/first-blood/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

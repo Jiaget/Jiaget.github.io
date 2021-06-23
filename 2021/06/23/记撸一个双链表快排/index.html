@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="Jiaget&#39;s field">
-    <title>浅析golang 闭包 - Jiaget&#39;s field</title>
+    <title>记撸一个双链表快排 - Jiaget&#39;s field</title>
     <meta name="author" content="Jiaget">
     
     
@@ -15,21 +15,22 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"什么是闭包闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉时的上下文也能照常运行。\n    --- 摘自维基百科\n\n","dateCreated":"2021-06-03T12:26:10+08:00","dateModified":"2021-06-23T08:47:54+08:00","datePublished":"2021-06-03T12:26:10+08:00","description":"","headline":"浅析golang 闭包","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/","keywords":"golang, 闭包, 计算机科学"}</script>
-    <meta name="description" content="什么是闭包闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉时的上下文也能照常运行。     --- 摘自维基百科">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"刷面筋的时候看到有问双链表排序问题。\n正想着用快排怎么排序双链表，写的时候各种空指针。写完后顺便记录一下爬坑过程吧。\n双链表的结构体构思很简单。一开始就简单构造了一下，没想别的。\ntype dLinkedList struct &#123;\n    Data  int\n    Prev  *dLinkedList\n    Next  *dLinkedList\n&#125;\n\n顺便写一下构造函数，包括随机数的生成呀，什么的。因为建链表的时候不想把for循环拆开讨论，直接建了一个前置节点，只要后面销毁就好了。顺便写好打印函数，测试一下。双链表就这么构造好了，一切都很顺利。\nfunc NewNode(x int) *dLinkedList &#123;\n    return &amp;dLinkedList&#123;\n        Data:  x,\n    &#125;\n&#125;\n\nfunc (d *dLinkedList) AddNode(x) &#123;\n    node := NewNode(x)\n    d.Next = node\n    node.Prev = d\n&#125;\n\nfunc (d *dLinkedList) Print() &#123;\n    cur := d\n    for cur != nil &#123;\n        fmt.Printf(&quot;%d &quot;, cur.Data)\n        cur = cur.Next\n    &#125;\n    fmt.Println()\n&#125;\n\nfunc GenDLL(size, min, max int) *dLinkedList &#123;\n    nums := Generate(size, min, max)\n    head := NewNode(0)\n    cur := head\n    for i := 0; i &lt; len(nums); i++ &#123;\n        cur.AddNode(nums[i])\n        cur = cur.Next\n    &#125;\n    head = head.Next\n    head.Prev = nil\n    return head\n&#125;\n\n数组的快排非常简单，分治的思想，首尾指针不断向中心移动，和 pivot 对比决定是否交换。\n到了链表这里，一些细节就需要处理，比如，首尾指针怎么判断是否相交？pivot 取哪个？\n懒人总是想用莫名奇妙的方法去实现，明明知道它不合理，但不想修改原来的代码，就算只是加个索引，这么简单的事情也懒得去做。（我也是服了自己了）。为了不想修改原先的代码，判断首尾指针相交，我只是简单比较了两个节点是否相等，并考虑到两个节点错位一格的情况，实际细想，也有错位两格的特殊情况。\n果然，这种脆弱的代码根本不会给我老老实实排好序，因为我就算解决了首尾指针相交的问题，在进入递归的部分，选取递归范围又犯了难，不使用索引来判断范围是否合法是不简单的事情，当然可以写一个函数来判断范围是否合法，但是链表的遍历是非常耗费时间的事情。增加时间复杂度很显然不应该去做。最后，还是老老实实给每一个节点增加了索引。\n接着就是 pivot 的选取了。\n最开始学的算法书写的 pivot 取数组第一个值就可以了。当然这在数组里倒是没什么问题，到了链表，就会出现空指针引用的问题。当然，没有思考这是为什么，只是简单的把 pivot 换成了链表中心的值，我只是希望 pivot 尽可能不要跑到两边的位置。\n要在脑子里模拟快排的每一步细节是很吃力的事情，天生犯懒的我也就这样过了。\n最后就是\n唉，算法苦手~\n","dateCreated":"2021-06-23T11:00:45+08:00","dateModified":"2021-06-23T11:22:08+08:00","datePublished":"2021-06-23T11:00:45+08:00","description":"","headline":"记撸一个双链表快排","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/","keywords":"双链表, 快排"}</script>
+    <meta name="description" content="刷面筋的时候看到有问双链表排序问题。 正想着用快排怎么排序双链表，写的时候各种空指针。写完后顺便记录一下爬坑过程吧。 双链表的结构体构思很简单。一开始就简单构造了一下，没想别的。 type dLinkedList struct &amp;#123;     Data  int     Prev  *dLinkedList     Next  *dLinkedList &amp;#125;  顺便写一下构造函数，包">
 <meta property="og:type" content="blog">
-<meta property="og:title" content="浅析golang 闭包">
-<meta property="og:url" content="http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/index.html">
+<meta property="og:title" content="记撸一个双链表快排">
+<meta property="og:url" content="http://example.com/2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/index.html">
 <meta property="og:site_name" content="Jiaget&#39;s field">
-<meta property="og:description" content="什么是闭包闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉时的上下文也能照常运行。     --- 摘自维基百科">
+<meta property="og:description" content="刷面筋的时候看到有问双链表排序问题。 正想着用快排怎么排序双链表，写的时候各种空指针。写完后顺便记录一下爬坑过程吧。 双链表的结构体构思很简单。一开始就简单构造了一下，没想别的。 type dLinkedList struct &amp;#123;     Data  int     Prev  *dLinkedList     Next  *dLinkedList &amp;#125;  顺便写一下构造函数，包">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-06-03T04:26:10.000Z">
-<meta property="article:modified_time" content="2021-06-23T00:47:54.624Z">
+<meta property="og:image" content="https://github.com/Jiaget/notes/blob/main/algorithm/d-linked-list.go">
+<meta property="article:published_time" content="2021-06-23T03:00:45.000Z">
+<meta property="article:modified_time" content="2021-06-23T03:22:08.036Z">
 <meta property="article:author" content="Jiaget">
-<meta property="article:tag" content="golang">
-<meta property="article:tag" content="闭包">
-<meta property="article:tag" content="计算机科学">
+<meta property="article:tag" content="双链表">
+<meta property="article:tag" content="快排">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/Jiaget/notes/blob/main/algorithm/d-linked-list.go">
     
         <link rel="publisher" href="https://plus.google.com/none"/>
     
@@ -221,20 +222,20 @@
         <div class="post-header main-content-wrap text-left">
     
         <h1 class="post-title">
-            浅析golang 闭包
+            记撸一个双链表快排
         </h1>
     
     
         <div class="post-meta">
-    <time datetime="2021-06-03T12:26:10+08:00">
+    <time datetime="2021-06-23T11:00:45+08:00">
 	
-		    6月 03, 2021
+		    6月 23, 2021
     	
     </time>
     
         <span>发布在 </span>
         
-    <a class="category-link" href="/categories/golang/">golang</a>
+    <a class="category-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a>
 
 
     
@@ -246,9 +247,59 @@
     
     <div class="post-content markdown">
         <div class="main-content-wrap">
-            <h1 id="什么是闭包"><a href="#什么是闭包" class="headerlink" title="什么是闭包"></a>什么是闭包</h1><pre><code>闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉时的上下文也能照常运行。
-    --- 摘自维基百科
+            <p>刷面筋的时候看到有问双链表排序问题。</p>
+<p>正想着用快排怎么排序双链表，写的时候各种空指针。写完后顺便记录一下爬坑过程吧。</p>
+<p>双链表的结构体构思很简单。一开始就简单构造了一下，没想别的。</p>
+<pre><code>type dLinkedList struct &#123;
+    Data  int
+    Prev  *dLinkedList
+    Next  *dLinkedList
+&#125;
 </code></pre>
+<p>顺便写一下构造函数，包括随机数的生成呀，什么的。因为建链表的时候不想把for循环拆开讨论，直接建了一个前置节点，只要后面销毁就好了。顺便写好打印函数，测试一下。双链表就这么构造好了，一切都很顺利。</p>
+<pre><code>func NewNode(x int) *dLinkedList &#123;
+    return &amp;dLinkedList&#123;
+        Data:  x,
+    &#125;
+&#125;
+
+func (d *dLinkedList) AddNode(x) &#123;
+    node := NewNode(x)
+    d.Next = node
+    node.Prev = d
+&#125;
+
+func (d *dLinkedList) Print() &#123;
+    cur := d
+    for cur != nil &#123;
+        fmt.Printf(&quot;%d &quot;, cur.Data)
+        cur = cur.Next
+    &#125;
+    fmt.Println()
+&#125;
+
+func GenDLL(size, min, max int) *dLinkedList &#123;
+    nums := Generate(size, min, max)
+    head := NewNode(0)
+    cur := head
+    for i := 0; i &lt; len(nums); i++ &#123;
+        cur.AddNode(nums[i])
+        cur = cur.Next
+    &#125;
+    head = head.Next
+    head.Prev = nil
+    return head
+&#125;
+</code></pre>
+<p>数组的快排非常简单，分治的思想，首尾指针不断向中心移动，和 <code>pivot</code> 对比决定是否交换。</p>
+<p>到了链表这里，一些细节就需要处理，比如，首尾指针怎么判断是否相交？pivot 取哪个？</p>
+<p>懒人总是想用莫名奇妙的方法去实现，明明知道它不合理，但不想修改原来的代码，就算只是加个索引，这么简单的事情也懒得去做。（我也是服了自己了）。为了不想修改原先的代码，判断首尾指针相交，我只是简单比较了两个节点是否相等，并考虑到两个节点错位一格的情况，实际细想，也有错位两格的特殊情况。</p>
+<p>果然，这种脆弱的代码根本不会给我老老实实排好序，因为我就算解决了首尾指针相交的问题，在进入递归的部分，选取递归范围又犯了难，不使用索引来判断范围是否合法是不简单的事情，当然可以写一个函数来判断范围是否合法，但是链表的遍历是非常耗费时间的事情。增加时间复杂度很显然不应该去做。最后，还是老老实实给每一个节点增加了索引。</p>
+<p>接着就是 pivot 的选取了。</p>
+<p>最开始学的算法书写的 pivot 取数组第一个值就可以了。当然这在数组里倒是没什么问题，到了链表，就会出现空指针引用的问题。当然，没有思考这是为什么，只是简单的把 pivot 换成了链表中心的值，我只是希望 pivot 尽可能不要跑到两边的位置。</p>
+<p>要在脑子里模拟快排的每一步细节是很吃力的事情，天生犯懒的我也就这样过了。</p>
+<p>最后就是<img src="https://github.com/Jiaget/notes/blob/main/algorithm/d-linked-list.go" alt="双向链表的代码了"></p>
+<p>唉，算法苦手~</p>
 
             
 
@@ -260,7 +311,7 @@
             <div class="post-footer-tags">
                 <span class="text-color-light text-small">标签</span><br/>
                 
-    <a class="tag tag--primary tag--small t-none-link" href="/tags/golang/" rel="tag">golang</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/" rel="tag">计算机科学</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/%E9%97%AD%E5%8C%85/" rel="tag">闭包</a>
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/%E5%8F%8C%E9%93%BE%E8%A1%A8/" rel="tag">双链表</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/%E5%BF%AB%E6%8E%92/" rel="tag">快排</a>
 
             </div>
         
@@ -270,14 +321,11 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/"
-                    data-tooltip="虚拟内存地址空间"
-                    aria-label="上一篇: 虚拟内存地址空间"
-                >
-                    
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
                     </a>
@@ -287,9 +335,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
-                    data-tooltip="Redis 相关场景"
-                    aria-label="下一篇: Redis 相关场景"
+                    href="/2021/06/23/Golang%E4%B9%8B%E5%8F%8D%E5%B0%84/"
+                    data-tooltip="Golang之反射"
+                    aria-label="下一篇: Golang之反射"
                 >
                     
                         <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
@@ -314,7 +362,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/"
                     title="分享到 Facebook"
                     aria-label="分享到 Facebook"
                 >
@@ -327,7 +375,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
+                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/"
                     title="分享到 Twitter"
                     aria-label="分享到 Twitter"
                 >
@@ -340,7 +388,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
+                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/"
                     title="分享到 Google+"
                     aria-label="分享到 Google+"
                 >
@@ -385,14 +433,11 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/"
-                    data-tooltip="虚拟内存地址空间"
-                    aria-label="上一篇: 虚拟内存地址空间"
-                >
-                    
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
                     </a>
@@ -402,9 +447,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/2021/06/01/Redis-%E6%B7%B1%E5%85%A5%E6%8E%A2%E8%AE%A8/"
-                    data-tooltip="Redis 相关场景"
-                    aria-label="下一篇: Redis 相关场景"
+                    href="/2021/06/23/Golang%E4%B9%8B%E5%8F%8D%E5%B0%84/"
+                    data-tooltip="Golang之反射"
+                    aria-label="下一篇: Golang之反射"
                 >
                     
                         <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
@@ -429,7 +474,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/"
                     title="分享到 Facebook"
                     aria-label="分享到 Facebook"
                 >
@@ -442,7 +487,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
+                    target="new" href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/"
                     title="分享到 Twitter"
                     aria-label="分享到 Twitter"
                 >
@@ -455,7 +500,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
+                    target="new" href="https://plus.google.com/share?url=http://example.com/2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/"
                     title="分享到 Google+"
                     aria-label="分享到 Google+"
                 >
@@ -489,7 +534,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
+                        href="https://www.facebook.com/sharer/sharer.php?u=http://example.com/2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/"
                         aria-label="分享到 Facebook"
                     >
                         <i class="fab fa-facebook" aria-hidden="true"></i><span>分享到 Facebook</span>
@@ -502,7 +547,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
+                        href="https://twitter.com/intent/tweet?text=http://example.com/2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/"
                         aria-label="分享到 Twitter"
                     >
                         <i class="fab fa-twitter" aria-hidden="true"></i><span>分享到 Twitter</span>
@@ -515,7 +560,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://plus.google.com/share?url=http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
+                        href="https://plus.google.com/share?url=http://example.com/2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/"
                         aria-label="分享到 Google+"
                     >
                         <i class="fab fa-google-plus" aria-hidden="true"></i><span>分享到 Google+</span>
