@@ -217,6 +217,105 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/"
+                            aria-label=": mutex 互斥锁"
+                        >
+                            mutex 互斥锁
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-07T23:16:47+08:00">
+	
+		    6月 07, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/golang/">golang</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <h1 id="mutex"><a href="#mutex" class="headerlink" title="mutex"></a>mutex</h1><pre><code>type Mutex struct &#123;
+    state int32
+    sema uint32
+&#125;
+</code></pre>
+<ul>
+<li>state:<ul>
+<li>代表锁的状态</li>
+<li>mutex的加锁与解锁都是通过 <code>atomic</code> 包提供的函数原子性地操作该字段实现的</li>
+</ul>
+</li>
+<li>sema:<ul>
+<li>一个信号量</li>
+<li>用作等待队列</li>
+</ul>
+</li>
+</ul>
+<h2 id="mutex-的-正常模式"><a href="#mutex-的-正常模式" class="headerlink" title="mutex 的 正常模式"></a>mutex 的 正常模式</h2><p>一个goroutine 会先自旋几次，尝试获得锁，如果仍然没有获得锁，则通过信号量 <code>sema</code> 排队等待（进入等待队列）。</p>
+<p>但是当锁被释放时，队首的goroutine也不会立即获得锁，而是与其他后来的自旋的goroutine竞争。一般情况下，处于自旋状态的goroutine会更先抢到锁，因为它们一直处于运行状态，而队列里出来的goroutine由于刚唤醒，还会因为需要分配cpu资源而需要消耗一点时间。这种情况下，为了保证先进先出，即使竞争失败了，仍然插入队列头部而不是尾部。</p>
+<h2 id="mutex的饥饿模式"><a href="#mutex的饥饿模式" class="headerlink" title="mutex的饥饿模式"></a>mutex的饥饿模式</h2><p>当一个goroutine本次加锁等待时间超过1ms后，它会将mutex从 <code>正常模式</code>切换成 <code>饥饿模式</code> 。</p>
+<p>在饥饿模式下，锁一旦被释放，就会直接传递给等待队列的头部goroutine。而如果有一些后来的goroutine需要这个锁，它们不会像正常模式一样自旋，而是直接被加入到队列尾部。</p>
+<p><code>饥饿模式</code> 也可以再切换回正常模式：</p>
+<ul>
+<li>当一个goroutine获得锁，且等待时间 <code>&lt; 1ms</code>时。</li>
+<li>当等待队列为空时 (即等待队列最后一个goroutine获得锁。)</li>
+</ul>
+<h2 id="两者对比"><a href="#两者对比" class="headerlink" title="两者对比"></a>两者对比</h2><ul>
+<li><p>正常模式</p>
+<ul>
+<li>这是一个自旋和排队共存的模式</li>
+<li>[优点] 由于自旋可以在无需唤醒的状态下直接获得锁，因此，正常模式可以保证Mutex有更好的。</li>
+<li>[缺点] 但是, 这个模式可能导致队列尾端的goroutine一直抢不到锁（尾端延迟）</li>
+</ul>
+</li>
+<li><p>饥饿模式</p>
+<ul>
+<li>这个模式会强制所有goroutine排队</li>
+<li>它在牺牲一定性能的情况下， 解决正常模式的尾端延迟问题</li>
+</ul>
+</li>
+</ul>
+<p>两种模式之间的切换，既保证锁的效率，又能顾及公平性，不会导致某个goroutine过长时间的等待。</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/06/05/%E8%81%8A%E8%81%8AGolang%E4%B9%8Bcontext/"
                             aria-label=": 聊聊Golang之context"
                         >
@@ -416,6 +515,29 @@ var key1 keyType1 = &quot;key1&quot;
 <li>性能高</li>
 <li>与业务无关</li>
 </ul>
+<h1 id="1-简单的分布式锁"><a href="#1-简单的分布式锁" class="headerlink" title="1. 简单的分布式锁"></a>1. 简单的分布式锁</h1><p>问题：<br>    获取锁的进程如果执行失败了，并不会主动解锁。</p>
+<p>方案：<br>    - 给锁设置过期时间。（但是有可能进程还没运行到过期指令，就挂了）<br>    - 将锁的内容设置为过期时间， <code>SETNX</code> 获取锁失败时， 拿这个时间和当前时间对比，如果锁过期了，删除锁，重新上锁</p>
+<p>不足：<br>    高并发下，多个进程都会去设置这个锁，并以为自己获取了锁</p>
+<p>解决；<br>    setNX 失败后，获取锁的时间，GETSET, 将自己的过期时间更新。再去获取旧值， 旧值和之前获得的不一致，说明锁被占用，自己放弃锁。</p>
+<pre><code>func tryLock(conn RedisConn) bool &#123;
+    now := time.Now()
+    expireTime := now.Add(time.Duration(1000))
+    if conn.SETNX(&quot;mykey&quot;, &quot;1&quot;) == 1 &#123;
+        conn.EXPIRE(&quot;mykey&quot;, 1000)
+        return true
+    &#125; else &#123;
+        oldVal := conn.get(&quot;mykey&quot;)
+        if oldVal != nil &amp;&amp; oldVal &lt; nowTime &#123;
+            currentVal = conn.GETSET(&quot;mykey&quot;, expireTime)
+            if oldVal == currentVal &#123;
+                conn.EXPIRE(&quot;mykey&quot;, 1000)
+                return true;
+            &#125;
+            return false
+        &#125;
+    &#125;
+&#125;
+</code></pre>
 
                     
                         
@@ -665,9 +787,44 @@ if h.B &gt; 31-bucketCntBits &#123;
             </div>
             
                 <div class="postShorten-content">
-                    <h1 id="什么是闭包"><a href="#什么是闭包" class="headerlink" title="什么是闭包"></a>什么是闭包</h1><pre><code>闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉时的上下文也能照常运行。
+                    <h1 id="0-函数"><a href="#0-函数" class="headerlink" title="0.函数"></a>0.函数</h1><pre><code>在 Golang 中，函数可以用作其他的函数入参，也能被当作返回值，还是能绑定到变量。
+
+func A() &#123;&#125;
+func B(f func())&#123;&#125;
+func C() &#123;
+    return A
+&#125;
+var f func() = C()
+</code></pre>
+<p>像上面这样的函数的三种角色（参数，返回值，变量）实际上是一个 <code>Function Value</code> 是一个指针，但是并不指向函数的执行入口。它会先指向一个结构体</p>
+<pre><code>type funcval struct &#123;
+    fn uintptr
+&#125;
+</code></pre>
+<p>这个结构体中的 <code>fn</code> 才会指向函数的执行入口。而这种二级指针的作用就是为了实现闭包。</p>
+<h1 id="1-什么是闭包"><a href="#1-什么是闭包" class="headerlink" title="1.什么是闭包"></a>1.什么是闭包</h1><pre><code>闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉时的上下文也能照常运行。
     --- 摘自维基百科
 </code></pre>
+<p>举一个例子：</p>
+<pre><code>func create() func()int &#123;
+    c := 2
+    return func() int &#123;
+        return c
+    &#125;
+&#125;
+
+func main() &#123;
+    f1 := create()
+    fmt.Println(f1&#123;&#125;)
+&#125;
+</code></pre>
+<p>在 <code>create()</code> 中的返回值是一个闭包函数，这样的闭包函数，在编译阶段就已经生成完毕，而 c 这样的局部变量返回给了外部空间的 <code>捕获变量</code> 会和闭包函数一起在执行阶段被保存在闭包对象中并船舰。</p>
+<p>局部变量 c 虽然在一开始被放在了 create() 函数栈中，但在堆上创建闭包对象时，它也被捕获在了堆上。</p>
+<p>捕获对象中的 funcValue 指向了 <code>create()</code> 函数中的返回函数</p>
+<h1 id="2-捕获变量的分配问题"><a href="#2-捕获变量的分配问题" class="headerlink" title="2. 捕获变量的分配问题"></a>2. 捕获变量的分配问题</h1><ul>
+<li>当被捕获的变量在函数中没有被修改时，它只会将值拷贝在捕获列表中即可。</li>
+<li>当捕获变量还被修改过。首先，捕获变量会被改成堆分配，在栈上只分配了一个地址。如果还存在一个闭包函数来获取这个变量，闭包对象中也同样获取这个变量的地址。这样 闭包函数和外部函数都可以操作这个变量。</li>
+</ul>
 
                     
                         
@@ -1248,264 +1405,6 @@ if h.B &gt; 31-bucketCntBits &#123;
                         <p>
                             <a
                                 href="/2021/05/30/GC/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                评论和共享
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/05/29/Linux-%E7%9A%84%E7%BD%91%E7%BB%9CI-O%E5%A4%8D%E7%94%A8%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/"
-                            aria-label=": Linux 的网络I/O复用并发模型"
-                        >
-                            Linux 的网络I/O复用并发模型
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-05-29T22:51:02+08:00">
-	
-		    5月 29, 2021
-    	
-    </time>
-    
-        <span>发布在 </span>
-        
-    <a class="category-link" href="/categories/linux/">linux</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="Linux-中网络I-O复用并发模型"><a href="#Linux-中网络I-O复用并发模型" class="headerlink" title="Linux 中网络I/O复用并发模型"></a>Linux 中网络I/O复用并发模型</h1><h2 id="什么是阻塞，非阻塞，IO多路复用？"><a href="#什么是阻塞，非阻塞，IO多路复用？" class="headerlink" title="什么是阻塞，非阻塞，IO多路复用？"></a>什么是阻塞，非阻塞，IO多路复用？</h2><ul>
-<li><p>流</p>
-<ul>
-<li>可进行I/O操作的内核对象<ul>
-<li>文字</li>
-<li>管道</li>
-<li>套接字</li>
-</ul>
-</li>
-<li>流的入口：文件描述符(fd)</li>
-</ul>
-</li>
-<li><p>阻塞等待<br>不占用CPU时间片</p>
-<ul>
-<li>缺点<ul>
-<li>不能处理多个I/O请求的问题</li>
-<li>同一个阻塞，同一时间只能处理一个流的阻塞监听</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>非阻塞（忙轮询）<br>占用资源不断去查看资源锁有没有释放</p>
-</li>
-<li><p>多路IO复用<br>既能阻塞等待，不浪费资源，又能同一时刻监听多个IO请求的状态</p>
-</li>
-</ul>
-<h2 id="IO复用解决的问题"><a href="#IO复用解决的问题" class="headerlink" title="IO复用解决的问题"></a>IO复用解决的问题</h2><p>如何解决大量IO读写问题</p>
-<ul>
-<li>忙轮询</li>
-</ul>
-<pre><code>while true &#123;
-    for i in 流[] &#123;
-        if i has 数据 &#123;
-            读 或者 其他处理
-        &#125;
-    &#125;
-&#125;
-</code></pre>
-<p>同时和多个流访问。</p>
-<ul>
-<li>select</li>
-</ul>
-<pre><code>while true &#123;
-    select(流[]); //阻塞
-
-  //有消息抵达
-    for i in 流[] &#123;
-        if i has 数据 &#123;
-            读 或者 其他处理
-        &#125;
-    &#125;
-&#125;
-</code></pre>
-<p>select负责接收IO，但不能精准直到哪些IO可用，还需要遍历。监听的IO有限，一般1024个，与平台无关</p>
-<ul>
-<li>epoll</li>
-</ul>
-<pre><code>while true &#123;
-    可处理的流[] = epoll_wait(epoll_fd); //阻塞
-
-  //有消息抵达，全部放在 “可处理的流[]”中
-    for i in 可处理的流[] &#123;
-        读 或者 其他处理
-    &#125;
-&#125;
-</code></pre>
-<p>类似select,但能返回所有可以处理的流，不必再去遍历确认</p>
-<h2 id="epoll是什么"><a href="#epoll是什么" class="headerlink" title="epoll是什么"></a>epoll是什么</h2><ul>
-<li>linux独有</li>
-<li>一种I/O 多路复用技术</li>
-<li>只关心活跃的链接，无需遍历所有的描述符集合。</li>
-<li>能处理大量链接请求（系统可以打开的文件数目 <code>cat /proc/sys/fs/file-max</code>）</li>
-</ul>
-<h2 id="API"><a href="#API" class="headerlink" title="API"></a>API</h2><ol>
-<li>创建</li>
-</ol>
-<pre><code>/** 
- * @param size 告诉内核监听的数目 
- * 
- * @returns 返回一个epoll句柄（即一个文件描述符） 
- */
-int epoll_create(int size);
-</code></pre>
-<ol start="2">
-<li>控制</li>
-</ol>
-<pre><code>/**
-* @param epfd 用epoll_create所创建的epoll句柄
-* @param op 表示对epoll监控描述符控制的动作
-*
-* EPOLL_CTL_ADD(注册新的fd到epfd)
-* EPOLL_CTL_MOD(修改已经注册的fd的监听事件)
-* EPOLL_CTL_DEL(epfd删除一个fd)
-*
-* @param fd 需要监听的文件描述符
-* @param event 告诉内核需要监听的事件
-*
-* @returns 成功返回0，失败返回-1, errno查看错误信息
-*/
-int epoll_ctl(int epfd, int op, int fd,
-struct epoll_event *event);
-
-
-struct epoll_event &#123;
-    __uint32_t events; /* epoll 事件 */
-    epoll_data_t data; /* 用户传递的数据 */
-&#125;
-
-/*
- * events : &#123;EPOLLIN, EPOLLOUT, EPOLLPRI,
-                         EPOLLHUP, EPOLLET, EPOLLONESHOT&#125;
- */
-typedef union epoll_data &#123;
-    void *ptr;
-    int fd;
-    uint32_t u32;
-    uint64_t u64;
-&#125; epoll_data_t;
-</code></pre>
-<ol start="3">
-<li>等待</li>
-</ol>
-<pre><code>/**
-*
-* @param epfd 用epoll_create所创建的epoll句柄
-* @param event 从内核得到的事件集合
-* @param maxevents 告知内核这个events有多大,
-* 注意: 值 不能大于创建epoll_create()时的size.
-* @param timeout 超时时间
-* -1: 永久阻塞
-* 0: 立即返回，非阻塞
-* &gt;0: 指定微秒
-*
-* @returns 成功: 有多少文件描述符就绪,时间到时返回0
-* 失败: -1, errno 查看错误
-*/
-int epoll_wait(int epfd, struct epoll_event *event,
-                             int maxevents, int timeout);
-</code></pre>
-<h3 id="epoll-基本编程架构"><a href="#epoll-基本编程架构" class="headerlink" title="epoll 基本编程架构"></a>epoll 基本编程架构</h3><pre><code>int epfd = epoll_crete(1000);
-
-//将 listen_fd 添加进 epoll 中
-epoll_ctl(epfd, EPOLL_CTL_ADD, listen_fd,&amp;listen_event);
-
-while (1) &#123;
-    //阻塞等待 epoll 中 的fd 触发
-    int active_cnt = epoll_wait(epfd, events, 1000, -1);
-
-    for (i = 0 ; i &lt; active_cnt; i++) &#123;
-        if (evnets[i].data.fd == listen_fd) &#123;
-            //accept. 并且将新accept 的fd 加进epoll中.
-        &#125;
-        else if (events[i].events &amp; EPOLLIN) &#123;
-            //对此fd 进行读操作
-        &#125;
-        else if (events[i].events &amp; EPOLLOUT) &#123;
-            //对此fd 进行写操作
-        &#125;
-    &#125;
-&#125;
-</code></pre>
-<h2 id="常见模型"><a href="#常见模型" class="headerlink" title="常见模型"></a>常见模型</h2><h3 id="单线程Accept"><a href="#单线程Accept" class="headerlink" title="单线程Accept"></a>单线程Accept</h3><p><img src="https://i.loli.net/2021/05/29/QHCbulfpiFw8Yx5.png" alt="single-accept.png"></p>
-<ul>
-<li>主线程的 <code>Accept（ListenFd）</code> 会阻塞主线程</li>
-<li>连接成功后，会在服务端生成一个连接的套接字</li>
-<li>一次只能形成一个连接，另一个客户端如果尝试连接，会阻塞</li>
-<li>处理完当前客户端，并关闭套接字文件，再去处理下一个客户端</li>
-</ul>
-<h3 id="单线程Accept-多线程读写业务-无I-O复用"><a href="#单线程Accept-多线程读写业务-无I-O复用" class="headerlink" title="单线程Accept + 多线程读写业务 (无I/O复用)"></a>单线程Accept + 多线程读写业务 (无I/O复用)</h3><p><img src="https://i.loli.net/2021/05/29/xTDhEHmgX3cYdvS.png" alt="single_multiple-thread.png"></p>
-<ul>
-<li><code>Accept(ListenFd)</code> 监听客户端请求，阻塞主线程</li>
-<li>接收客户端请求后，开辟一个新线程，进行读写业务。</li>
-<li>主线程继续监听，能处理其他客户端的请求</li>
-</ul>
-<p>这个模型虽然支持了并发，但是：</p>
-<ul>
-<li>高并发情况下，多线程加重服务器负担</li>
-<li>长连接的场景，客户端没有读写业务，但它不关闭，就需要不断进行心跳检测，占用了资源。</li>
-</ul>
-<h3 id="单线程多路I-O复用"><a href="#单线程多路I-O复用" class="headerlink" title="单线程多路I/O复用"></a>单线程多路I/O复用</h3><p><img src="https://i.loli.net/2021/05/29/jR7IJpbGqB58x6s.png" alt="single-reuseIO.png"></p>
-<ul>
-<li>主线程创建 <code>listenFd</code>， 采用多路I/O服用机制，进行IO状态阻塞监控。当client1发送请求，检测到了 <code>listenFd</code> 触发读时间，运行 accept 建立连接，并将 <code>connFd1</code>加入监听集合。</li>
-<li>client1进行读写请求时，多路IO复用机制的监听阻塞释放，并触发套接字读写事件</li>
-<li>client1触发的读写业务会使主线程阻塞，无法处理新的客户端的请求。</li>
-</ul>
-<p>该模型可以监听多个客户端的读写状态。且发生阻塞，处于非忙轮询的状态，不浪费CPU资源</p>
-<p><strong>缺点</strong>：</p>
-<ul>
-<li>能同时监听，但不能同时处理多个客户端的读写请求</li>
-<li>不支持高并发场景</li>
-</ul>
-<h2 id="单线程多路I-O复用-多线程业务工作池"><a href="#单线程多路I-O复用-多线程业务工作池" class="headerlink" title="单线程多路I/O复用 + 多线程业务工作池"></a>单线程多路I/O复用 + 多线程业务工作池</h2><p>该场景使用比较少</p>
-<p><img src="https://i.loli.net/2021/05/29/yLX8YB1SvKU9s5M.png" alt="single-reuse-thread.png"></p>
-<ul>
-<li>主线程采用多路I/O复用机制监听连接请求。当监听到客户端连接请求后，处理连接请求，并将生成的<code>connFd1</code>加入到监听集合中</li>
-<li>当监听到读写事件，则进行读写消息的处理</li>
-<li>主线程处理读写消息，将业务逻辑交给工作线程池处理。工作线程池在server启动前开启的一定数量的线程。他们只处理逻辑业务，不处理套接字读写操作。</li>
-<li>工作线程池处理完业务，再触发<code>connFd1</code>的写事件，将回执消息返回给对方</li>
-</ul>
-<p>优点：<br>    - 将业务处理分离出来，缩短客户端的等待时间。<br>    - 能并发处理客户端业务。</p>
-<p>缺点：<br>    - 读写处理仍然需要单独处理。(排队)<br>    - 业务处理后的结果，也需要按顺序返回给客户端。（排队）</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/05/29/Linux-%E7%9A%84%E7%BD%91%E7%BB%9CI-O%E5%A4%8D%E7%94%A8%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

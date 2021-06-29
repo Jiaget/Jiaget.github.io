@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>一个goroutine的一生</title>
+      <link href="2021/06/24/%E4%B8%80%E4%B8%AAgoroutine%E7%9A%84%E4%B8%80%E7%94%9F/"/>
+      <url>2021/06/24/%E4%B8%80%E4%B8%AAgoroutine%E7%9A%84%E4%B8%80%E7%94%9F/</url>
+      
+        <content type="html"><![CDATA[<p>一个函数被编译成可执行文件以后，会通过 <code>程序执行入口</code> 进入内存虚拟地址空间中的代码段。</p><p>对于一个 main 函数而言， 程序会以 <code>runtime.main</code> 作为入口， 创建一个 <code>main goroutine</code>, 之后再去调用 <code>main.main</code> 函数。</p><p>提到 Golang 的协程运行，就不得不提 <code>GMP</code> 模型, 在虚拟地址空间的 <code>数据段</code> 会记录这样的全局变量：</p><ul><li><p>g0 （主协程）</p><ul><li>g0 会在主线程栈上分配栈空间</li><li>g0 持有 m0 指针</li></ul></li><li><p>m0</p><ul><li>m0 即主线程所对应的m</li><li>m0 持有 g0 的指针，且m0上运行的第一个g就是g0</li></ul></li><li><p>allgs: 记录所有的g</p></li><li><p>allm: 记录所有的m</p></li><li><p>allp: 在程序初始化的过程中，调度器会进行初始化，根据环境变量 GOMAXPROCS 来决定创建 p 的个数。</p><ul><li>同样， 第一个被创建的p，会和m0相关联。</li></ul></li><li><p>sched: 调度器</p><ul><li>记录所有空闲的 m 和 p</li><li>runq</li></ul></li><li><p>runq：runq作为全局变量，记录在 <code>sched</code> 下</p><ul><li>这里的runq是全局runq</li><li>当然还有一个本地runq， 记录在P中。</li></ul></li></ul><h2 id="本地队列与全局队列"><a href="#本地队列与全局队列" class="headerlink" title="本地队列与全局队列"></a>本地队列与全局队列</h2><p>runq， 在 <code>runtime.p</code> 中记录的是本地队列，在 <code>runtime.schedt</code> 中记录的是全局队列。</p><p>当本地队列满了，G就会放在全局队列中。 m 优先获取本地队列的 g， 再从全局队列中获取，当 本地和全局都没有 g ， 它会从其他 m 中分担一些 g。</p><h2 id="main-函数"><a href="#main-函数" class="headerlink" title="main 函数"></a>main 函数</h2><p>回到main函数的执行过程中来。</p><p>main函数执行过程中需要创建的 main goroutine， 会被加入到 allp[0] 的本地队列中， 之后会通过 mstart 函数开启调度循环(schedule()),调度器将队列中的 g 调度到m0上去执行。</p><p>main goroutine 的工作不仅仅是调用 main 函数， 它还会开启线程监控， 包初始化等工作， 准备工作结束后，执行完 main 函数后， goroutine 便退出。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> golang </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> golang </tag>
+            
+            <tag> goroutine </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>记撸一个双链表快排</title>
       <link href="2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/"/>
       <url>2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/</url>
@@ -62,7 +89,7 @@
       <link href="2021/06/20/%E7%AA%A5%E6%8E%A2Gin%E6%A1%86%E6%9E%B6/"/>
       <url>2021/06/20/%E7%AA%A5%E6%8E%A2Gin%E6%A1%86%E6%9E%B6/</url>
       
-        <content type="html"><![CDATA[<p>几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的客户端服务端 – <img src="https://github.com/Jiaget/simplebank" alt="一个简易的银行系统"></p><p>作为练手项目，Gin有很多特性与功能都没有研究与使用过， 这次的学习希望可以从深度和广度两个方面，更加全面的一窥Gin框架，这个活跃在社区广受好评的web框架。</p><h1 id="回顾-HTTP-服务开发的基本流程"><a href="#回顾-HTTP-服务开发的基本流程" class="headerlink" title="回顾 HTTP 服务开发的基本流程"></a>回顾 HTTP 服务开发的基本流程</h1><ul><li>开启TCP 监听</li><li>初始化一些 <code>handler</code> 处理具体的业务逻辑</li><li>将业务逻辑和相关的 <code>Method</code>, <code>URL</code> 绑定，对外暴露一些具体功能服务</li></ul><h1 id="Gin-的几个重要模型："><a href="#Gin-的几个重要模型：" class="headerlink" title="Gin 的几个重要模型："></a>Gin 的几个重要模型：</h1><ul><li><p>Engine </p><ul><li>初始化一个 <code>gin</code> 对象实例，该对象实例中包含一些框架的基础功能， <code>日志</code>, <code>中间件设置</code>, <code>路由控制</code>, <code>handlercontext</code></li></ul></li><li><p>Router:</p><ul><li>定义路由规则与条件，通过HTTP服务将具体路由注册到一个 <code>context</code> 实现的Handler 中</li></ul></li><li><p>Context:</p><ul><li>该模块是框架中重要的一环，它可以让我们在中间件中共享变量，管理整个流程，验证请求的json， 提供一个json的响应。</li></ul></li><li><p>Bind:</p><ul><li>context 中，可以获取到请求的详细信息（ HTTP 的 head 和 body）</li><li>但是我们需要根据不同的HTTP协议参数获取相应的格式化数据，来处理底层的业务逻辑，这需要我们使用 <code>bind</code> 相关的方法来解析 HTTP数据。</li></ul></li></ul>]]></content>
+        <content type="html"><![CDATA[<p>几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的服务端+客户端 – <a href="https://github.com/Jiaget/simplebank">一个简易的银行系统</a></p><p>作为练手项目，Gin有很多特性与功能都没有研究与使用过， 这次的学习希望可以从深度和广度两个方面，更加全面的一窥Gin框架，这个活跃在社区广受好评的web框架。</p><h1 id="回顾-HTTP-服务开发的基本流程"><a href="#回顾-HTTP-服务开发的基本流程" class="headerlink" title="回顾 HTTP 服务开发的基本流程"></a>回顾 HTTP 服务开发的基本流程</h1><ul><li>开启TCP 监听</li><li>初始化一些 <code>handler</code> 处理具体的业务逻辑</li><li>将业务逻辑和相关的 <code>Method</code>, <code>URL</code> 绑定，对外暴露一些具体功能服务</li></ul><h1 id="Gin-的几个重要模型："><a href="#Gin-的几个重要模型：" class="headerlink" title="Gin 的几个重要模型："></a>Gin 的几个重要模型：</h1><ul><li><p>Engine </p><ul><li>初始化一个 <code>gin</code> 对象实例，该对象实例中包含一些框架的基础功能， <code>日志</code>, <code>中间件设置</code>, <code>路由控制</code>, <code>handlercontext</code></li></ul></li><li><p>Router:</p><ul><li>定义路由规则与条件，通过HTTP服务将具体路由注册到一个 <code>context</code> 实现的Handler 中</li></ul></li><li><p>Context:</p><ul><li>该模块是框架中重要的一环，它可以让我们在中间件中共享变量，管理整个流程，验证请求的json， 提供一个json的响应。</li></ul></li><li><p>Bind:</p><ul><li>context 中，可以获取到请求的详细信息（ HTTP 的 head 和 body）</li><li>但是我们需要根据不同的HTTP协议参数获取相应的格式化数据，来处理底层的业务逻辑，这需要我们使用 <code>bind</code> 相关的方法来解析 HTTP数据。</li></ul></li></ul>]]></content>
       
       
       <categories>
@@ -303,7 +330,7 @@
       <link href="2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"/>
       <url>2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/</url>
       
-        <content type="html"><![CDATA[<h1 id="涉及指令"><a href="#涉及指令" class="headerlink" title="涉及指令"></a>涉及指令</h1><ul><li><code>SETNX key value</code>: （nx: not exist） key不存在时，设置成value,返回1; 没设置成功，返回0</li><li><code>EXPIRE key locktime</code>: 设置key有效时常</li><li><code>DEL key</code>:删除</li><li><code>GETSET key value</code>: 先GET,再SET,先返回value,没有就返回nil。再实现设置操作。</li></ul><h1 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h1><p>分布式锁就是 对于一个所有进程都能访问到的资源上，设置一个锁资源，让这些进程来竞争这个锁。</p><p>我们希望分布式锁：</p><ul><li>响应快</li><li>性能高</li><li>与业务无关</li></ul>]]></content>
+        <content type="html"><![CDATA[<h1 id="涉及指令"><a href="#涉及指令" class="headerlink" title="涉及指令"></a>涉及指令</h1><ul><li><code>SETNX key value</code>: （nx: not exist） key不存在时，设置成value,返回1; 没设置成功，返回0</li><li><code>EXPIRE key locktime</code>: 设置key有效时常</li><li><code>DEL key</code>:删除</li><li><code>GETSET key value</code>: 先GET,再SET,先返回value,没有就返回nil。再实现设置操作。</li></ul><h1 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h1><p>分布式锁就是 对于一个所有进程都能访问到的资源上，设置一个锁资源，让这些进程来竞争这个锁。</p><p>我们希望分布式锁：</p><ul><li>响应快</li><li>性能高</li><li>与业务无关</li></ul><h1 id="1-简单的分布式锁"><a href="#1-简单的分布式锁" class="headerlink" title="1. 简单的分布式锁"></a>1. 简单的分布式锁</h1><p>问题：<br>    获取锁的进程如果执行失败了，并不会主动解锁。</p><p>方案：<br>    - 给锁设置过期时间。（但是有可能进程还没运行到过期指令，就挂了）<br>    - 将锁的内容设置为过期时间， <code>SETNX</code> 获取锁失败时， 拿这个时间和当前时间对比，如果锁过期了，删除锁，重新上锁</p><p>不足：<br>    高并发下，多个进程都会去设置这个锁，并以为自己获取了锁</p><p>解决；<br>    setNX 失败后，获取锁的时间，GETSET, 将自己的过期时间更新。再去获取旧值， 旧值和之前获得的不一致，说明锁被占用，自己放弃锁。</p><pre><code>func tryLock(conn RedisConn) bool &#123;    now := time.Now()    expireTime := now.Add(time.Duration(1000))    if conn.SETNX(&quot;mykey&quot;, &quot;1&quot;) == 1 &#123;        conn.EXPIRE(&quot;mykey&quot;, 1000)        return true    &#125; else &#123;        oldVal := conn.get(&quot;mykey&quot;)        if oldVal != nil &amp;&amp; oldVal &lt; nowTime &#123;            currentVal = conn.GETSET(&quot;mykey&quot;, expireTime)            if oldVal == currentVal &#123;                conn.EXPIRE(&quot;mykey&quot;, 1000)                return true;            &#125;            return false        &#125;    &#125;&#125;</code></pre>]]></content>
       
       
       <categories>
@@ -390,7 +417,7 @@
       <link href="2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"/>
       <url>2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/</url>
       
-        <content type="html"><![CDATA[<h1 id="什么是闭包"><a href="#什么是闭包" class="headerlink" title="什么是闭包"></a>什么是闭包</h1><pre><code>闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉时的上下文也能照常运行。    --- 摘自维基百科</code></pre>]]></content>
+        <content type="html"><![CDATA[<h1 id="0-函数"><a href="#0-函数" class="headerlink" title="0.函数"></a>0.函数</h1><pre><code>在 Golang 中，函数可以用作其他的函数入参，也能被当作返回值，还是能绑定到变量。func A() &#123;&#125;func B(f func())&#123;&#125;func C() &#123;    return A&#125;var f func() = C()</code></pre><p>像上面这样的函数的三种角色（参数，返回值，变量）实际上是一个 <code>Function Value</code> 是一个指针，但是并不指向函数的执行入口。它会先指向一个结构体</p><pre><code>type funcval struct &#123;    fn uintptr&#125;</code></pre><p>这个结构体中的 <code>fn</code> 才会指向函数的执行入口。而这种二级指针的作用就是为了实现闭包。</p><h1 id="1-什么是闭包"><a href="#1-什么是闭包" class="headerlink" title="1.什么是闭包"></a>1.什么是闭包</h1><pre><code>闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉时的上下文也能照常运行。    --- 摘自维基百科</code></pre><p>举一个例子：</p><pre><code>func create() func()int &#123;    c := 2    return func() int &#123;        return c    &#125;&#125;func main() &#123;    f1 := create()    fmt.Println(f1&#123;&#125;)&#125;</code></pre><p>在 <code>create()</code> 中的返回值是一个闭包函数，这样的闭包函数，在编译阶段就已经生成完毕，而 c 这样的局部变量返回给了外部空间的 <code>捕获变量</code> 会和闭包函数一起在执行阶段被保存在闭包对象中并船舰。</p><p>局部变量 c 虽然在一开始被放在了 create() 函数栈中，但在堆上创建闭包对象时，它也被捕获在了堆上。</p><p>捕获对象中的 funcValue 指向了 <code>create()</code> 函数中的返回函数</p><h1 id="2-捕获变量的分配问题"><a href="#2-捕获变量的分配问题" class="headerlink" title="2. 捕获变量的分配问题"></a>2. 捕获变量的分配问题</h1><ul><li>当被捕获的变量在函数中没有被修改时，它只会将值拷贝在捕获列表中即可。</li><li>当捕获变量还被修改过。首先，捕获变量会被改成堆分配，在栈上只分配了一个地址。如果还存在一个闭包函数来获取这个变量，闭包对象中也同样获取这个变量的地址。这样 闭包函数和外部函数都可以操作这个变量。</li></ul>]]></content>
       
       
       <categories>

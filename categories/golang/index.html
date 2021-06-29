@@ -217,6 +217,106 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/06/24/%E4%B8%80%E4%B8%AAgoroutine%E7%9A%84%E4%B8%80%E7%94%9F/"
+                            aria-label=": 一个goroutine的一生"
+                        >
+                            一个goroutine的一生
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-24T13:25:09+08:00">
+	
+		    6月 24, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/golang/">golang</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <p>一个函数被编译成可执行文件以后，会通过 <code>程序执行入口</code> 进入内存虚拟地址空间中的代码段。</p>
+<p>对于一个 main 函数而言， 程序会以 <code>runtime.main</code> 作为入口， 创建一个 <code>main goroutine</code>, 之后再去调用 <code>main.main</code> 函数。</p>
+<p>提到 Golang 的协程运行，就不得不提 <code>GMP</code> 模型, 在虚拟地址空间的 <code>数据段</code> 会记录这样的全局变量：</p>
+<ul>
+<li><p>g0 （主协程）</p>
+<ul>
+<li>g0 会在主线程栈上分配栈空间</li>
+<li>g0 持有 m0 指针</li>
+</ul>
+</li>
+<li><p>m0</p>
+<ul>
+<li>m0 即主线程所对应的m</li>
+<li>m0 持有 g0 的指针，且m0上运行的第一个g就是g0</li>
+</ul>
+</li>
+<li><p>allgs: 记录所有的g</p>
+</li>
+<li><p>allm: 记录所有的m</p>
+</li>
+<li><p>allp: 在程序初始化的过程中，调度器会进行初始化，根据环境变量 GOMAXPROCS 来决定创建 p 的个数。</p>
+<ul>
+<li>同样， 第一个被创建的p，会和m0相关联。</li>
+</ul>
+</li>
+<li><p>sched: 调度器</p>
+<ul>
+<li>记录所有空闲的 m 和 p</li>
+<li>runq</li>
+</ul>
+</li>
+<li><p>runq：runq作为全局变量，记录在 <code>sched</code> 下</p>
+<ul>
+<li>这里的runq是全局runq</li>
+<li>当然还有一个本地runq， 记录在P中。</li>
+</ul>
+</li>
+</ul>
+<h2 id="本地队列与全局队列"><a href="#本地队列与全局队列" class="headerlink" title="本地队列与全局队列"></a>本地队列与全局队列</h2><p>runq， 在 <code>runtime.p</code> 中记录的是本地队列，在 <code>runtime.schedt</code> 中记录的是全局队列。</p>
+<p>当本地队列满了，G就会放在全局队列中。 m 优先获取本地队列的 g， 再从全局队列中获取，当 本地和全局都没有 g ， 它会从其他 m 中分担一些 g。</p>
+<h2 id="main-函数"><a href="#main-函数" class="headerlink" title="main 函数"></a>main 函数</h2><p>回到main函数的执行过程中来。</p>
+<p>main函数执行过程中需要创建的 main goroutine， 会被加入到 allp[0] 的本地队列中， 之后会通过 mstart 函数开启调度循环(schedule()),调度器将队列中的 g 调度到m0上去执行。</p>
+<p>main goroutine 的工作不仅仅是调用 main 函数， 它还会开启线程监控， 包初始化等工作， 准备工作结束后，执行完 main 函数后， goroutine 便退出。</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/24/%E4%B8%80%E4%B8%AAgoroutine%E7%9A%84%E4%B8%80%E7%94%9F/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/06/23/Golang%E4%B9%8B%E5%8F%8D%E5%B0%84/"
                             aria-label=": Golang之反射"
                         >
@@ -1030,9 +1130,44 @@ if h.B &gt; 31-bucketCntBits &#123;
             </div>
             
                 <div class="postShorten-content">
-                    <h1 id="什么是闭包"><a href="#什么是闭包" class="headerlink" title="什么是闭包"></a>什么是闭包</h1><pre><code>闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉时的上下文也能照常运行。
+                    <h1 id="0-函数"><a href="#0-函数" class="headerlink" title="0.函数"></a>0.函数</h1><pre><code>在 Golang 中，函数可以用作其他的函数入参，也能被当作返回值，还是能绑定到变量。
+
+func A() &#123;&#125;
+func B(f func())&#123;&#125;
+func C() &#123;
+    return A
+&#125;
+var f func() = C()
+</code></pre>
+<p>像上面这样的函数的三种角色（参数，返回值，变量）实际上是一个 <code>Function Value</code> 是一个指针，但是并不指向函数的执行入口。它会先指向一个结构体</p>
+<pre><code>type funcval struct &#123;
+    fn uintptr
+&#125;
+</code></pre>
+<p>这个结构体中的 <code>fn</code> 才会指向函数的执行入口。而这种二级指针的作用就是为了实现闭包。</p>
+<h1 id="1-什么是闭包"><a href="#1-什么是闭包" class="headerlink" title="1.什么是闭包"></a>1.什么是闭包</h1><pre><code>闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉时的上下文也能照常运行。
     --- 摘自维基百科
 </code></pre>
+<p>举一个例子：</p>
+<pre><code>func create() func()int &#123;
+    c := 2
+    return func() int &#123;
+        return c
+    &#125;
+&#125;
+
+func main() &#123;
+    f1 := create()
+    fmt.Println(f1&#123;&#125;)
+&#125;
+</code></pre>
+<p>在 <code>create()</code> 中的返回值是一个闭包函数，这样的闭包函数，在编译阶段就已经生成完毕，而 c 这样的局部变量返回给了外部空间的 <code>捕获变量</code> 会和闭包函数一起在执行阶段被保存在闭包对象中并船舰。</p>
+<p>局部变量 c 虽然在一开始被放在了 create() 函数栈中，但在堆上创建闭包对象时，它也被捕获在了堆上。</p>
+<p>捕获对象中的 funcValue 指向了 <code>create()</code> 函数中的返回函数</p>
+<h1 id="2-捕获变量的分配问题"><a href="#2-捕获变量的分配问题" class="headerlink" title="2. 捕获变量的分配问题"></a>2. 捕获变量的分配问题</h1><ul>
+<li>当被捕获的变量在函数中没有被修改时，它只会将值拷贝在捕获列表中即可。</li>
+<li>当捕获变量还被修改过。首先，捕获变量会被改成堆分配，在栈上只分配了一个地址。如果还存在一个闭包函数来获取这个变量，闭包对象中也同样获取这个变量的地址。这样 闭包函数和外部函数都可以操作这个变量。</li>
+</ul>
 
                     
                         

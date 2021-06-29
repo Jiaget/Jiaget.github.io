@@ -217,6 +217,106 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/06/24/%E4%B8%80%E4%B8%AAgoroutine%E7%9A%84%E4%B8%80%E7%94%9F/"
+                            aria-label=": 一个goroutine的一生"
+                        >
+                            一个goroutine的一生
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-24T13:25:09+08:00">
+	
+		    6月 24, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/golang/">golang</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <p>一个函数被编译成可执行文件以后，会通过 <code>程序执行入口</code> 进入内存虚拟地址空间中的代码段。</p>
+<p>对于一个 main 函数而言， 程序会以 <code>runtime.main</code> 作为入口， 创建一个 <code>main goroutine</code>, 之后再去调用 <code>main.main</code> 函数。</p>
+<p>提到 Golang 的协程运行，就不得不提 <code>GMP</code> 模型, 在虚拟地址空间的 <code>数据段</code> 会记录这样的全局变量：</p>
+<ul>
+<li><p>g0 （主协程）</p>
+<ul>
+<li>g0 会在主线程栈上分配栈空间</li>
+<li>g0 持有 m0 指针</li>
+</ul>
+</li>
+<li><p>m0</p>
+<ul>
+<li>m0 即主线程所对应的m</li>
+<li>m0 持有 g0 的指针，且m0上运行的第一个g就是g0</li>
+</ul>
+</li>
+<li><p>allgs: 记录所有的g</p>
+</li>
+<li><p>allm: 记录所有的m</p>
+</li>
+<li><p>allp: 在程序初始化的过程中，调度器会进行初始化，根据环境变量 GOMAXPROCS 来决定创建 p 的个数。</p>
+<ul>
+<li>同样， 第一个被创建的p，会和m0相关联。</li>
+</ul>
+</li>
+<li><p>sched: 调度器</p>
+<ul>
+<li>记录所有空闲的 m 和 p</li>
+<li>runq</li>
+</ul>
+</li>
+<li><p>runq：runq作为全局变量，记录在 <code>sched</code> 下</p>
+<ul>
+<li>这里的runq是全局runq</li>
+<li>当然还有一个本地runq， 记录在P中。</li>
+</ul>
+</li>
+</ul>
+<h2 id="本地队列与全局队列"><a href="#本地队列与全局队列" class="headerlink" title="本地队列与全局队列"></a>本地队列与全局队列</h2><p>runq， 在 <code>runtime.p</code> 中记录的是本地队列，在 <code>runtime.schedt</code> 中记录的是全局队列。</p>
+<p>当本地队列满了，G就会放在全局队列中。 m 优先获取本地队列的 g， 再从全局队列中获取，当 本地和全局都没有 g ， 它会从其他 m 中分担一些 g。</p>
+<h2 id="main-函数"><a href="#main-函数" class="headerlink" title="main 函数"></a>main 函数</h2><p>回到main函数的执行过程中来。</p>
+<p>main函数执行过程中需要创建的 main goroutine， 会被加入到 allp[0] 的本地队列中， 之后会通过 mstart 函数开启调度循环(schedule()),调度器将队列中的 g 调度到m0上去执行。</p>
+<p>main goroutine 的工作不仅仅是调用 main 函数， 它还会开启线程监控， 包初始化等工作， 准备工作结束后，执行完 main 函数后， goroutine 便退出。</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/24/%E4%B8%80%E4%B8%AAgoroutine%E7%9A%84%E4%B8%80%E7%94%9F/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/06/23/Golang%E4%B9%8B%E5%8F%8D%E5%B0%84/"
                             aria-label=": Golang之反射"
                         >
@@ -300,7 +400,7 @@
             </div>
             
                 <div class="postShorten-content">
-                    <p>几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的客户端服务端 – <img src="https://github.com/Jiaget/simplebank" alt="一个简易的银行系统"></p>
+                    <p>几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的服务端+客户端 – <a target="_blank" rel="noopener" href="https://github.com/Jiaget/simplebank">一个简易的银行系统</a></p>
 <p>作为练手项目，Gin有很多特性与功能都没有研究与使用过， 这次的学习希望可以从深度和广度两个方面，更加全面的一窥Gin框架，这个活跃在社区广受好评的web框架。</p>
 <h1 id="回顾-HTTP-服务开发的基本流程"><a href="#回顾-HTTP-服务开发的基本流程" class="headerlink" title="回顾 HTTP 服务开发的基本流程"></a>回顾 HTTP 服务开发的基本流程</h1><ul>
 <li>开启TCP 监听</li>
@@ -1122,66 +1222,6 @@ if h.B &gt; 31-bucketCntBits &#123;
                         <p>
                             <a
                                 href="/2021/06/03/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                评论和共享
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"
-                            aria-label=": 浅析golang 闭包"
-                        >
-                            浅析golang 闭包
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-06-03T12:26:10+08:00">
-	
-		    6月 03, 2021
-    	
-    </time>
-    
-        <span>发布在 </span>
-        
-    <a class="category-link" href="/categories/golang/">golang</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="什么是闭包"><a href="#什么是闭包" class="headerlink" title="什么是闭包"></a>什么是闭包</h1><pre><code>闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉时的上下文也能照常运行。
-    --- 摘自维基百科
-</code></pre>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2021-06-23T03:25:24.563Z</updated>
+  <updated>2021-06-28T06:00:40.123Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>一个goroutine的一生</title>
+    <link href="http://example.com/2021/06/24/%E4%B8%80%E4%B8%AAgoroutine%E7%9A%84%E4%B8%80%E7%94%9F/"/>
+    <id>http://example.com/2021/06/24/%E4%B8%80%E4%B8%AAgoroutine%E7%9A%84%E4%B8%80%E7%94%9F/</id>
+    <published>2021-06-24T05:25:09.000Z</published>
+    <updated>2021-06-28T06:00:40.123Z</updated>
+    
+    <content type="html"><![CDATA[<p>一个函数被编译成可执行文件以后，会通过 <code>程序执行入口</code> 进入内存虚拟地址空间中的代码段。</p><p>对于一个 main 函数而言， 程序会以 <code>runtime.main</code> 作为入口， 创建一个 <code>main goroutine</code>, 之后再去调用 <code>main.main</code> 函数。</p><p>提到 Golang 的协程运行，就不得不提 <code>GMP</code> 模型, 在虚拟地址空间的 <code>数据段</code> 会记录这样的全局变量：</p><ul><li><p>g0 （主协程）</p><ul><li>g0 会在主线程栈上分配栈空间</li><li>g0 持有 m0 指针</li></ul></li><li><p>m0</p><ul><li>m0 即主线程所对应的m</li><li>m0 持有 g0 的指针，且m0上运行的第一个g就是g0</li></ul></li><li><p>allgs: 记录所有的g</p></li><li><p>allm: 记录所有的m</p></li><li><p>allp: 在程序初始化的过程中，调度器会进行初始化，根据环境变量 GOMAXPROCS 来决定创建 p 的个数。</p><ul><li>同样， 第一个被创建的p，会和m0相关联。</li></ul></li><li><p>sched: 调度器</p><ul><li>记录所有空闲的 m 和 p</li><li>runq</li></ul></li><li><p>runq：runq作为全局变量，记录在 <code>sched</code> 下</p><ul><li>这里的runq是全局runq</li><li>当然还有一个本地runq， 记录在P中。</li></ul></li></ul><h2 id="本地队列与全局队列"><a href="#本地队列与全局队列" class="headerlink" title="本地队列与全局队列"></a>本地队列与全局队列</h2><p>runq， 在 <code>runtime.p</code> 中记录的是本地队列，在 <code>runtime.schedt</code> 中记录的是全局队列。</p><p>当本地队列满了，G就会放在全局队列中。 m 优先获取本地队列的 g， 再从全局队列中获取，当 本地和全局都没有 g ， 它会从其他 m 中分担一些 g。</p><h2 id="main-函数"><a href="#main-函数" class="headerlink" title="main 函数"></a>main 函数</h2><p>回到main函数的执行过程中来。</p><p>main函数执行过程中需要创建的 main goroutine， 会被加入到 allp[0] 的本地队列中， 之后会通过 mstart 函数开启调度循环(schedule()),调度器将队列中的 g 调度到m0上去执行。</p><p>main goroutine 的工作不仅仅是调用 main 函数， 它还会开启线程监控， 包初始化等工作， 准备工作结束后，执行完 main 函数后， goroutine 便退出。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;一个函数被编译成可执行文件以后，会通过 &lt;code&gt;程序执行入口&lt;/code&gt; 进入内存虚拟地址空间中的代码段。&lt;/p&gt;
+&lt;p&gt;对于一个 main 函数而言， 程序会以 &lt;code&gt;runtime.main&lt;/code&gt; 作为入口， 创建一个 &lt;code&gt;main goro</summary>
+      
+    
+    
+    
+    <category term="golang" scheme="http://example.com/categories/golang/"/>
+    
+    
+    <category term="golang" scheme="http://example.com/tags/golang/"/>
+    
+    <category term="goroutine" scheme="http://example.com/tags/goroutine/"/>
+    
+  </entry>
   
   <entry>
     <title>记撸一个双链表快排</title>
@@ -77,15 +104,15 @@
     <link href="http://example.com/2021/06/20/%E7%AA%A5%E6%8E%A2Gin%E6%A1%86%E6%9E%B6/"/>
     <id>http://example.com/2021/06/20/%E7%AA%A5%E6%8E%A2Gin%E6%A1%86%E6%9E%B6/</id>
     <published>2021-06-20T06:25:35.000Z</published>
-    <updated>2021-06-23T01:13:36.847Z</updated>
+    <updated>2021-06-23T03:26:09.443Z</updated>
     
-    <content type="html"><![CDATA[<p>几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的客户端服务端 – <img src="https://github.com/Jiaget/simplebank" alt="一个简易的银行系统"></p><p>作为练手项目，Gin有很多特性与功能都没有研究与使用过， 这次的学习希望可以从深度和广度两个方面，更加全面的一窥Gin框架，这个活跃在社区广受好评的web框架。</p><h1 id="回顾-HTTP-服务开发的基本流程"><a href="#回顾-HTTP-服务开发的基本流程" class="headerlink" title="回顾 HTTP 服务开发的基本流程"></a>回顾 HTTP 服务开发的基本流程</h1><ul><li>开启TCP 监听</li><li>初始化一些 <code>handler</code> 处理具体的业务逻辑</li><li>将业务逻辑和相关的 <code>Method</code>, <code>URL</code> 绑定，对外暴露一些具体功能服务</li></ul><h1 id="Gin-的几个重要模型："><a href="#Gin-的几个重要模型：" class="headerlink" title="Gin 的几个重要模型："></a>Gin 的几个重要模型：</h1><ul><li><p>Engine </p><ul><li>初始化一个 <code>gin</code> 对象实例，该对象实例中包含一些框架的基础功能， <code>日志</code>, <code>中间件设置</code>, <code>路由控制</code>, <code>handlercontext</code></li></ul></li><li><p>Router:</p><ul><li>定义路由规则与条件，通过HTTP服务将具体路由注册到一个 <code>context</code> 实现的Handler 中</li></ul></li><li><p>Context:</p><ul><li>该模块是框架中重要的一环，它可以让我们在中间件中共享变量，管理整个流程，验证请求的json， 提供一个json的响应。</li></ul></li><li><p>Bind:</p><ul><li>context 中，可以获取到请求的详细信息（ HTTP 的 head 和 body）</li><li>但是我们需要根据不同的HTTP协议参数获取相应的格式化数据，来处理底层的业务逻辑，这需要我们使用 <code>bind</code> 相关的方法来解析 HTTP数据。</li></ul></li></ul>]]></content>
+    <content type="html"><![CDATA[<p>几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的服务端+客户端 – <a href="https://github.com/Jiaget/simplebank">一个简易的银行系统</a></p><p>作为练手项目，Gin有很多特性与功能都没有研究与使用过， 这次的学习希望可以从深度和广度两个方面，更加全面的一窥Gin框架，这个活跃在社区广受好评的web框架。</p><h1 id="回顾-HTTP-服务开发的基本流程"><a href="#回顾-HTTP-服务开发的基本流程" class="headerlink" title="回顾 HTTP 服务开发的基本流程"></a>回顾 HTTP 服务开发的基本流程</h1><ul><li>开启TCP 监听</li><li>初始化一些 <code>handler</code> 处理具体的业务逻辑</li><li>将业务逻辑和相关的 <code>Method</code>, <code>URL</code> 绑定，对外暴露一些具体功能服务</li></ul><h1 id="Gin-的几个重要模型："><a href="#Gin-的几个重要模型：" class="headerlink" title="Gin 的几个重要模型："></a>Gin 的几个重要模型：</h1><ul><li><p>Engine </p><ul><li>初始化一个 <code>gin</code> 对象实例，该对象实例中包含一些框架的基础功能， <code>日志</code>, <code>中间件设置</code>, <code>路由控制</code>, <code>handlercontext</code></li></ul></li><li><p>Router:</p><ul><li>定义路由规则与条件，通过HTTP服务将具体路由注册到一个 <code>context</code> 实现的Handler 中</li></ul></li><li><p>Context:</p><ul><li>该模块是框架中重要的一环，它可以让我们在中间件中共享变量，管理整个流程，验证请求的json， 提供一个json的响应。</li></ul></li><li><p>Bind:</p><ul><li>context 中，可以获取到请求的详细信息（ HTTP 的 head 和 body）</li><li>但是我们需要根据不同的HTTP协议参数获取相应的格式化数据，来处理底层的业务逻辑，这需要我们使用 <code>bind</code> 相关的方法来解析 HTTP数据。</li></ul></li></ul>]]></content>
     
     
       
       
-    <summary type="html">&lt;p&gt;几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的客户端服务端 – &lt;img src=&quot;https://github.com/Jiaget/simplebank&quot; alt=&quot;一个简易的银行系统&quot;&gt;&lt;/p&gt;
-&lt;p&gt;作为练手项</summary>
+    <summary type="html">&lt;p&gt;几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的服务端+客户端 – &lt;a href=&quot;https://github.com/Jiaget/simplebank&quot;&gt;一个简易的银行系统&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;作为练手项目，G</summary>
       
     
     
@@ -319,9 +346,9 @@
     <link href="http://example.com/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"/>
     <id>http://example.com/2021/06/04/%E8%81%8A%E8%81%8A%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/</id>
     <published>2021-06-04T14:49:51.000Z</published>
-    <updated>2021-06-16T10:12:16.344Z</updated>
+    <updated>2021-06-28T05:03:22.530Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="涉及指令"><a href="#涉及指令" class="headerlink" title="涉及指令"></a>涉及指令</h1><ul><li><code>SETNX key value</code>: （nx: not exist） key不存在时，设置成value,返回1; 没设置成功，返回0</li><li><code>EXPIRE key locktime</code>: 设置key有效时常</li><li><code>DEL key</code>:删除</li><li><code>GETSET key value</code>: 先GET,再SET,先返回value,没有就返回nil。再实现设置操作。</li></ul><h1 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h1><p>分布式锁就是 对于一个所有进程都能访问到的资源上，设置一个锁资源，让这些进程来竞争这个锁。</p><p>我们希望分布式锁：</p><ul><li>响应快</li><li>性能高</li><li>与业务无关</li></ul>]]></content>
+    <content type="html"><![CDATA[<h1 id="涉及指令"><a href="#涉及指令" class="headerlink" title="涉及指令"></a>涉及指令</h1><ul><li><code>SETNX key value</code>: （nx: not exist） key不存在时，设置成value,返回1; 没设置成功，返回0</li><li><code>EXPIRE key locktime</code>: 设置key有效时常</li><li><code>DEL key</code>:删除</li><li><code>GETSET key value</code>: 先GET,再SET,先返回value,没有就返回nil。再实现设置操作。</li></ul><h1 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h1><p>分布式锁就是 对于一个所有进程都能访问到的资源上，设置一个锁资源，让这些进程来竞争这个锁。</p><p>我们希望分布式锁：</p><ul><li>响应快</li><li>性能高</li><li>与业务无关</li></ul><h1 id="1-简单的分布式锁"><a href="#1-简单的分布式锁" class="headerlink" title="1. 简单的分布式锁"></a>1. 简单的分布式锁</h1><p>问题：<br>    获取锁的进程如果执行失败了，并不会主动解锁。</p><p>方案：<br>    - 给锁设置过期时间。（但是有可能进程还没运行到过期指令，就挂了）<br>    - 将锁的内容设置为过期时间， <code>SETNX</code> 获取锁失败时， 拿这个时间和当前时间对比，如果锁过期了，删除锁，重新上锁</p><p>不足：<br>    高并发下，多个进程都会去设置这个锁，并以为自己获取了锁</p><p>解决；<br>    setNX 失败后，获取锁的时间，GETSET, 将自己的过期时间更新。再去获取旧值， 旧值和之前获得的不一致，说明锁被占用，自己放弃锁。</p><pre><code>func tryLock(conn RedisConn) bool &#123;    now := time.Now()    expireTime := now.Add(time.Duration(1000))    if conn.SETNX(&quot;mykey&quot;, &quot;1&quot;) == 1 &#123;        conn.EXPIRE(&quot;mykey&quot;, 1000)        return true    &#125; else &#123;        oldVal := conn.get(&quot;mykey&quot;)        if oldVal != nil &amp;&amp; oldVal &lt; nowTime &#123;            currentVal = conn.GETSET(&quot;mykey&quot;, expireTime)            if oldVal == currentVal &#123;                conn.EXPIRE(&quot;mykey&quot;, 1000)                return true;            &#125;            return false        &#125;    &#125;&#125;</code></pre>]]></content>
     
     
       
@@ -404,14 +431,16 @@
     <link href="http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/"/>
     <id>http://example.com/2021/06/03/%E6%B5%85%E6%9E%90golang-%E9%97%AD%E5%8C%85/</id>
     <published>2021-06-03T04:26:10.000Z</published>
-    <updated>2021-06-23T00:47:54.624Z</updated>
+    <updated>2021-06-23T12:17:44.769Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="什么是闭包"><a href="#什么是闭包" class="headerlink" title="什么是闭包"></a>什么是闭包</h1><pre><code>闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉时的上下文也能照常运行。    --- 摘自维基百科</code></pre>]]></content>
+    <content type="html"><![CDATA[<h1 id="0-函数"><a href="#0-函数" class="headerlink" title="0.函数"></a>0.函数</h1><pre><code>在 Golang 中，函数可以用作其他的函数入参，也能被当作返回值，还是能绑定到变量。func A() &#123;&#125;func B(f func())&#123;&#125;func C() &#123;    return A&#125;var f func() = C()</code></pre><p>像上面这样的函数的三种角色（参数，返回值，变量）实际上是一个 <code>Function Value</code> 是一个指针，但是并不指向函数的执行入口。它会先指向一个结构体</p><pre><code>type funcval struct &#123;    fn uintptr&#125;</code></pre><p>这个结构体中的 <code>fn</code> 才会指向函数的执行入口。而这种二级指针的作用就是为了实现闭包。</p><h1 id="1-什么是闭包"><a href="#1-什么是闭包" class="headerlink" title="1.什么是闭包"></a>1.什么是闭包</h1><pre><code>闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉时的上下文也能照常运行。    --- 摘自维基百科</code></pre><p>举一个例子：</p><pre><code>func create() func()int &#123;    c := 2    return func() int &#123;        return c    &#125;&#125;func main() &#123;    f1 := create()    fmt.Println(f1&#123;&#125;)&#125;</code></pre><p>在 <code>create()</code> 中的返回值是一个闭包函数，这样的闭包函数，在编译阶段就已经生成完毕，而 c 这样的局部变量返回给了外部空间的 <code>捕获变量</code> 会和闭包函数一起在执行阶段被保存在闭包对象中并船舰。</p><p>局部变量 c 虽然在一开始被放在了 create() 函数栈中，但在堆上创建闭包对象时，它也被捕获在了堆上。</p><p>捕获对象中的 funcValue 指向了 <code>create()</code> 函数中的返回函数</p><h1 id="2-捕获变量的分配问题"><a href="#2-捕获变量的分配问题" class="headerlink" title="2. 捕获变量的分配问题"></a>2. 捕获变量的分配问题</h1><ul><li>当被捕获的变量在函数中没有被修改时，它只会将值拷贝在捕获列表中即可。</li><li>当捕获变量还被修改过。首先，捕获变量会被改成堆分配，在栈上只分配了一个地址。如果还存在一个闭包函数来获取这个变量，闭包对象中也同样获取这个变量的地址。这样 闭包函数和外部函数都可以操作这个变量。</li></ul>]]></content>
     
     
       
       
-    <summary type="html">&lt;h1 id=&quot;什么是闭包&quot;&gt;&lt;a href=&quot;#什么是闭包&quot; class=&quot;headerlink&quot; title=&quot;什么是闭包&quot;&gt;&lt;/a&gt;什么是闭包&lt;/h1&gt;&lt;pre&gt;&lt;code&gt;闭包包含自由变量（在函数外部定义，但在函数内被引用），闭包的自由变量在被捕捉时被确定，保证脱离了捕捉</summary>
+    <summary type="html">&lt;h1 id=&quot;0-函数&quot;&gt;&lt;a href=&quot;#0-函数&quot; class=&quot;headerlink&quot; title=&quot;0.函数&quot;&gt;&lt;/a&gt;0.函数&lt;/h1&gt;&lt;pre&gt;&lt;code&gt;在 Golang 中，函数可以用作其他的函数入参，也能被当作返回值，还是能绑定到变量。
+
+func A() </summary>
       
     
     
@@ -538,34 +567,6 @@
     <category term="三色标记法" scheme="http://example.com/tags/%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E6%B3%95/"/>
     
     <category term="写屏障" scheme="http://example.com/tags/%E5%86%99%E5%B1%8F%E9%9A%9C/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Linux 的网络I/O复用并发模型</title>
-    <link href="http://example.com/2021/05/29/Linux-%E7%9A%84%E7%BD%91%E7%BB%9CI-O%E5%A4%8D%E7%94%A8%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/"/>
-    <id>http://example.com/2021/05/29/Linux-%E7%9A%84%E7%BD%91%E7%BB%9CI-O%E5%A4%8D%E7%94%A8%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/</id>
-    <published>2021-05-29T14:51:02.000Z</published>
-    <updated>2021-05-30T11:00:20.556Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="Linux-中网络I-O复用并发模型"><a href="#Linux-中网络I-O复用并发模型" class="headerlink" title="Linux 中网络I/O复用并发模型"></a>Linux 中网络I/O复用并发模型</h1><h2 id="什么是阻塞，非阻塞，IO多路复用？"><a href="#什么是阻塞，非阻塞，IO多路复用？" class="headerlink" title="什么是阻塞，非阻塞，IO多路复用？"></a>什么是阻塞，非阻塞，IO多路复用？</h2><ul><li><p>流</p><ul><li>可进行I/O操作的内核对象<ul><li>文字</li><li>管道</li><li>套接字</li></ul></li><li>流的入口：文件描述符(fd)</li></ul></li><li><p>阻塞等待<br>不占用CPU时间片</p><ul><li>缺点<ul><li>不能处理多个I/O请求的问题</li><li>同一个阻塞，同一时间只能处理一个流的阻塞监听</li></ul></li></ul></li><li><p>非阻塞（忙轮询）<br>占用资源不断去查看资源锁有没有释放</p></li><li><p>多路IO复用<br>既能阻塞等待，不浪费资源，又能同一时刻监听多个IO请求的状态</p></li></ul><h2 id="IO复用解决的问题"><a href="#IO复用解决的问题" class="headerlink" title="IO复用解决的问题"></a>IO复用解决的问题</h2><p>如何解决大量IO读写问题</p><ul><li>忙轮询</li></ul><pre><code>while true &#123;    for i in 流[] &#123;        if i has 数据 &#123;            读 或者 其他处理        &#125;    &#125;&#125;</code></pre><p>同时和多个流访问。</p><ul><li>select</li></ul><pre><code>while true &#123;    select(流[]); //阻塞  //有消息抵达    for i in 流[] &#123;        if i has 数据 &#123;            读 或者 其他处理        &#125;    &#125;&#125;</code></pre><p>select负责接收IO，但不能精准直到哪些IO可用，还需要遍历。监听的IO有限，一般1024个，与平台无关</p><ul><li>epoll</li></ul><pre><code>while true &#123;    可处理的流[] = epoll_wait(epoll_fd); //阻塞  //有消息抵达，全部放在 “可处理的流[]”中    for i in 可处理的流[] &#123;        读 或者 其他处理    &#125;&#125;</code></pre><p>类似select,但能返回所有可以处理的流，不必再去遍历确认</p><h2 id="epoll是什么"><a href="#epoll是什么" class="headerlink" title="epoll是什么"></a>epoll是什么</h2><ul><li>linux独有</li><li>一种I/O 多路复用技术</li><li>只关心活跃的链接，无需遍历所有的描述符集合。</li><li>能处理大量链接请求（系统可以打开的文件数目 <code>cat /proc/sys/fs/file-max</code>）</li></ul><h2 id="API"><a href="#API" class="headerlink" title="API"></a>API</h2><ol><li>创建</li></ol><pre><code>/**  * @param size 告诉内核监听的数目  *  * @returns 返回一个epoll句柄（即一个文件描述符）  */int epoll_create(int size);</code></pre><ol start="2"><li>控制</li></ol><pre><code>/*** @param epfd 用epoll_create所创建的epoll句柄* @param op 表示对epoll监控描述符控制的动作** EPOLL_CTL_ADD(注册新的fd到epfd)* EPOLL_CTL_MOD(修改已经注册的fd的监听事件)* EPOLL_CTL_DEL(epfd删除一个fd)** @param fd 需要监听的文件描述符* @param event 告诉内核需要监听的事件** @returns 成功返回0，失败返回-1, errno查看错误信息*/int epoll_ctl(int epfd, int op, int fd,struct epoll_event *event);struct epoll_event &#123;    __uint32_t events; /* epoll 事件 */    epoll_data_t data; /* 用户传递的数据 */&#125;/* * events : &#123;EPOLLIN, EPOLLOUT, EPOLLPRI,                         EPOLLHUP, EPOLLET, EPOLLONESHOT&#125; */typedef union epoll_data &#123;    void *ptr;    int fd;    uint32_t u32;    uint64_t u64;&#125; epoll_data_t;</code></pre><ol start="3"><li>等待</li></ol><pre><code>/**** @param epfd 用epoll_create所创建的epoll句柄* @param event 从内核得到的事件集合* @param maxevents 告知内核这个events有多大,* 注意: 值 不能大于创建epoll_create()时的size.* @param timeout 超时时间* -1: 永久阻塞* 0: 立即返回，非阻塞* &gt;0: 指定微秒** @returns 成功: 有多少文件描述符就绪,时间到时返回0* 失败: -1, errno 查看错误*/int epoll_wait(int epfd, struct epoll_event *event,                             int maxevents, int timeout);</code></pre><h3 id="epoll-基本编程架构"><a href="#epoll-基本编程架构" class="headerlink" title="epoll 基本编程架构"></a>epoll 基本编程架构</h3><pre><code>int epfd = epoll_crete(1000);//将 listen_fd 添加进 epoll 中epoll_ctl(epfd, EPOLL_CTL_ADD, listen_fd,&amp;listen_event);while (1) &#123;    //阻塞等待 epoll 中 的fd 触发    int active_cnt = epoll_wait(epfd, events, 1000, -1);    for (i = 0 ; i &lt; active_cnt; i++) &#123;        if (evnets[i].data.fd == listen_fd) &#123;            //accept. 并且将新accept 的fd 加进epoll中.        &#125;        else if (events[i].events &amp; EPOLLIN) &#123;            //对此fd 进行读操作        &#125;        else if (events[i].events &amp; EPOLLOUT) &#123;            //对此fd 进行写操作        &#125;    &#125;&#125;</code></pre><h2 id="常见模型"><a href="#常见模型" class="headerlink" title="常见模型"></a>常见模型</h2><h3 id="单线程Accept"><a href="#单线程Accept" class="headerlink" title="单线程Accept"></a>单线程Accept</h3><p><img src="https://i.loli.net/2021/05/29/QHCbulfpiFw8Yx5.png" alt="single-accept.png"></p><ul><li>主线程的 <code>Accept（ListenFd）</code> 会阻塞主线程</li><li>连接成功后，会在服务端生成一个连接的套接字</li><li>一次只能形成一个连接，另一个客户端如果尝试连接，会阻塞</li><li>处理完当前客户端，并关闭套接字文件，再去处理下一个客户端</li></ul><h3 id="单线程Accept-多线程读写业务-无I-O复用"><a href="#单线程Accept-多线程读写业务-无I-O复用" class="headerlink" title="单线程Accept + 多线程读写业务 (无I/O复用)"></a>单线程Accept + 多线程读写业务 (无I/O复用)</h3><p><img src="https://i.loli.net/2021/05/29/xTDhEHmgX3cYdvS.png" alt="single_multiple-thread.png"></p><ul><li><code>Accept(ListenFd)</code> 监听客户端请求，阻塞主线程</li><li>接收客户端请求后，开辟一个新线程，进行读写业务。</li><li>主线程继续监听，能处理其他客户端的请求</li></ul><p>这个模型虽然支持了并发，但是：</p><ul><li>高并发情况下，多线程加重服务器负担</li><li>长连接的场景，客户端没有读写业务，但它不关闭，就需要不断进行心跳检测，占用了资源。</li></ul><h3 id="单线程多路I-O复用"><a href="#单线程多路I-O复用" class="headerlink" title="单线程多路I/O复用"></a>单线程多路I/O复用</h3><p><img src="https://i.loli.net/2021/05/29/jR7IJpbGqB58x6s.png" alt="single-reuseIO.png"></p><ul><li>主线程创建 <code>listenFd</code>， 采用多路I/O服用机制，进行IO状态阻塞监控。当client1发送请求，检测到了 <code>listenFd</code> 触发读时间，运行 accept 建立连接，并将 <code>connFd1</code>加入监听集合。</li><li>client1进行读写请求时，多路IO复用机制的监听阻塞释放，并触发套接字读写事件</li><li>client1触发的读写业务会使主线程阻塞，无法处理新的客户端的请求。</li></ul><p>该模型可以监听多个客户端的读写状态。且发生阻塞，处于非忙轮询的状态，不浪费CPU资源</p><p><strong>缺点</strong>：</p><ul><li>能同时监听，但不能同时处理多个客户端的读写请求</li><li>不支持高并发场景</li></ul><h2 id="单线程多路I-O复用-多线程业务工作池"><a href="#单线程多路I-O复用-多线程业务工作池" class="headerlink" title="单线程多路I/O复用 + 多线程业务工作池"></a>单线程多路I/O复用 + 多线程业务工作池</h2><p>该场景使用比较少</p><p><img src="https://i.loli.net/2021/05/29/yLX8YB1SvKU9s5M.png" alt="single-reuse-thread.png"></p><ul><li>主线程采用多路I/O复用机制监听连接请求。当监听到客户端连接请求后，处理连接请求，并将生成的<code>connFd1</code>加入到监听集合中</li><li>当监听到读写事件，则进行读写消息的处理</li><li>主线程处理读写消息，将业务逻辑交给工作线程池处理。工作线程池在server启动前开启的一定数量的线程。他们只处理逻辑业务，不处理套接字读写操作。</li><li>工作线程池处理完业务，再触发<code>connFd1</code>的写事件，将回执消息返回给对方</li></ul><p>优点：<br>    - 将业务处理分离出来，缩短客户端的等待时间。<br>    - 能并发处理客户端业务。</p><p>缺点：<br>    - 读写处理仍然需要单独处理。(排队)<br>    - 业务处理后的结果，也需要按顺序返回给客户端。（排队）</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;Linux-中网络I-O复用并发模型&quot;&gt;&lt;a href=&quot;#Linux-中网络I-O复用并发模型&quot; class=&quot;headerlink&quot; title=&quot;Linux 中网络I/O复用并发模型&quot;&gt;&lt;/a&gt;Linux 中网络I/O复用并发模型&lt;/h1&gt;&lt;h2 id=&quot;什</summary>
-      
-    
-    
-    
-    <category term="linux" scheme="http://example.com/categories/linux/"/>
-    
-    
-    <category term="linux" scheme="http://example.com/tags/linux/"/>
-    
-    <category term="并发模型" scheme="http://example.com/tags/%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/"/>
-    
-    <category term="epoll" scheme="http://example.com/tags/epoll/"/>
     
   </entry>
   

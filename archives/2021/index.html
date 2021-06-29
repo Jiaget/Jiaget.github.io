@@ -217,6 +217,106 @@
                     
                         <a
                             class="link-unstyled"
+                            href="/2021/06/24/%E4%B8%80%E4%B8%AAgoroutine%E7%9A%84%E4%B8%80%E7%94%9F/"
+                            aria-label=": 一个goroutine的一生"
+                        >
+                            一个goroutine的一生
+                        </a>
+                    
+                </h1>
+                <div class="postShorten-meta">
+    <time datetime="2021-06-24T13:25:09+08:00">
+	
+		    6月 24, 2021
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/golang/">golang</a>
+
+
+    
+</div>
+
+            </div>
+            
+                <div class="postShorten-content">
+                    <p>一个函数被编译成可执行文件以后，会通过 <code>程序执行入口</code> 进入内存虚拟地址空间中的代码段。</p>
+<p>对于一个 main 函数而言， 程序会以 <code>runtime.main</code> 作为入口， 创建一个 <code>main goroutine</code>, 之后再去调用 <code>main.main</code> 函数。</p>
+<p>提到 Golang 的协程运行，就不得不提 <code>GMP</code> 模型, 在虚拟地址空间的 <code>数据段</code> 会记录这样的全局变量：</p>
+<ul>
+<li><p>g0 （主协程）</p>
+<ul>
+<li>g0 会在主线程栈上分配栈空间</li>
+<li>g0 持有 m0 指针</li>
+</ul>
+</li>
+<li><p>m0</p>
+<ul>
+<li>m0 即主线程所对应的m</li>
+<li>m0 持有 g0 的指针，且m0上运行的第一个g就是g0</li>
+</ul>
+</li>
+<li><p>allgs: 记录所有的g</p>
+</li>
+<li><p>allm: 记录所有的m</p>
+</li>
+<li><p>allp: 在程序初始化的过程中，调度器会进行初始化，根据环境变量 GOMAXPROCS 来决定创建 p 的个数。</p>
+<ul>
+<li>同样， 第一个被创建的p，会和m0相关联。</li>
+</ul>
+</li>
+<li><p>sched: 调度器</p>
+<ul>
+<li>记录所有空闲的 m 和 p</li>
+<li>runq</li>
+</ul>
+</li>
+<li><p>runq：runq作为全局变量，记录在 <code>sched</code> 下</p>
+<ul>
+<li>这里的runq是全局runq</li>
+<li>当然还有一个本地runq， 记录在P中。</li>
+</ul>
+</li>
+</ul>
+<h2 id="本地队列与全局队列"><a href="#本地队列与全局队列" class="headerlink" title="本地队列与全局队列"></a>本地队列与全局队列</h2><p>runq， 在 <code>runtime.p</code> 中记录的是本地队列，在 <code>runtime.schedt</code> 中记录的是全局队列。</p>
+<p>当本地队列满了，G就会放在全局队列中。 m 优先获取本地队列的 g， 再从全局队列中获取，当 本地和全局都没有 g ， 它会从其他 m 中分担一些 g。</p>
+<h2 id="main-函数"><a href="#main-函数" class="headerlink" title="main 函数"></a>main 函数</h2><p>回到main函数的执行过程中来。</p>
+<p>main函数执行过程中需要创建的 main goroutine， 会被加入到 allp[0] 的本地队列中， 之后会通过 mstart 函数开启调度循环(schedule()),调度器将队列中的 g 调度到m0上去执行。</p>
+<p>main goroutine 的工作不仅仅是调用 main 函数， 它还会开启线程监控， 包初始化等工作， 准备工作结束后，执行完 main 函数后， goroutine 便退出。</p>
+
+                    
+                        
+
+
+                    
+                    
+                        <p>
+                            <a
+                                href="/2021/06/24/%E4%B8%80%E4%B8%AAgoroutine%E7%9A%84%E4%B8%80%E7%94%9F/#post-footer"
+                                class="postShorten-excerpt_link link"
+                                aria-label=""
+                            >
+                                评论和共享
+                            </a>
+                        </p>
+                    
+                </div>
+            
+        </div>
+        
+    </article>
+    
+    
+    <article class="postShorten postShorten--thumbnailimg-bottom">
+        <div class="postShorten-wrap">
+            
+            <div class="postShorten-header">
+                <h1 class="postShorten-title">
+                    
+                        <a
+                            class="link-unstyled"
                             href="/2021/06/23/%E8%AE%B0%E6%92%B8%E4%B8%80%E4%B8%AA%E5%8F%8C%E9%93%BE%E8%A1%A8%E5%BF%AB%E6%8E%92/"
                             aria-label=": 记撸一个双链表快排"
                         >
@@ -410,7 +510,7 @@ func GenDLL(size, min, max int) *dLinkedList &#123;
             </div>
             
                 <div class="postShorten-content">
-                    <p>几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的客户端服务端 – <img src="https://github.com/Jiaget/simplebank" alt="一个简易的银行系统"></p>
+                    <p>几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的服务端+客户端 – <a target="_blank" rel="noopener" href="https://github.com/Jiaget/simplebank">一个简易的银行系统</a></p>
 <p>作为练手项目，Gin有很多特性与功能都没有研究与使用过， 这次的学习希望可以从深度和广度两个方面，更加全面的一窥Gin框架，这个活跃在社区广受好评的web框架。</p>
 <h1 id="回顾-HTTP-服务开发的基本流程"><a href="#回顾-HTTP-服务开发的基本流程" class="headerlink" title="回顾 HTTP 服务开发的基本流程"></a>回顾 HTTP 服务开发的基本流程</h1><ul>
 <li>开启TCP 监听</li>
@@ -1058,105 +1158,6 @@ Windows Registry Editor Version 5.00
                         <p>
                             <a
                                 href="/2021/06/08/vsCode-%E6%B7%BB%E5%8A%A0%E8%87%B3%E5%8F%B3%E9%94%AE/#post-footer"
-                                class="postShorten-excerpt_link link"
-                                aria-label=""
-                            >
-                                评论和共享
-                            </a>
-                        </p>
-                    
-                </div>
-            
-        </div>
-        
-    </article>
-    
-    
-    <article class="postShorten postShorten--thumbnailimg-bottom">
-        <div class="postShorten-wrap">
-            
-            <div class="postShorten-header">
-                <h1 class="postShorten-title">
-                    
-                        <a
-                            class="link-unstyled"
-                            href="/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/"
-                            aria-label=": mutex 互斥锁"
-                        >
-                            mutex 互斥锁
-                        </a>
-                    
-                </h1>
-                <div class="postShorten-meta">
-    <time datetime="2021-06-07T23:16:47+08:00">
-	
-		    6月 07, 2021
-    	
-    </time>
-    
-        <span>发布在 </span>
-        
-    <a class="category-link" href="/categories/golang/">golang</a>
-
-
-    
-</div>
-
-            </div>
-            
-                <div class="postShorten-content">
-                    <h1 id="mutex"><a href="#mutex" class="headerlink" title="mutex"></a>mutex</h1><pre><code>type Mutex struct &#123;
-    state int32
-    sema uint32
-&#125;
-</code></pre>
-<ul>
-<li>state:<ul>
-<li>代表锁的状态</li>
-<li>mutex的加锁与解锁都是通过 <code>atomic</code> 包提供的函数原子性地操作该字段实现的</li>
-</ul>
-</li>
-<li>sema:<ul>
-<li>一个信号量</li>
-<li>用作等待队列</li>
-</ul>
-</li>
-</ul>
-<h2 id="mutex-的-正常模式"><a href="#mutex-的-正常模式" class="headerlink" title="mutex 的 正常模式"></a>mutex 的 正常模式</h2><p>一个goroutine 会先自旋几次，尝试获得锁，如果仍然没有获得锁，则通过信号量 <code>sema</code> 排队等待（进入等待队列）。</p>
-<p>但是当锁被释放时，队首的goroutine也不会立即获得锁，而是与其他后来的自旋的goroutine竞争。一般情况下，处于自旋状态的goroutine会更先抢到锁，因为它们一直处于运行状态，而队列里出来的goroutine由于刚唤醒，还会因为需要分配cpu资源而需要消耗一点时间。这种情况下，为了保证先进先出，即使竞争失败了，仍然插入队列头部而不是尾部。</p>
-<h2 id="mutex的饥饿模式"><a href="#mutex的饥饿模式" class="headerlink" title="mutex的饥饿模式"></a>mutex的饥饿模式</h2><p>当一个goroutine本次加锁等待时间超过1ms后，它会将mutex从 <code>正常模式</code>切换成 <code>饥饿模式</code> 。</p>
-<p>在饥饿模式下，锁一旦被释放，就会直接传递给等待队列的头部goroutine。而如果有一些后来的goroutine需要这个锁，它们不会像正常模式一样自旋，而是直接被加入到队列尾部。</p>
-<p><code>饥饿模式</code> 也可以再切换回正常模式：</p>
-<ul>
-<li>当一个goroutine获得锁，且等待时间 <code>&lt; 1ms</code>时。</li>
-<li>当等待队列为空时 (即等待队列最后一个goroutine获得锁。)</li>
-</ul>
-<h2 id="两者对比"><a href="#两者对比" class="headerlink" title="两者对比"></a>两者对比</h2><ul>
-<li><p>正常模式</p>
-<ul>
-<li>这是一个自旋和排队共存的模式</li>
-<li>[优点] 由于自旋可以在无需唤醒的状态下直接获得锁，因此，正常模式可以保证Mutex有更好的。</li>
-<li>[缺点] 但是, 这个模式可能导致队列尾端的goroutine一直抢不到锁（尾端延迟）</li>
-</ul>
-</li>
-<li><p>饥饿模式</p>
-<ul>
-<li>这个模式会强制所有goroutine排队</li>
-<li>它在牺牲一定性能的情况下， 解决正常模式的尾端延迟问题</li>
-</ul>
-</li>
-</ul>
-<p>两种模式之间的切换，既保证锁的效率，又能顾及公平性，不会导致某个goroutine过长时间的等待。</p>
-
-                    
-                        
-
-
-                    
-                    
-                        <p>
-                            <a
-                                href="/2021/06/07/mutex-%E4%BA%92%E6%96%A5%E9%94%81/#post-footer"
                                 class="postShorten-excerpt_link link"
                                 aria-label=""
                             >

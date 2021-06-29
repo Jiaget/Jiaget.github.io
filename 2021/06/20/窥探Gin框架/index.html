@@ -15,22 +15,20 @@
             <link rel="alternate" type="application/atom+xml" title="RSS" href="/atom.xml">
         
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的客户端服务端 – \n作为练手项目，Gin有很多特性与功能都没有研究与使用过， 这次的学习希望可以从深度和广度两个方面，更加全面的一窥Gin框架，这个活跃在社区广受好评的web框架。\n回顾 HTTP 服务开发的基本流程\n开启TCP 监听\n初始化一些 handler 处理具体的业务逻辑\n将业务逻辑和相关的 Method, URL 绑定，对外暴露一些具体功能服务\n\nGin 的几个重要模型：\nEngine \n\n初始化一个 gin 对象实例，该对象实例中包含一些框架的基础功能， 日志, 中间件设置, 路由控制, handlercontext\n\n\nRouter:\n\n定义路由规则与条件，通过HTTP服务将具体路由注册到一个 context 实现的Handler 中\n\n\nContext:\n\n该模块是框架中重要的一环，它可以让我们在中间件中共享变量，管理整个流程，验证请求的json， 提供一个json的响应。\n\n\nBind:\n\ncontext 中，可以获取到请求的详细信息（ HTTP 的 head 和 body）\n但是我们需要根据不同的HTTP协议参数获取相应的格式化数据，来处理底层的业务逻辑，这需要我们使用 bind 相关的方法来解析 HTTP数据。\n\n\n\n","dateCreated":"2021-06-20T14:25:35+08:00","dateModified":"2021-06-23T09:13:36+08:00","datePublished":"2021-06-20T14:25:35+08:00","description":"","headline":"窥探Gin框架","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/20/%E7%AA%A5%E6%8E%A2Gin%E6%A1%86%E6%9E%B6/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/20/%E7%AA%A5%E6%8E%A2Gin%E6%A1%86%E6%9E%B6/","keywords":"golang, Web"}</script>
-    <meta name="description" content="几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的客户端服务端 –  作为练手项目，Gin有很多特性与功能都没有研究与使用过， 这次的学习希望可以从深度和广度两个方面，更加全面的一窥Gin框架，这个活跃在社区广受好评的web框架。 回顾 HTTP 服务开发的基本流程 开启TCP 监听 初始化一些 handler 处理具体的业务逻辑 将业务逻辑和相">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Jiaget","sameAs":[],"image":"Avatar.jpg"},"articleBody":"几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的服务端+客户端 – 一个简易的银行系统\n作为练手项目，Gin有很多特性与功能都没有研究与使用过， 这次的学习希望可以从深度和广度两个方面，更加全面的一窥Gin框架，这个活跃在社区广受好评的web框架。\n回顾 HTTP 服务开发的基本流程\n开启TCP 监听\n初始化一些 handler 处理具体的业务逻辑\n将业务逻辑和相关的 Method, URL 绑定，对外暴露一些具体功能服务\n\nGin 的几个重要模型：\nEngine \n\n初始化一个 gin 对象实例，该对象实例中包含一些框架的基础功能， 日志, 中间件设置, 路由控制, handlercontext\n\n\nRouter:\n\n定义路由规则与条件，通过HTTP服务将具体路由注册到一个 context 实现的Handler 中\n\n\nContext:\n\n该模块是框架中重要的一环，它可以让我们在中间件中共享变量，管理整个流程，验证请求的json， 提供一个json的响应。\n\n\nBind:\n\ncontext 中，可以获取到请求的详细信息（ HTTP 的 head 和 body）\n但是我们需要根据不同的HTTP协议参数获取相应的格式化数据，来处理底层的业务逻辑，这需要我们使用 bind 相关的方法来解析 HTTP数据。\n\n\n\n","dateCreated":"2021-06-20T14:25:35+08:00","dateModified":"2021-06-23T11:26:09+08:00","datePublished":"2021-06-20T14:25:35+08:00","description":"","headline":"窥探Gin框架","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2021/06/20/%E7%AA%A5%E6%8E%A2Gin%E6%A1%86%E6%9E%B6/"},"publisher":{"@type":"Organization","name":"Jiaget","sameAs":[],"image":"Avatar.jpg","logo":{"@type":"ImageObject","url":"Avatar.jpg"}},"url":"http://example.com/2021/06/20/%E7%AA%A5%E6%8E%A2Gin%E6%A1%86%E6%9E%B6/","keywords":"golang, Web"}</script>
+    <meta name="description" content="几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的服务端+客户端 – 一个简易的银行系统 作为练手项目，Gin有很多特性与功能都没有研究与使用过， 这次的学习希望可以从深度和广度两个方面，更加全面的一窥Gin框架，这个活跃在社区广受好评的web框架。 回顾 HTTP 服务开发的基本流程 开启TCP 监听 初始化一些 handler 处理具体的业务">
 <meta property="og:type" content="blog">
 <meta property="og:title" content="窥探Gin框架">
 <meta property="og:url" content="http://example.com/2021/06/20/%E7%AA%A5%E6%8E%A2Gin%E6%A1%86%E6%9E%B6/index.html">
 <meta property="og:site_name" content="Jiaget&#39;s field">
-<meta property="og:description" content="几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的客户端服务端 –  作为练手项目，Gin有很多特性与功能都没有研究与使用过， 这次的学习希望可以从深度和广度两个方面，更加全面的一窥Gin框架，这个活跃在社区广受好评的web框架。 回顾 HTTP 服务开发的基本流程 开启TCP 监听 初始化一些 handler 处理具体的业务逻辑 将业务逻辑和相">
+<meta property="og:description" content="几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的服务端+客户端 – 一个简易的银行系统 作为练手项目，Gin有很多特性与功能都没有研究与使用过， 这次的学习希望可以从深度和广度两个方面，更加全面的一窥Gin框架，这个活跃在社区广受好评的web框架。 回顾 HTTP 服务开发的基本流程 开启TCP 监听 初始化一些 handler 处理具体的业务">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://github.com/Jiaget/simplebank">
 <meta property="article:published_time" content="2021-06-20T06:25:35.000Z">
-<meta property="article:modified_time" content="2021-06-23T01:13:36.847Z">
+<meta property="article:modified_time" content="2021-06-23T03:26:09.443Z">
 <meta property="article:author" content="Jiaget">
 <meta property="article:tag" content="golang">
 <meta property="article:tag" content="Web">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://github.com/Jiaget/simplebank">
     
         <link rel="publisher" href="https://plus.google.com/none"/>
     
@@ -247,7 +245,7 @@
     
     <div class="post-content markdown">
         <div class="main-content-wrap">
-            <p>几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的客户端服务端 – <img src="https://github.com/Jiaget/simplebank" alt="一个简易的银行系统"></p>
+            <p>几个月前，为了学习Gin框架的基本使用（实际还有许多Golang其他的工具框架），从头搭建了一个简易的服务端+客户端 – <a target="_blank" rel="noopener" href="https://github.com/Jiaget/simplebank">一个简易的银行系统</a></p>
 <p>作为练手项目，Gin有很多特性与功能都没有研究与使用过， 这次的学习希望可以从深度和广度两个方面，更加全面的一窥Gin框架，这个活跃在社区广受好评的web框架。</p>
 <h1 id="回顾-HTTP-服务开发的基本流程"><a href="#回顾-HTTP-服务开发的基本流程" class="headerlink" title="回顾 HTTP 服务开发的基本流程"></a>回顾 HTTP 服务开发的基本流程</h1><ul>
 <li>开启TCP 监听</li>
@@ -331,7 +329,7 @@
             <a
                 class="post-action-btn btn btn--default btn-open-shareoptions"
                 href="#btn-open-shareoptions"
-                aria-label="Diesen Beitrag teilen"
+                aria-label="Share this post"
             >
                 <i class="fa fa-share-alt" aria-hidden="true"></i>
             </a>
@@ -381,7 +379,7 @@
         
         <li class="post-action">
             
-                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
             
                 <i class="fa fa-list" aria-hidden="true"></i>
             </a>
@@ -446,7 +444,7 @@
             <a
                 class="post-action-btn btn btn--default btn-open-shareoptions"
                 href="#btn-open-shareoptions"
-                aria-label="Diesen Beitrag teilen"
+                aria-label="Share this post"
             >
                 <i class="fa fa-share-alt" aria-hidden="true"></i>
             </a>
@@ -496,7 +494,7 @@
         
         <li class="post-action">
             
-                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
             
                 <i class="fa fa-list" aria-hidden="true"></i>
             </a>
