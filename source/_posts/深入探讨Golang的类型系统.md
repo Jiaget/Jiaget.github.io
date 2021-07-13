@@ -2,6 +2,9 @@
 title: 深入探讨Golang的类型系统
 date: 2021-06-09 19:33:42
 tags:
+	- golang
+	- 类型
+categories: golang
 ---
 
 # 先讲一讲Golang的方法
